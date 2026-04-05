@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, Phone } from 'lucide-react'
 import Link from 'next/link'
@@ -23,6 +24,8 @@ const navLinks: NavLink[] = [
 export default function Navigation() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const pathname = usePathname()
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60)
@@ -32,9 +35,13 @@ export default function Navigation() {
 
   const handleNavClick = (href: string) => {
     setMenuOpen(false)
-    const el = document.querySelector(href)
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' })
+    if (pathname === '/') {
+      // Already on homepage — just scroll to section
+      const el = document.querySelector(href)
+      if (el) el.scrollIntoView({ behavior: 'smooth' })
+    } else {
+      // On a subpage — navigate to homepage with hash
+      router.push('/' + href)
     }
   }
 
@@ -53,13 +60,20 @@ export default function Navigation() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center justify-between" aria-label="Hauptnavigation">
             {/* Logo */}
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            <Link
+              href="/"
+              onClick={(e) => {
+                if (pathname === '/') {
+                  e.preventDefault()
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }
+                setMenuOpen(false)
+              }}
               className="focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded-lg"
               aria-label="Zur Startseite"
             >
               <Logo size={40} withText={true} textColor="#FFFFFF" />
-            </button>
+            </Link>
 
             {/* Desktop Nav Links */}
             <ul className="hidden md:flex items-center gap-5 lg:gap-7" role="list">
@@ -132,7 +146,13 @@ export default function Navigation() {
             className="fixed top-0 left-0 right-0 bottom-0 z-40 bg-brand-purple-deep/97 backdrop-blur-md flex flex-col"
           >
             <div className="flex items-center justify-between px-4 py-5">
-              <Logo size={40} withText={true} textColor="#FFFFFF" />
+              <Link
+                href="/"
+                onClick={() => setMenuOpen(false)}
+                aria-label="Zur Startseite"
+              >
+                <Logo size={40} withText={true} textColor="#FFFFFF" />
+              </Link>
               <button
                 onClick={() => setMenuOpen(false)}
                 className="text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
@@ -145,17 +165,15 @@ export default function Navigation() {
             <nav className="flex flex-col gap-2 px-4 mt-8" aria-label="Mobile Navigation">
               {navLinks.map((link, i) => (
                 link.isPage ? (
-                  <motion.a
-                    key={link.href}
-                    href={link.href}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 + 0.1 }}
-                    onClick={() => setMenuOpen(false)}
-                    className="text-left text-2xl font-serif font-bold py-4 border-b border-white/10 hover:text-brand-orange transition-colors focus:outline-none text-white"
-                  >
-                    {link.label}
-                  </motion.a>
+                  <motion.div key={link.href} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 + 0.1 }}>
+                    <Link
+                      href={link.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="block text-left text-2xl font-serif font-bold py-4 border-b border-white/10 hover:text-brand-orange transition-colors focus:outline-none text-white"
+                    >
+                      {link.label}
+                    </Link>
+                  </motion.div>
                 ) : (
                   <motion.button
                     key={link.href}
