@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: Arial, Helvetica, sans-serif; }
+
+  .cover {
+    width: 1080px;
+    height: 608px;
+    position: relative;
+    overflow: hidden;
+    background: #2D1140;
+  }
+
+  /* Background image */
+  .bg {
+    position: absolute;
+    inset: 0;
+    background-image: url('/images/pellets-2.jpg');
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.35);
+  }
+
+  /* Purple gradient overlay */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(45,17,64,0.92) 0%, rgba(107,45,139,0.75) 50%, rgba(45,17,64,0.85) 100%);
+  }
+
+  /* Content */
+  .content {
+    position: relative;
+    z-index: 10;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 60px 80px;
+    gap: 60px;
+  }
+
+  /* Left side */
+  .left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* Logo area */
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .logo-sub {
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+
+  .logo-main {
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 0.02em;
+  }
+
+  /* Divider */
+  .divider {
+    width: 60px;
+    height: 3px;
+    background: #E8A030;
+    border-radius: 2px;
+  }
+
+  /* Headline */
+  .headline {
+    font-size: 42px;
+    font-weight: 700;
+    color: white;
+    line-height: 1.15;
+  }
+
+  .headline span.orange { color: #E8A030; }
+  .headline span.blue { color: #7AABE0; }
+
+  /* Subline */
+  .subline {
+    font-size: 17px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.5;
+    max-width: 420px;
+  }
+
+  /* Tags */
+  .tags {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 1.5px solid;
+    letter-spacing: 0.05em;
+  }
+
+  .tag-orange { color: #E8A030; border-color: rgba(232,160,48,0.4); background: rgba(232,160,48,0.1); }
+  .tag-blue   { color: #7AABE0; border-color: rgba(91,142,201,0.4); background: rgba(91,142,201,0.1); }
+  .tag-teal   { color: #5BC4C4; border-color: rgba(59,165,165,0.4); background: rgba(59,165,165,0.1); }
+  .tag-green  { color: #8FC95A; border-color: rgba(106,173,61,0.4); background: rgba(106,173,61,0.1); }
+
+  /* Right side — stats */
+  .right {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 36px 48px;
+    min-width: 240px;
+    backdrop-filter: blur(10px);
+  }
+
+  .stat {
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .stat + .stat {
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .stat-number {
+    font-size: 44px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .stat-number.orange { color: #E8A030; }
+  .stat-number.purple { color: #A06BC9; }
+  .stat-number.blue   { color: #7AABE0; }
+
+  .stat-label {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  /* Bottom address bar */
+  .address-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.4);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 14px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .address-text {
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.03em;
+  }
+
+  .phone {
+    font-size: 15px;
+    color: #E8A030;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .meister-badge {
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div class="cover" id="cover">
+  <div class="bg"></div>
+  <div class="overlay"></div>
+
+  <div class="content">
+    <!-- Left -->
+    <div class="left">
+      <div class="logo-row">
+        <!-- SVG Logo -->
+        <svg class="logo-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 28L32 8L56 28V56H40V40H24V56H8V28Z" stroke="#6B2D8B" stroke-width="3" stroke-linejoin="round" fill="none"/>
+          <path d="M28 38 C28 32 36 30 36 24 C36 20 33 17 30 17 C27 17 26 19 26 21" stroke="#E8A030" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <ellipse cx="31" cy="42" rx="4" ry="6" stroke="#5B8EC9" stroke-width="2.5" fill="none"/>
+        </svg>
+        <div class="logo-text">
+          <span class="logo-sub">Haustechnik</span>
+          <span class="logo-main">Frey</span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="headline">
+        Ihr Partner für<br>
+        <span class="orange">Wärme</span> und <span class="blue">Wasser</span><br>
+        in Langenau
+      </div>
+
+      <div class="subline">
+        Meisterbetrieb für Heizung, Sanitär, Lüftung und Solar — seit über 30 Jahren.
+      </div>
+
+      <div class="tags">
+        <span class="tag tag-orange">Heizung</span>
+        <span class="tag tag-blue">Sanitär</span>
+        <span class="tag tag-teal">Lüftung</span>
+        <span class="tag tag-green">Solar</span>
+      </div>
+    </div>
+
+    <!-- Right: Stats -->
+    <div class="right">
+      <div class="stat">
+        <div class="stat-number orange">30+</div>
+        <div class="stat-label">Jahre Erfahrung</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number purple">500+</div>
+        <div class="stat-label">Projekte</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number blue">24/6</div>
+        <div class="stat-label">Erreichbar</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Address bar -->
+  <div class="address-bar">
+    <span class="address-text">📍 Schammenstraße 19 · 89129 Langenau</span>
+    <span class="phone">☎ 07345 3286</span>
+    <span class="meister-badge">✓ Meisterbetrieb</span>
+  </div>
+</div>
+
+<br><br>
+<p style="color:#888; font-family:Arial; text-align:center; font-size:14px">
+  ↑ 1080×608px Cover Photo — Screenshot this at 100% zoom, then crop to the cover div.<br>
+  Or open DevTools → right-click the .cover div → "Capture node screenshot"
+</p>
+
+</body>
+</html>

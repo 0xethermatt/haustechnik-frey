@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(vercel --version)",
+      "Bash(vercel whoami:*)",
+      "Bash(vercel --yes)",
+      "Bash(vercel --yes --name haustechnik-frey)",
+      "WebFetch(domain:www.saier-ulm.de)",
+      "Bash(cp \"/Users/mathis/Desktop/Kundendienst.jpeg\" \"/Users/mathis/Desktop/Frey-Haustechnik/public/images/kundendienst-1.jpeg\")",
+      "Bash(cp \"/Users/mathis/Desktop/Bad.jpeg\" \"/Users/mathis/Desktop/Frey-Haustechnik/public/images/bad-5.jpeg\")",
+      "Bash(cp \"/Users/mathis/Desktop/Heizraum.webp\" \"/Users/mathis/Desktop/Frey-Haustechnik/public/images/heizraum-3.webp\")",
+      "Bash(find ~/Desktop -maxdepth 1 -newer ~/Desktop/Gasheizung.avif \\\\\\(-name *.jpg -o -name *.jpeg -o -name *.png -o -name *.avif -o -name *.webp \\\\\\))",
+      "Bash(find ~/Desktop -maxdepth 1 -name *bo* -o -name *hei* -o -name *boden*)",
+      "Bash(ls -la ~/Desktop/*.jpg ~/Desktop/*.jpeg ~/Desktop/*.png ~/Desktop/*.avif ~/Desktop/*.webp)",
+      "Bash(grep -i -E \"\\\\.\\(jpg|jpeg|png|avif|webp\\)$\")",
+      "Bash(vercel --prod)",
+      "Bash(npx vercel:*)",
+      "Bash(~/.npm-global/bin/vercel --prod)",
+      "Bash(source ~/.zshrc)",
+      "Bash(source ~/.zprofile)",
+      "Read(//Users/mathis/**)",
+      "Bash(~/.nvm/versions/node/v21.7.1/bin/vercel --prod)",
+      "Bash(export NVM_DIR=\"$HOME/.nvm\")",
+      "Bash(source \"$NVM_DIR/nvm.sh\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(xargs kill:*)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
