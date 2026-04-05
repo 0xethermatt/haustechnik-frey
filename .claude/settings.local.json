@@ -25,7 +25,28 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(xargs kill:*)",
       "Bash(git rm:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(vercel ls:*)",
+      "Bash(git remote:*)",
+      "Bash(git push:*)",
+      "Bash(brew install:*)",
+      "Bash(ls ~/.ssh/*.pub)",
+      "Bash(cat ~/.ssh/*.pub)",
+      "Bash(ssh-keygen -t ed25519 -C \"mathis@frey-haustechnik\" -f ~/.ssh/id_ed25519 -N \"\")",
+      "Bash(export NVM_DIR=$HOME/.nvm)",
+      "Bash(source $NVM_DIR/nvm.sh)",
+      "Bash(gh --version)",
+      "Bash(curl -sS https://webi.sh/gh)",
+      "Bash(sh)",
+      "Bash(source ~/.config/envman/PATH.env)",
+      "Read(//tmp/gh_2.45.0_macOS_arm64/bin/**)",
+      "Bash(gh auth:*)",
+      "Bash(gh pr:*)",
+      "Bash(npm i:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)"
     ]
   }
 }
