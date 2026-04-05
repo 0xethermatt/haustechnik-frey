@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import CookieBanner from '@/components/CookieBanner'
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://haustechnik-frey.de'),
@@ -144,6 +145,7 @@ export default function RootLayout({
       <body className="font-sans bg-brand-cream text-brand-purple-deep antialiased">
         {children}
         <CookieBanner />
+        <Analytics />
       </body>
     </html>
   )
