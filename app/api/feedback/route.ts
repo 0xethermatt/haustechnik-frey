@@ -1,28 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFileSync, appendFileSync, existsSync, mkdirSync, readFileSync } from "fs";
-import { join } from "path";
-
-const TRAINING_DIR = join(process.cwd(), "training-data");
-const FEEDBACK_FILE = join(TRAINING_DIR, "feedback.jsonl");
-const IMAGES_DIR = join(TRAINING_DIR, "images");
-
-function ensureDirs() {
-  if (!existsSync(TRAINING_DIR)) mkdirSync(TRAINING_DIR, { recursive: true });
-  if (!existsSync(IMAGES_DIR)) mkdirSync(IMAGES_DIR, { recursive: true });
-}
+import { put, list } from "@vercel/blob";
 
 export async function POST(req: NextRequest) {
   try {
-    ensureDirs();
-
     const body = await req.json();
-    const {
-      sessionId,
-      rating,       // 1–5
-      comment,      // optional string
-      stil,
-      liked,        // boolean shorthand
-    } = body;
+    const { sessionId, rating, comment, stil, liked } = body;
 
     if (!sessionId || !rating) {
       return NextResponse.json({ error: "sessionId und rating erforderlich" }, { status: 400 });
@@ -33,11 +15,16 @@ export async function POST(req: NextRequest) {
       rating: Number(rating),
       comment: comment || "",
       stil: stil || "",
-      liked: liked ?? rating >= 4,
+      liked: liked ?? Number(rating) >= 4,
       timestamp: new Date().toISOString(),
+      source: "frey",
     };
 
-    appendFileSync(FEEDBACK_FILE, JSON.stringify(entry) + "\n", "utf8");
+    await put(
+      `training/feedback/${sessionId}_${Date.now()}.json`,
+      JSON.stringify(entry),
+      { access: "public", contentType: "application/json", addRandomSuffix: false }
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -48,22 +35,28 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
-    ensureDirs();
+    const { blobs } = await list({ prefix: "training/feedback/" });
 
-    if (!existsSync(FEEDBACK_FILE)) {
-      return NextResponse.json({ entries: [], count: 0, avgRating: null });
-    }
+    const entries = await Promise.all(
+      blobs.map(async (blob) => {
+        try {
+          const res = await fetch(blob.url);
+          return await res.json();
+        } catch {
+          return null;
+        }
+      })
+    );
 
-    const raw = readFileSync(FEEDBACK_FILE, "utf8").trim();
-    if (!raw) return NextResponse.json({ entries: [], count: 0, avgRating: null });
-
-    const entries = raw.split("\n").map((line) => JSON.parse(line));
-    const avg = entries.reduce((s, e) => s + e.rating, 0) / entries.length;
+    const valid = entries.filter(Boolean);
+    const avg = valid.length > 0
+      ? valid.reduce((s: number, e: { rating: number }) => s + e.rating, 0) / valid.length
+      : null;
 
     return NextResponse.json({
-      entries,
-      count: entries.length,
-      avgRating: Math.round(avg * 10) / 10,
+      entries: valid.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
+      count: valid.length,
+      avgRating: avg ? Math.round(avg * 10) / 10 : null,
     });
   } catch (error) {
     console.error("Feedback GET Error:", error);

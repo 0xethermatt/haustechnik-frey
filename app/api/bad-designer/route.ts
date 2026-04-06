@@ -1,25 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import Replicate from "replicate";
-import { writeFileSync, existsSync, mkdirSync } from "fs";
-import { join } from "path";
+import { put } from "@vercel/blob";
 import { randomBytes } from "crypto";
 
-const TRAINING_DIR = join(process.cwd(), "training-data");
-const IMAGES_DIR = join(TRAINING_DIR, "images");
-
-function ensureDirs() {
-  if (!existsSync(TRAINING_DIR)) mkdirSync(TRAINING_DIR, { recursive: true });
-  if (!existsSync(IMAGES_DIR)) mkdirSync(IMAGES_DIR, { recursive: true });
-}
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
-const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN,
-});
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 
 const STILE: Record<string, string> = {
   modern:
@@ -34,14 +20,13 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get("image") as File;
     const stil = (formData.get("stil") as string) || "modern";
-    const consent = true; // Bilder werden immer intern gespeichert
     const sessionId = randomBytes(8).toString("hex");
+    const ts = Date.now();
 
     if (!file) {
       return NextResponse.json({ error: "Kein Bild hochgeladen" }, { status: 400 });
     }
 
-    // Bild in Base64 umwandeln
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     const base64 = buffer.toString("base64");
@@ -55,10 +40,7 @@ export async function POST(req: NextRequest) {
         {
           role: "user",
           content: [
-            {
-              type: "image",
-              source: { type: "base64", media_type: mimeType, data: base64 },
-            },
+            { type: "image", source: { type: "base64", media_type: mimeType, data: base64 } },
             {
               type: "text",
               text: `Analyze this bathroom photo and extract strict placement rules for an AI renovation generator.
@@ -85,75 +67,50 @@ Be precise and short.`,
     let presentFixtures = "";
     let absentFixtures = "";
     for (const line of rulesRaw.split("\n")) {
-      if (line.startsWith("CONSTRAINTS:")) {
-        constraints = line.replace("CONSTRAINTS:", "").trim();
-      }
-      if (line.startsWith("PRESENT_FIXTURES:")) {
-        presentFixtures = line.replace("PRESENT_FIXTURES:", "").trim();
-      }
-      if (line.startsWith("ABSENT_FIXTURES:")) {
-        absentFixtures = line.replace("ABSENT_FIXTURES:", "").trim();
-      }
+      if (line.startsWith("CONSTRAINTS:")) constraints = line.replace("CONSTRAINTS:", "").trim();
+      if (line.startsWith("PRESENT_FIXTURES:")) presentFixtures = line.replace("PRESENT_FIXTURES:", "").trim();
+      if (line.startsWith("ABSENT_FIXTURES:")) absentFixtures = line.replace("ABSENT_FIXTURES:", "").trim();
     }
 
     // Schritt 2: Flux Depth Pro generiert das neue Bild
     const stilDesc = STILE[stil] || STILE.modern;
-    const absentRule = absentFixtures
-      ? `NEVER ADD these fixtures which are NOT in the original photo: ${absentFixtures}.`
-      : "";
-    const presentRule = presentFixtures
-      ? `Only renovate the existing fixtures already present: ${presentFixtures}.`
-      : "";
+    const absentRule = absentFixtures ? `NEVER ADD these fixtures which are NOT in the original photo: ${absentFixtures}.` : "";
+    const presentRule = presentFixtures ? `Only renovate the existing fixtures already present: ${presentFixtures}.` : "";
     const prompt = `${stilDesc}. ABSOLUTE RULES: ${presentRule} ${absentRule} ${constraints} Never add new plumbing fixtures not visible in the original. Do not place any object on walls with windows. Only change surfaces, tiles, materials and lighting. No water, no pools.`;
 
-    // Bild als Data URL für Replicate
     const imageDataUrl = `data:${mimeType};base64,${base64}`;
-
     const output = await replicate.run(
       "black-forest-labs/flux-depth-pro:0e370dce5fdf15aa8b5fe2491474be45628756e8fba97574bfb3bcab46d09fff" as `${string}/${string}:${string}`,
-      {
-        input: {
-          control_image: imageDataUrl,
-          prompt,
-          guidance: 28,
-          steps: 50,
-          output_format: "jpg",
-          prompt_upsampling: true,
-        },
-      }
+      { input: { control_image: imageDataUrl, prompt, guidance: 28, steps: 50, output_format: "jpg", prompt_upsampling: true } }
     );
 
     const resultUrl = Array.isArray(output) ? output[0] : output;
 
-    // Bilder speichern wenn Einwilligung gegeben
-    if (consent) {
-      try {
-        ensureDirs();
-        const ts = Date.now();
-        // Originalbild speichern
-        const origExt = mimeType.split("/")[1] || "jpg";
-        writeFileSync(join(IMAGES_DIR, `${sessionId}_${ts}_${stil}_before.${origExt}`), buffer);
-        // Generiertes Bild herunterladen & speichern
-        const genRes = await fetch(String(resultUrl));
-        const genBuf = Buffer.from(await genRes.arrayBuffer());
-        writeFileSync(join(IMAGES_DIR, `${sessionId}_${ts}_${stil}_after.jpg`), genBuf);
-      } catch (saveErr) {
-        console.error("Bild-Speichern fehlgeschlagen:", saveErr);
-        // Nicht kritisch – weiter ohne Fehler
-      }
+    // Bilder in Vercel Blob speichern (non-blocking)
+    try {
+      const origExt = mimeType.split("/")[1] || "jpg";
+      const prefix = `training/frey/${sessionId}_${ts}_${stil}`;
+
+      await put(`${prefix}_before.${origExt}`, buffer, {
+        access: "public",
+        contentType: mimeType,
+        addRandomSuffix: false,
+      });
+
+      const genRes = await fetch(String(resultUrl));
+      const genBuf = Buffer.from(await genRes.arrayBuffer());
+      await put(`${prefix}_after.jpg`, genBuf, {
+        access: "public",
+        contentType: "image/jpeg",
+        addRandomSuffix: false,
+      });
+    } catch (saveErr) {
+      console.error("Blob-Speichern fehlgeschlagen:", saveErr);
     }
 
-    return NextResponse.json({
-      success: true,
-      imageUrl: String(resultUrl),
-      analysis: rulesRaw,
-      sessionId,
-    });
+    return NextResponse.json({ success: true, imageUrl: String(resultUrl), analysis: rulesRaw, sessionId });
   } catch (error) {
     console.error("BadGenerator Error:", error);
-    return NextResponse.json(
-      { error: "Fehler bei der Generierung. Bitte versuche es erneut." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Fehler bei der Generierung. Bitte versuche es erneut." }, { status: 500 });
   }
 }
