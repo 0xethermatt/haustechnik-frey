@@ -92,7 +92,7 @@ Be precise and short.`,
       const prefix = `training/frey/${sessionId}_${ts}_${stil}`;
 
       await put(`${prefix}_before.${origExt}`, buffer, {
-        access: "public",
+        access: "private",
         contentType: mimeType,
         addRandomSuffix: false,
       });
@@ -100,7 +100,7 @@ Be precise and short.`,
       const genRes = await fetch(String(resultUrl));
       const genBuf = Buffer.from(await genRes.arrayBuffer());
       await put(`${prefix}_after.jpg`, genBuf, {
-        access: "public",
+        access: "private",
         contentType: "image/jpeg",
         addRandomSuffix: false,
       });

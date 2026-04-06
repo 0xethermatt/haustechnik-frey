@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     await put(
       `training/feedback/${sessionId}_${Date.now()}.json`,
       JSON.stringify(entry),
-      { access: "public", contentType: "application/json", addRandomSuffix: false }
+      { access: "private", contentType: "application/json", addRandomSuffix: false }
     );
 
     return NextResponse.json({ success: true });
