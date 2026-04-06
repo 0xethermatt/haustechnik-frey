@@ -7,6 +7,12 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 export const metadata: Metadata = {
   metadataBase: new URL('https://haustechnik-frey.de'),
   title: 'Haustechnik Andreas Frey | Heizung · Sanitär · Lüftung · Solar in Langenau',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/favicon.svg',
+  },
   description:
     'Ihr Meisterbetrieb für Heizung, Sanitär, Lüftung und Solar in Langenau (Baden-Württemberg). Seit über 30 Jahren selbständig — persönlich, zuverlässig, regional. Jetzt Kontakt aufnehmen!',
   keywords: [
