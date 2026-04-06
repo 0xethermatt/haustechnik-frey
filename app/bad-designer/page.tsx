@@ -71,6 +71,22 @@ const RATING_LABELS: Record<number, string> = {
   5: "Begeistert mich!",
 };
 
+// Korrigiert EXIF-Rotation von Handy-Fotos vor dem Upload
+async function fixOrientation(file: File): Promise<{ file: File; preview: string }> {
+  const bitmap = await createImageBitmap(file);
+  const canvas = document.createElement("canvas");
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
+  canvas.getContext("2d")!.drawImage(bitmap, 0, 0);
+  bitmap.close();
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => {
+      const fixed = new File([blob!], file.name, { type: "image/jpeg" });
+      resolve({ file: fixed, preview: canvas.toDataURL("image/jpeg", 0.92) });
+    }, "image/jpeg", 0.92);
+  });
+}
+
 export default function BadDesignerPage() {
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -91,27 +107,25 @@ export default function BadDesignerPage() {
 
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setImage(file);
     setResult(null);
     setError(null);
-    const reader = new FileReader();
-    reader.onload = () => setPreview(reader.result as string);
-    reader.readAsDataURL(file);
+    const { file: fixed, preview: fixedPreview } = await fixOrientation(file);
+    setImage(fixed);
+    setPreview(fixedPreview);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
     if (!file || !file.type.startsWith("image/")) return;
-    setImage(file);
     setResult(null);
     setError(null);
-    const reader = new FileReader();
-    reader.onload = () => setPreview(reader.result as string);
-    reader.readAsDataURL(file);
+    const { file: fixed, preview: fixedPreview } = await fixOrientation(file);
+    setImage(fixed);
+    setPreview(fixedPreview);
   };
 
   const handleGenerate = async () => {
