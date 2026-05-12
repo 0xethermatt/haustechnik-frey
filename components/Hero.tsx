@@ -137,7 +137,9 @@ export default function Hero() {
                 </span>
               ))}
               <Link
-                href="/bad-designer"
+                href="https://bad.haustechnik-frey.de"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border bg-white/10 text-white border-white/30 hover:bg-white/20 hover:border-white/50 transition-colors duration-200"
               >
                 <Sparkles className="w-3 h-3" aria-hidden="true" />

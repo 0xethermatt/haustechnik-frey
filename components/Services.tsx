@@ -142,7 +142,7 @@ const services: Service[] = [
       'Kostenlos & unverbindlich',
       'Direkt anfragen',
     ],
-    subPageHref: '/bad-designer',
+    subPageHref: 'https://bad.haustechnik-frey.de',
   },
 ]
 
@@ -262,6 +262,8 @@ export default function Services() {
                 {service.subPageHref && (
                   <Link
                     href={service.subPageHref}
+                    target={service.subPageHref.startsWith('https') ? '_blank' : undefined}
+                    rel={service.subPageHref.startsWith('https') ? 'noopener noreferrer' : undefined}
                     className={`text-sm font-semibold ${service.color} flex items-center gap-1 hover:gap-2 transition-all mt-2`}
                   >
                     Mehr erfahren

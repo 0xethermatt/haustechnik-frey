@@ -7,7 +7,7 @@ import { Menu, X, Phone } from 'lucide-react'
 import Link from 'next/link'
 import Logo from './Logo'
 
-type NavLink = { label: string; href: string; accent?: boolean; isPage?: boolean }
+type NavLink = { label: string; href: string; accent?: boolean; isPage?: boolean; isExternal?: boolean }
 
 const navLinks: NavLink[] = [
   { label: 'Leistungen', href: '#leistungen' },
@@ -15,7 +15,7 @@ const navLinks: NavLink[] = [
   { label: 'Projekte', href: '#projekte' },
   { label: 'Rechner', href: '/rechner', isPage: true },
   { label: 'Über uns', href: '#ueber-uns' },
-  { label: 'KI-Badplaner', href: '/bad-designer', isPage: true },
+  { label: 'KI-Badplaner', href: 'https://bad.haustechnik-frey.de', isPage: true, isExternal: true },
   { label: 'FAQ', href: '/faq', isPage: true },
   { label: 'Karriere', href: '/karriere', isPage: true },
   { label: 'Kontakt', href: '#kontakt' },
@@ -82,6 +82,8 @@ export default function Navigation() {
                   {link.isPage ? (
                     <Link
                       href={link.href}
+                      target={link.isExternal ? "_blank" : undefined}
+                      rel={link.isExternal ? "noopener noreferrer" : undefined}
                       className="font-medium text-sm tracking-wide transition-colors duration-200 relative group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded text-white/80 hover:text-white"
                     >
                       {link.label}
@@ -168,6 +170,8 @@ export default function Navigation() {
                   <motion.div key={link.href} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 + 0.1 }}>
                     <Link
                       href={link.href}
+                      target={link.isExternal ? "_blank" : undefined}
+                      rel={link.isExternal ? "noopener noreferrer" : undefined}
                       onClick={() => setMenuOpen(false)}
                       className="block text-left text-2xl font-serif font-bold py-4 border-b border-white/10 hover:text-brand-orange transition-colors focus:outline-none text-white"
                     >
