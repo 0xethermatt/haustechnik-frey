@@ -12,9 +12,10 @@ const GAS_KWH_PER_M3    = 10      // Erdgas
 const GAS_BOILER_EFF    = 0.90
 const COP               = 3.0
 const PV_KWH_PER_KWP    = 950     // ~Deutschland Süd
-const PV_SELFUSE_NO_BAT = 0.32
-const PV_SELFUSE_BAT    = 0.65
-const CO2_OIL_KG_PER_L  = 2.65
+const PV_SELFUSE_NO_BAT    = 0.32
+const PV_SELFUSE_BAT       = 0.65
+const EINSPEISEVERGUETUNG  = 0.0778  // €/kWh Einspeisung ≤10 kWp, 2026
+const CO2_OIL_KG_PER_L    = 2.65
 const CO2_GAS_KG_PER_KWH = 0.201
 const CO2_STROM_KG_PER_KWH = 0.38
 
@@ -33,6 +34,7 @@ function SliderRow({
   unit,
   onChange,
   hint,
+  decimals = 0,
 }: {
   label: string
   value: number
@@ -42,6 +44,7 @@ function SliderRow({
   unit: string
   onChange: (v: number) => void
   hint?: string
+  decimals?: number
 }) {
   const pct = ((value - min) / (max - min)) * 100
   return (
@@ -49,7 +52,7 @@ function SliderRow({
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-white/80">{label}</span>
         <span className="text-sm font-bold text-white">
-          {fmt(value)} {unit}
+          {fmt(value, decimals)} {unit}
         </span>
       </div>
       <input
@@ -64,9 +67,9 @@ function SliderRow({
         aria-label={label}
       />
       <div className="flex justify-between text-xs text-white/30">
-        <span>{fmt(min)} {unit}</span>
+        <span>{fmt(min, decimals)} {unit}</span>
         {hint && <span className="text-white/40 italic">{hint}</span>}
-        <span>{fmt(max)} {unit}</span>
+        <span>{fmt(max, decimals)} {unit}</span>
       </div>
     </div>
   )
@@ -105,13 +108,16 @@ export default function EinsparRechner() {
     const hpElecKwh = heatKwh / COP
 
     // PV self-coverage
-    const pvGenKwh  = pvKwp * PV_KWH_PER_KWP
-    const selfRate  = withBattery ? PV_SELFUSE_BAT : PV_SELFUSE_NO_BAT
-    const pvCovered = Math.min(pvGenKwh * selfRate, hpElecKwh)
-    const hpElecNet = hpElecKwh - pvCovered
+    const pvGenKwh       = pvKwp * PV_KWH_PER_KWP
+    const selfRate       = withBattery ? PV_SELFUSE_BAT : PV_SELFUSE_NO_BAT
+    const pvCovered      = Math.min(pvGenKwh * selfRate, hpElecKwh)
+    const hpElecNet      = hpElecKwh - pvCovered
 
     // Heat pump annual cost
-    const hpCost = hpElecNet * strompreis
+    // Opportunity cost: PV-Eigenstrom ist nicht gratis — entgangene Einspeisung
+    const opportunityCost = pvKwp > 0 ? pvCovered * EINSPEISEVERGUETUNG : 0
+    const hpGridCost      = hpElecNet * strompreis
+    const hpCost          = hpGridCost + opportunityCost
 
     // Savings
     const annualSavings   = currentCost - hpCost
@@ -128,6 +134,8 @@ export default function EinsparRechner() {
     return {
       currentCost,
       hpCost,
+      hpGridCost,
+      opportunityCost,
       annualSavings,
       monthlySavings,
       heatKwh,
@@ -230,6 +238,7 @@ export default function EinsparRechner() {
               step={0.01}
               unit={fuel === 'oel' ? '€/L' : '€/kWh'}
               onChange={setFuelPrice}
+              decimals={2}
             />
 
             <SliderRow
@@ -241,6 +250,7 @@ export default function EinsparRechner() {
               unit="€/kWh"
               onChange={setStrompreis}
               hint="~0,32 € typisch"
+              decimals={2}
             />
 
             {/* PV toggle */}
@@ -405,9 +415,14 @@ export default function EinsparRechner() {
             <div className="bg-white/5 border border-white/8 rounded-2xl px-4 py-3 flex items-start gap-2.5">
               <Info className="w-4 h-4 text-white/30 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-white/35 leading-relaxed">
-                Berechnung: {fuel === 'oel' ? `${fmt(consumption)} L × 10 kWh/L × 85% = ${fmt(result.heatKwh)} kWh Wärme` : `${fmt(consumption)} m³ × 10 kWh/m³ × 90% = ${fmt(result.heatKwh)} kWh Wärme`}
-                {' '}→ WP benötigt {fmt(result.hpElecKwh)} kWh Strom (÷ COP {COP})
-                {pvKwp > 0 && ` · PV deckt ${fmt(result.pvCovered)} kWh`}
+                {fuel === 'oel' ? `${fmt(consumption)} L × 10 kWh/L × 85%` : `${fmt(consumption)} m³ × 10 kWh/m³ × 90%`}
+                {' '}= {fmt(result.heatKwh)} kWh Wärme → WP: {fmt(result.hpElecKwh)} kWh Strom (÷ COP {COP})
+                {pvKwp > 0 && (
+                  <>
+                    {' '}· PV deckt {fmt(result.pvCovered)} kWh (Netzstrom: {fmt(result.hpGridCost)} €
+                    {' '}+ entgangene Einspeisung {fmt(result.opportunityCost)} € @ {fmt(EINSPEISEVERGUETUNG * 100, 1)} ct/kWh)
+                  </>
+                )}
               </p>
             </div>
 
