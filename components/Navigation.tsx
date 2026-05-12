@@ -13,12 +13,9 @@ const navLinks: NavLink[] = [
   { label: 'Leistungen', href: '#leistungen' },
   { label: 'So läufts ab', href: '#prozess' },
   { label: 'Projekte', href: '#projekte' },
-  { label: 'Rechner', href: '/rechner', isPage: true },
   { label: 'Über uns', href: '#ueber-uns' },
-  { label: 'KI-Badplaner', href: 'https://bad.haustechnik-frey.de', isPage: true, isExternal: true },
-  { label: 'FAQ', href: '/faq', isPage: true },
-  { label: 'Karriere', href: '/karriere', isPage: true },
-  { label: 'Kontakt', href: '#kontakt' },
+  { label: 'Rechner', href: '/rechner', isPage: true },
+  { label: 'KI-Badplaner', href: '/bad-designer', isPage: true },
 ]
 
 export default function Navigation() {
