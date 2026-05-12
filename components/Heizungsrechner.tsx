@@ -110,8 +110,8 @@ function getBeg(
     }
   }
   let pct = 30
-  if (['oel', 'gas', 'nachtspeicher'].includes(current)) pct += 5   // Klimaschutz-Bonus
-  if (['oel', 'nachtspeicher'].includes(current)) pct += 5          // Heizungstausch-Bonus
+  if (['oel', 'gas', 'nachtspeicher'].includes(current)) pct += 5
+  if (['oel', 'nachtspeicher'].includes(current)) pct += 5
   return {
     pct,
     note: `BEG EM ${pct}% (inkl. Boni für Heizungstausch)`,
@@ -143,7 +143,6 @@ function calcResult(s: WizardState): CalcResult {
   const netMin = Math.max(Math.round((bruttoMin - subsidyMax) / 100) * 100, 0)
   const netMax = Math.max(Math.round((bruttoMax - subsidyMin) / 100) * 100, 0)
 
-  // Annual cost comparison
   const annualDemand = wohnflaeche * SPECIFIC_DEMAND[baujahr]
   const currentAnnual = annualDemand * CURRENT_ENERGY_PRICE[aktuellesSystem]
   const newAnnual = annualDemand * NEW_SYSTEM_COST_PER_KWH[heizloesung]
@@ -153,7 +152,6 @@ function calcResult(s: WizardState): CalcResult {
   const paybackYears =
     annualSavings > 0 ? Math.round((netMid / annualSavings) * 10) / 10 : null
 
-  // Recommendation text
   const loesungLabel: Record<Heizloesung, string> = {
     waermepumpe: 'Wärmepumpe',
     pellet: 'Pelletheizung',
@@ -219,31 +217,30 @@ interface OptionCardProps {
   sublabel?: string
   selected: boolean
   onClick: () => void
-  accent?: string
 }
 
-function OptionCard({ icon, label, sublabel, selected, onClick, accent = 'brand-orange' }: OptionCardProps) {
+function OptionCard({ icon, label, sublabel, selected, onClick }: OptionCardProps) {
   return (
     <button
       onClick={onClick}
       className={`flex flex-col items-center gap-2.5 p-4 rounded-2xl border-2 transition-all duration-200 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange
         ${selected
-          ? 'border-brand-orange bg-brand-orange/8 shadow-orange-glow/30'
-          : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-card'
+          ? 'border-brand-orange bg-brand-orange/15 shadow-orange-glow/30'
+          : 'border-white/10 bg-white/8 hover:border-white/25 hover:bg-white/12'
         }`}
     >
       <div
         className={`p-3 rounded-xl transition-colors duration-200 ${
-          selected ? 'bg-brand-orange/15 text-brand-orange' : 'bg-gray-100 text-gray-400'
+          selected ? 'bg-brand-orange/20 text-brand-orange' : 'bg-white/10 text-white/40'
         }`}
       >
         {icon}
       </div>
-      <span className={`font-semibold text-sm leading-tight ${selected ? 'text-brand-purple-deep' : 'text-gray-600'}`}>
+      <span className={`font-semibold text-sm leading-tight ${selected ? 'text-white' : 'text-white/70'}`}>
         {label}
       </span>
       {sublabel && (
-        <span className={`text-[11px] leading-tight ${selected ? 'text-brand-orange' : 'text-gray-400'}`}>
+        <span className={`text-[11px] leading-tight ${selected ? 'text-brand-orange' : 'text-white/40'}`}>
           {sublabel}
         </span>
       )}
@@ -270,10 +267,10 @@ function Step1({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h3 className="text-xl font-serif font-bold text-brand-purple-deep mb-1">
+        <h3 className="text-xl font-serif font-bold text-white mb-1">
           Was möchten Sie beheizen?
         </h3>
-        <p className="text-sm text-gray-400">Wählen Sie Ihren Gebäudetyp</p>
+        <p className="text-sm text-white/50">Wählen Sie Ihren Gebäudetyp</p>
       </div>
       <div className="grid grid-cols-3 gap-3">
         {options.map((o) => (
@@ -319,22 +316,20 @@ function Step2({
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h3 className="text-xl font-serif font-bold text-brand-purple-deep mb-1">
+        <h3 className="text-xl font-serif font-bold text-white mb-1">
           Wie groß ist die Wohnfläche?
         </h3>
-        <p className="text-sm text-gray-400">Bewegen Sie den Regler oder tippen Sie den Wert ein</p>
+        <p className="text-sm text-white/50">Bewegen Sie den Regler oder tippen Sie den Wert ein</p>
       </div>
 
-      {/* Display */}
       <div className="text-center">
-        <span className="text-6xl font-serif font-bold text-brand-purple-deep">
+        <span className="text-6xl font-serif font-bold text-white">
           {state.wohnflaeche}
         </span>
-        <span className="text-3xl font-serif font-bold text-brand-purple-deep ml-1">m²</span>
-        <p className="text-sm text-gray-400 mt-2">{sizeHint}</p>
+        <span className="text-3xl font-serif font-bold text-white ml-1">m²</span>
+        <p className="text-sm text-white/50 mt-2">{sizeHint}</p>
       </div>
 
-      {/* Slider */}
       <div className="px-2">
         <input
           type="range"
@@ -346,7 +341,7 @@ function Step2({
           style={{ '--range-pct': `${pct}%` } as React.CSSProperties}
           aria-label="Wohnfläche in Quadratmeter"
         />
-        <div className="flex justify-between text-xs text-gray-400 mt-2">
+        <div className="flex justify-between text-xs text-white/40 mt-2">
           <span>40 m²</span>
           <span>400 m²</span>
         </div>
@@ -380,10 +375,10 @@ function Step3({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h3 className="text-xl font-serif font-bold text-brand-purple-deep mb-1">
+        <h3 className="text-xl font-serif font-bold text-white mb-1">
           Wann wurde das Gebäude gebaut?
         </h3>
-        <p className="text-sm text-gray-400">Das Baujahr beeinflusst den Energiebedarf</p>
+        <p className="text-sm text-white/50">Das Baujahr beeinflusst den Energiebedarf</p>
       </div>
       <div className="grid grid-cols-2 gap-3">
         {options.map((o) => (
@@ -423,10 +418,10 @@ function Step4({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h3 className="text-xl font-serif font-bold text-brand-purple-deep mb-1">
+        <h3 className="text-xl font-serif font-bold text-white mb-1">
           Was haben Sie aktuell?
         </h3>
-        <p className="text-sm text-gray-400">Ihr bestehendes Heizsystem</p>
+        <p className="text-sm text-white/50">Ihr bestehendes Heizsystem</p>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {options.map((o) => (
@@ -463,7 +458,7 @@ function Step5({
       sublabel: 'Effizient & zukunftssicher',
       icon: <Thermometer className="w-6 h-6" />,
       tag: 'BEG bis 40 %',
-      tagColor: 'bg-brand-green/15 text-brand-green',
+      tagColor: 'bg-brand-green/20 text-brand-green',
     },
     {
       value: 'pellet',
@@ -471,7 +466,7 @@ function Step5({
       sublabel: 'CO₂-neutral & günstig',
       icon: <Leaf className="w-6 h-6" />,
       tag: 'BEG bis 35 %',
-      tagColor: 'bg-brand-green/15 text-brand-green',
+      tagColor: 'bg-brand-green/20 text-brand-green',
     },
     {
       value: 'gas-brennwert',
@@ -479,7 +474,7 @@ function Step5({
       sublabel: 'Günstigste Anschaffung',
       icon: <Flame className="w-6 h-6" />,
       tag: 'Keine Förderung',
-      tagColor: 'bg-gray-100 text-gray-400',
+      tagColor: 'bg-white/10 text-white/40',
     },
     {
       value: 'solar-kombi',
@@ -487,16 +482,16 @@ function Step5({
       sublabel: 'WP + Solarthermie',
       icon: <Sun className="w-6 h-6" />,
       tag: 'BEG bis 40 %',
-      tagColor: 'bg-brand-green/15 text-brand-green',
+      tagColor: 'bg-brand-green/20 text-brand-green',
     },
   ]
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h3 className="text-xl font-serif font-bold text-brand-purple-deep mb-1">
+        <h3 className="text-xl font-serif font-bold text-white mb-1">
           Welche Lösung interessiert Sie?
         </h3>
-        <p className="text-sm text-gray-400">Wählen Sie Ihr Wunschsystem</p>
+        <p className="text-sm text-white/50">Wählen Sie Ihr Wunschsystem</p>
       </div>
       <div className="grid grid-cols-2 gap-3">
         {options.map((o) => (
@@ -508,17 +503,17 @@ function Step5({
             }}
             className={`flex flex-col gap-2 p-4 rounded-2xl border-2 text-left transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange
               ${state.heizloesung === o.value
-                ? 'border-brand-orange bg-brand-orange/8 shadow-orange-glow/30'
-                : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-card'
+                ? 'border-brand-orange bg-brand-orange/15 shadow-orange-glow/30'
+                : 'border-white/10 bg-white/8 hover:border-white/25 hover:bg-white/12'
               }`}
           >
-            <div className={`p-2.5 rounded-xl w-fit ${state.heizloesung === o.value ? 'bg-brand-orange/15 text-brand-orange' : 'bg-gray-100 text-gray-400'}`}>
+            <div className={`p-2.5 rounded-xl w-fit ${state.heizloesung === o.value ? 'bg-brand-orange/20 text-brand-orange' : 'bg-white/10 text-white/40'}`}>
               {o.icon}
             </div>
-            <span className={`font-semibold text-sm ${state.heizloesung === o.value ? 'text-brand-purple-deep' : 'text-gray-600'}`}>
+            <span className={`font-semibold text-sm ${state.heizloesung === o.value ? 'text-white' : 'text-white/70'}`}>
               {o.label}
             </span>
-            <span className="text-[11px] text-gray-400 leading-tight">{o.sublabel}</span>
+            <span className="text-[11px] text-white/40 leading-tight">{o.sublabel}</span>
             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full w-fit ${o.tagColor}`}>
               {o.tag}
             </span>
@@ -543,37 +538,35 @@ function Step6({ state, reset }: { state: WizardState; reset: () => void }) {
       label: 'Investition (brutto)',
       value: `${fmt(r.bruttoMin)} – ${fmt(r.bruttoMax)}`,
       color: 'text-brand-purple',
-      bg: 'bg-brand-purple/8',
+      bg: 'bg-brand-purple/25',
     },
     {
       icon: <Percent className="w-5 h-5" />,
       label: r.noSubsidy ? 'Förderung (BEG)' : `BEG-Förderung (${r.begPct} %)`,
       value: r.noSubsidy ? 'Keine' : `${fmt(r.subsidyMin)} – ${fmt(r.subsidyMax)}`,
-      color: r.noSubsidy ? 'text-gray-400' : 'text-brand-green',
-      bg: r.noSubsidy ? 'bg-gray-100' : 'bg-brand-green/8',
+      color: r.noSubsidy ? 'text-white/40' : 'text-brand-green',
+      bg: r.noSubsidy ? 'bg-white/10' : 'bg-brand-green/20',
     },
     {
       icon: <TrendingDown className="w-5 h-5" />,
       label: 'Jährliche Ersparnis',
       value: r.annualSavings > 0 ? `≈ ${fmt(r.annualSavings)} / Jahr` : 'Kaum Ersparnis',
       color: 'text-brand-blue',
-      bg: 'bg-brand-blue/8',
+      bg: 'bg-brand-blue/20',
     },
   ]
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Header */}
       <div className="flex items-center gap-2">
-        <div className="bg-brand-green/15 text-brand-green p-1.5 rounded-full">
+        <div className="bg-brand-green/20 text-brand-green p-1.5 rounded-full">
           <CheckCircle2 className="w-5 h-5" />
         </div>
-        <h3 className="text-xl font-serif font-bold text-brand-purple-deep">
+        <h3 className="text-xl font-serif font-bold text-white">
           Ihre persönliche Schätzung
         </h3>
       </div>
 
-      {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {kpis.map((k, i) => (
           <motion.div
@@ -594,24 +587,23 @@ function Step6({ state, reset }: { state: WizardState; reset: () => void }) {
         ))}
       </div>
 
-      {/* Net cost after subsidy */}
       {!r.noSubsidy && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-brand-orange/10 border border-brand-orange/30 rounded-2xl px-4 py-3 flex items-center gap-3"
+          className="bg-brand-orange/15 border border-brand-orange/30 rounded-2xl px-4 py-3 flex items-center gap-3"
         >
           <BadgeEuro className="w-5 h-5 text-brand-orange flex-shrink-0" />
           <div>
             <span className="text-xs font-semibold text-brand-orange uppercase tracking-wide">
               Netto nach Förderung
             </span>
-            <p className="font-serif font-bold text-brand-purple-deep text-lg leading-tight">
+            <p className="font-serif font-bold text-white text-lg leading-tight">
               {fmt(r.netMin)} – {fmt(r.netMax)}
             </p>
             {r.paybackYears && (
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-white/40 mt-0.5">
                 Amortisation in ca. {r.paybackYears} Jahren
               </p>
             )}
@@ -619,21 +611,19 @@ function Step6({ state, reset }: { state: WizardState; reset: () => void }) {
         </motion.div>
       )}
 
-      {/* Recommendation */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="bg-brand-cream rounded-2xl p-4 border border-gray-200"
+        className="bg-white/8 border border-white/10 rounded-2xl p-4"
       >
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">
+        <p className="text-xs font-semibold text-white/50 uppercase tracking-wide mb-1.5">
           Unsere Einschätzung
         </p>
-        <p className="text-sm text-gray-600 leading-relaxed">{r.recommendation}</p>
+        <p className="text-sm text-white/70 leading-relaxed">{r.recommendation}</p>
       </motion.div>
 
-      {/* Disclaimer */}
-      <div className="flex items-start gap-2 text-gray-400">
+      <div className="flex items-start gap-2 text-white/40">
         <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
         <p className="text-xs leading-relaxed">
           Richtwerte auf Basis aktueller Marktpreise und BEG-Fördersätze (2025). Verbindliche
@@ -641,7 +631,6 @@ function Step6({ state, reset }: { state: WizardState; reset: () => void }) {
         </p>
       </div>
 
-      {/* CTAs */}
       <div className="flex flex-col sm:flex-row gap-3">
         <a
           href="tel:+4973453286"
@@ -652,7 +641,7 @@ function Step6({ state, reset }: { state: WizardState; reset: () => void }) {
         </a>
         <button
           onClick={reset}
-          className="flex items-center justify-center gap-2 bg-brand-warm border border-gray-200 text-gray-500 hover:text-brand-purple-deep font-semibold px-5 py-3.5 rounded-full transition-colors focus:outline-none"
+          className="flex items-center justify-center gap-2 bg-white/8 border border-white/15 text-white/50 hover:text-white font-semibold px-5 py-3.5 rounded-full transition-colors focus:outline-none"
         >
           <RotateCcw className="w-4 h-4" />
           Neu berechnen
@@ -747,12 +736,12 @@ export default function Heizungsrechner() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 0.6, delay: 0.15 }}
-          className="bg-white rounded-3xl shadow-card-hover overflow-hidden"
+          className="bg-white/8 backdrop-blur-sm border border-white/10 rounded-3xl overflow-hidden"
         >
           {/* Progress header */}
-          <div className="px-6 pt-6 pb-4 border-b border-gray-100">
+          <div className="px-6 pt-6 pb-4 border-b border-white/10">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+              <span className="text-xs font-semibold text-white/50 uppercase tracking-wide">
                 {state.step <= TOTAL_STEPS
                   ? `Schritt ${state.step} von ${TOTAL_STEPS} — ${stepLabels[state.step - 1]}`
                   : 'Ergebnis'}
@@ -760,7 +749,7 @@ export default function Heizungsrechner() {
               {state.step > 1 && state.step <= TOTAL_STEPS && (
                 <button
                   onClick={() => goTo(state.step - 1)}
-                  className="text-xs text-gray-400 hover:text-brand-purple flex items-center gap-1 transition-colors focus:outline-none"
+                  className="text-xs text-white/40 hover:text-white flex items-center gap-1 transition-colors focus:outline-none"
                   aria-label="Zurück"
                 >
                   <ArrowLeft className="w-3 h-3" /> Zurück
@@ -769,7 +758,7 @@ export default function Heizungsrechner() {
               {state.step > TOTAL_STEPS && (
                 <button
                   onClick={reset}
-                  className="text-xs text-gray-400 hover:text-brand-purple flex items-center gap-1 transition-colors focus:outline-none"
+                  className="text-xs text-white/40 hover:text-white flex items-center gap-1 transition-colors focus:outline-none"
                 >
                   <RotateCcw className="w-3 h-3" /> Neu
                 </button>
@@ -777,7 +766,7 @@ export default function Heizungsrechner() {
             </div>
 
             {/* Progress bar */}
-            <div className="w-full h-1.5 bg-gray-100 rounded-full" role="progressbar" aria-valuenow={Math.round(progressPct)} aria-valuemin={0} aria-valuemax={100}>
+            <div className="w-full h-1.5 bg-white/10 rounded-full" role="progressbar" aria-valuenow={Math.round(progressPct)} aria-valuemin={0} aria-valuemax={100}>
               <motion.div
                 className="h-full bg-brand-orange rounded-full"
                 animate={{ width: `${progressPct}%` }}
@@ -795,7 +784,7 @@ export default function Heizungsrechner() {
                       ? 'bg-brand-orange'
                       : i === state.step - 1
                       ? 'bg-brand-orange/40'
-                      : 'bg-gray-100'
+                      : 'bg-white/10'
                   }`}
                 />
               ))}
