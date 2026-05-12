@@ -13,7 +13,7 @@ const navLinks: NavLink[] = [
   { label: 'Leistungen', href: '#leistungen' },
   { label: 'So läufts ab', href: '#prozess' },
   { label: 'Projekte', href: '#projekte' },
-  { label: 'Rechner', href: '#heizungsrechner' },
+  { label: 'Rechner', href: '/rechner', isPage: true },
   { label: 'Über uns', href: '#ueber-uns' },
   { label: 'KI-Badplaner', href: '/bad-designer', isPage: true },
   { label: 'FAQ', href: '/faq', isPage: true },
