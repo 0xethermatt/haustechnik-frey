@@ -17,7 +17,7 @@ export default function RechnerPage() {
   return (
     <main>
       <Navigation />
-      <div className="pt-24" />
+      <div className="h-24 bg-[#3B1560]" />
       <Heizungsrechner />
       <EinsparRechner />
       <Footer />
