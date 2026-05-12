@@ -10,29 +10,53 @@ const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 const STILE: Record<string, string> = {
   modern:
     "modern minimalist German bathroom renovation, large format light gray ceramic tiles 60x120cm, floating white vanity with integrated sink, backlit LED mirror, recessed ceiling spotlights, chrome fittings, walk-in glass shower with frameless door, clean lines, photorealistic interior photography, southern Germany style",
-  warm: "warm natural German bathroom renovation, large format beige sand ceramic tiles 60x120cm, floating vanity with natural oak wood front, warm indirect LED lighting under vanity, walk-in glass shower, cozy minimalist design, photorealistic interior photography, southern Germany style",
+  warm:
+    "warm natural German bathroom renovation, large format beige sand ceramic tiles 60x120cm, floating vanity with natural oak wood front, warm indirect LED lighting under vanity, walk-in glass shower, cozy minimalist design, photorealistic interior photography, southern Germany style",
   dunkel:
     "dark dramatic German bathroom renovation, large format anthracite dark ceramic tiles 60x120cm, floating dark vanity with matte black fittings, indirect LED strip lighting, walk-in glass shower with black frame, bold design, photorealistic interior photography, southern Germany style",
+  minimalistisch:
+    "ultra-minimalist German bathroom renovation, floor-to-ceiling large format white ceramic tiles, wall-hung toilet with concealed cistern, slim floating vanity, backlit frameless mirror, recessed ceiling lights, no visible pipes, serene and clutter-free atmosphere, photorealistic interior photography, southern Germany style",
+  landhaus:
+    "German country farmhouse bathroom renovation, natural stone or wood-look tiles, rustic wooden vanity with ceramic sink, freestanding clawfoot bathtub, antique brass fittings, warm wood accents, soft warm ambient lighting, cozy rural atmosphere, photorealistic interior photography",
+  industrial:
+    "industrial loft bathroom renovation, large format concrete-look gray tiles, matte black fittings and hardware, exposed black metal pipe accents, industrial wall sconces, dark grout lines, raw and bold design aesthetic, photorealistic interior photography",
 };
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const file = formData.get("image") as File;
+    const files = formData.getAll("image") as File[];
     const stil = (formData.get("stil") as string) || "modern";
+    const weitereWuensche = (formData.get("weitereWuensche") as string) || "";
     const sessionId = randomBytes(8).toString("hex");
     const ts = Date.now();
 
-    if (!file) {
+    if (!files || files.length === 0) {
       return NextResponse.json({ error: "Kein Bild hochgeladen" }, { status: 400 });
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const base64 = buffer.toString("base64");
-    const mimeType = file.type as "image/jpeg" | "image/png" | "image/webp";
+    // Prepare all images as base64 for Claude analysis
+    const imageBuffers = await Promise.all(
+      files.map(async (f) => {
+        const bytes = await f.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        return { buffer, mimeType: f.type as "image/jpeg" | "image/png" | "image/webp", file: f };
+      })
+    );
 
-    // Schritt 1: Claude analysiert das Bild
+    const primaryImage = imageBuffers[0];
+
+    // Build multi-image content for Claude
+    const imageContents = imageBuffers.map(({ buffer, mimeType }) => ({
+      type: "image" as const,
+      source: {
+        type: "base64" as const,
+        media_type: mimeType,
+        data: buffer.toString("base64"),
+      },
+    }));
+
+    // Step 1: Claude analyzes the bathroom
     const analysis = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 600,
@@ -40,7 +64,7 @@ export async function POST(req: NextRequest) {
         {
           role: "user",
           content: [
-            { type: "image", source: { type: "base64", media_type: mimeType, data: base64 } },
+            ...imageContents,
             {
               type: "text",
               text: `Analyze this bathroom photo and extract strict placement rules for an AI renovation generator.
@@ -72,28 +96,40 @@ Be precise and short.`,
       if (line.startsWith("ABSENT_FIXTURES:")) absentFixtures = line.replace("ABSENT_FIXTURES:", "").trim();
     }
 
-    // Schritt 2: Flux Depth Pro generiert das neue Bild
+    // Step 2: Build prompt
     const stilDesc = STILE[stil] || STILE.modern;
     const absentRule = absentFixtures ? `NEVER ADD these fixtures which are NOT in the original photo: ${absentFixtures}.` : "";
     const presentRule = presentFixtures ? `Only renovate the existing fixtures already present: ${presentFixtures}.` : "";
-    const prompt = `${stilDesc}. ABSOLUTE RULES: ${presentRule} ${absentRule} ${constraints} Never add new plumbing fixtures not visible in the original. Do not place any object on walls with windows. Only change surfaces, tiles, materials and lighting. No water, no pools.`;
+    const wuenscheRule = weitereWuensche ? `Additional customer requirements: ${weitereWuensche}.` : "";
+    const prompt = `${stilDesc}. ${wuenscheRule} ABSOLUTE RULES: ${presentRule} ${absentRule} ${constraints} Never add new plumbing fixtures not visible in the original. Do not place any object on walls with windows. Only change surfaces, tiles, materials and lighting. No water, no pools.`;
 
-    const imageDataUrl = `data:${mimeType};base64,${base64}`;
+    // Step 3: Flux Depth Pro generates the renovation
+    const primaryBase64 = primaryImage.buffer.toString("base64");
+    const imageDataUrl = `data:${primaryImage.mimeType};base64,${primaryBase64}`;
     const output = await replicate.run(
       "black-forest-labs/flux-depth-pro:0e370dce5fdf15aa8b5fe2491474be45628756e8fba97574bfb3bcab46d09fff" as `${string}/${string}:${string}`,
-      { input: { control_image: imageDataUrl, prompt, guidance: 28, steps: 50, output_format: "jpg", prompt_upsampling: true } }
+      {
+        input: {
+          control_image: imageDataUrl,
+          prompt,
+          guidance: 28,
+          steps: 50,
+          output_format: "jpg",
+          prompt_upsampling: true,
+        },
+      }
     );
 
     const resultUrl = Array.isArray(output) ? output[0] : output;
 
-    // Bilder in Vercel Blob speichern (non-blocking)
+    // Save to Vercel Blob (non-blocking)
     try {
-      const origExt = mimeType.split("/")[1] || "jpg";
+      const origExt = primaryImage.mimeType.split("/")[1] || "jpg";
       const prefix = `training/frey/${sessionId}_${ts}_${stil}`;
 
-      await put(`${prefix}_before.${origExt}`, buffer, {
+      await put(`${prefix}_before.${origExt}`, primaryImage.buffer, {
         access: "private",
-        contentType: mimeType,
+        contentType: primaryImage.mimeType,
         addRandomSuffix: false,
       });
 
