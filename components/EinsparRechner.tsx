@@ -10,7 +10,7 @@ const OIL_KWH_PER_LITER = 10      // Heizwert Heizöl EL
 const OIL_BOILER_EFF    = 0.85
 const GAS_KWH_PER_M3    = 10      // Erdgas
 const GAS_BOILER_EFF    = 0.90
-const COP               = 3.0
+// COP is now a user-controlled slider — see state below
 const PV_KWH_PER_KWP    = 950     // ~Deutschland Süd
 // Saisonaler Deckungsgrad: WP braucht Strom im Winter, PV erzeugt im Sommer
 // Batterie hilft stunden-, nicht monatsweise → realistisch 15–30% WP-Deckung
@@ -81,9 +81,10 @@ function SliderRow({
 
 export default function EinsparRechner() {
   const [fuel, setFuel] = useState<'oel' | 'gas'>('oel')
-  const [consumption, setConsumption] = useState(2000)   // Liter Öl or m³ Gas
+  const [consumption, setConsumption] = useState(2000)
   const [fuelPrice, setFuelPrice] = useState(fuel === 'oel' ? 1.05 : 1.10)
   const [strompreis, setStrompreis] = useState(0.32)
+  const [cop, setCop] = useState(3.0)
   const [pvKwp, setPvKwp] = useState(0)
   const [withBattery, setWithBattery] = useState(false)
 
@@ -107,7 +108,7 @@ export default function EinsparRechner() {
       : consumption * fuelPrice  // fuelPrice = €/m³ for gas
 
     // Heat pump: electricity needed
-    const hpElecKwh = heatKwh / COP
+    const hpElecKwh = heatKwh / cop
 
     // PV self-coverage — saisonaler Mismatch beachten:
     // WP heizt im Winter, PV erzeugt im Sommer → Batterie hilft stunden-, nicht monatsweise
@@ -147,7 +148,7 @@ export default function EinsparRechner() {
       co2Saved: Math.max(co2Saved, 0),
       savingsPct: currentCost > 0 ? Math.round((annualSavings / currentCost) * 100) : 0,
     }
-  }, [fuel, consumption, fuelPrice, strompreis, pvKwp, withBattery])
+  }, [fuel, consumption, fuelPrice, strompreis, cop, pvKwp, withBattery])
 
   const barWidthCurrent = 100
   const barWidthHp = result.currentCost > 0
@@ -256,6 +257,39 @@ export default function EinsparRechner() {
               decimals={2}
             />
 
+            {/* COP slider */}
+            <div className="flex flex-col gap-2">
+              <SliderRow
+                label="Jahresarbeitszahl (COP)"
+                value={cop}
+                min={2.0}
+                max={5.0}
+                step={0.1}
+                unit=""
+                onChange={setCop}
+                decimals={1}
+              />
+              <div className={`text-xs px-3 py-2 rounded-xl flex items-center gap-2 transition-colors duration-300 ${
+                cop < 2.8 ? 'bg-red-500/10 text-red-300' :
+                cop < 3.5 ? 'bg-brand-orange/10 text-brand-orange' :
+                cop < 4.2 ? 'bg-brand-green/10 text-brand-green' :
+                'bg-brand-blue/10 text-brand-blue'
+              }`}>
+                <span className="text-base">
+                  {cop < 2.8 ? '❄️' : cop < 3.5 ? '🌡️' : cop < 4.2 ? '🌿' : '💧'}
+                </span>
+                <span>
+                  {cop < 2.8
+                    ? 'Luft-WP bei Kälte / älteres Modell'
+                    : cop < 3.5
+                    ? 'Luft-Wasser-Wärmepumpe (Standard)'
+                    : cop < 4.2
+                    ? 'Luft-WP modern / Sole-Wasser-WP'
+                    : 'Sole- oder Wasser-Wasser-WP (Erdwärme)'}
+                </span>
+              </div>
+            </div>
+
             {/* PV toggle */}
             <div className="border-t border-white/10 pt-5 flex flex-col gap-4">
               <div className="flex items-center justify-between">
@@ -350,7 +384,7 @@ export default function EinsparRechner() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="flex items-center gap-1.5 text-white/70">
                     <Zap className="w-4 h-4 text-brand-green" />
-                    Wärmepumpe (COP {COP})
+                    Wärmepumpe (COP {fmt(cop, 1)})
                     {pvKwp > 0 && <Sun className="w-3.5 h-3.5 text-brand-orange" />}
                   </span>
                   <span className="font-bold text-brand-green">{fmt(result.hpCost)} €</span>
@@ -450,7 +484,7 @@ export default function EinsparRechner() {
               <Info className="w-4 h-4 text-white/30 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-white/35 leading-relaxed">
                 {fuel === 'oel' ? `${fmt(consumption)} L × 10 kWh/L × 85%` : `${fmt(consumption)} m³ × 10 kWh/m³ × 90%`}
-                {' '}= {fmt(result.heatKwh)} kWh Wärme → WP: {fmt(result.hpElecKwh)} kWh Strom (÷ COP {COP}).
+                {' '}= {fmt(result.heatKwh)} kWh Wärme → WP: {fmt(result.hpElecKwh)} kWh Strom (÷ COP {fmt(cop, 1)}).
                 {pvKwp > 0 ? (
                   <>
                     {' '}PV deckt realistisch {fmt(result.pvCovered)} kWh ({withBattery ? '28' : '15'} % — saisonaler Mismatch: WP heizt im Winter, PV erzeugt im Sommer).
