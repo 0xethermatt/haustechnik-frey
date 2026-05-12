@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import { X, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react'
+import { X, ZoomIn, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react'
 
 interface Project {
   id: number
@@ -199,6 +199,8 @@ const projects: Project[] = [
   },
 ]
 
+const INITIAL_COUNT = 6
+
 const filters = [
   { key: 'alle', label: 'Alle Projekte' },
   { key: 'heizung', label: 'Heizung' },
@@ -212,22 +214,33 @@ type FilterKey = 'alle' | 'heizung' | 'sanitaer' | 'lueftung' | 'solar'
 export default function Projects() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>('alle')
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [showAll, setShowAll] = useState(false)
 
   const filtered =
     activeFilter === 'alle'
       ? projects
       : projects.filter((p) => p.category === activeFilter)
 
+  const visibleProjects =
+    showAll || filtered.length <= INITIAL_COUNT
+      ? filtered
+      : filtered.slice(0, INITIAL_COUNT)
+
+  const handleFilterChange = (key: FilterKey) => {
+    setActiveFilter(key)
+    setShowAll(false)
+  }
+
   const openLightbox = (index: number) => setLightboxIndex(index)
   const closeLightbox = () => setLightboxIndex(null)
 
   const prevImage = () => {
     if (lightboxIndex === null) return
-    setLightboxIndex((lightboxIndex - 1 + filtered.length) % filtered.length)
+    setLightboxIndex((lightboxIndex - 1 + visibleProjects.length) % visibleProjects.length)
   }
   const nextImage = () => {
     if (lightboxIndex === null) return
-    setLightboxIndex((lightboxIndex + 1) % filtered.length)
+    setLightboxIndex((lightboxIndex + 1) % visibleProjects.length)
   }
 
   return (
@@ -272,7 +285,7 @@ export default function Projects() {
           {filters.map((filter) => (
             <button
               key={filter.key}
-              onClick={() => setActiveFilter(filter.key)}
+              onClick={() => handleFilterChange(filter.key)}
               className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-purple ${
                 activeFilter === filter.key
                   ? 'bg-brand-purple text-white shadow-purple-glow'
@@ -291,7 +304,7 @@ export default function Projects() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
         >
           <AnimatePresence mode="popLayout">
-            {filtered.map((project, index) => (
+            {visibleProjects.map((project, index) => (
               <motion.button
                 key={project.id}
                 layout
@@ -331,6 +344,28 @@ export default function Projects() {
             ))}
           </AnimatePresence>
         </motion.div>
+
+        {/* Expand / Collapse */}
+        {filtered.length > INITIAL_COUNT && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="flex justify-center mt-10"
+          >
+            <button
+              onClick={() => setShowAll((prev) => !prev)}
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-full border-2 border-brand-purple text-brand-purple font-semibold text-sm hover:bg-brand-purple hover:text-white transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-purple"
+            >
+              {showAll ? (
+                <>Weniger anzeigen <ChevronUp className="w-4 h-4" /></>
+              ) : (
+                <>Alle {filtered.length} Projekte anzeigen <ChevronDown className="w-4 h-4" /></>
+              )}
+            </button>
+          </motion.div>
+        )}
       </div>
 
       {/* Lightbox */}
@@ -345,7 +380,7 @@ export default function Projects() {
             onClick={closeLightbox}
             role="dialog"
             aria-modal="true"
-            aria-label={`Bild: ${filtered[lightboxIndex]?.title}`}
+            aria-label={`Bild: ${visibleProjects[lightboxIndex]?.title}`}
           >
             {/* Close */}
             <button
@@ -377,8 +412,8 @@ export default function Projects() {
             >
               <div className="relative" style={{ aspectRatio: '16 / 9' }}>
                 <Image
-                  src={filtered[lightboxIndex].image}
-                  alt={filtered[lightboxIndex].imageAlt}
+                  src={visibleProjects[lightboxIndex].image}
+                  alt={visibleProjects[lightboxIndex].imageAlt}
                   fill
                   className="object-cover"
                   sizes="(max-width: 1280px) 100vw, 1280px"
@@ -387,14 +422,14 @@ export default function Projects() {
               </div>
               {/* Caption */}
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${filtered[lightboxIndex].tagColor} mb-2 inline-block`}>
-                  {filtered[lightboxIndex].categoryLabel}
+                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${visibleProjects[lightboxIndex].tagColor} mb-2 inline-block`}>
+                  {visibleProjects[lightboxIndex].categoryLabel}
                 </span>
                 <h3 className="text-white font-serif font-bold text-xl">
-                  {filtered[lightboxIndex].title}
+                  {visibleProjects[lightboxIndex].title}
                 </h3>
                 <p className="text-white/60 text-sm mt-1">
-                  {lightboxIndex + 1} / {filtered.length}
+                  {lightboxIndex + 1} / {visibleProjects.length}
                 </p>
               </div>
             </motion.div>
