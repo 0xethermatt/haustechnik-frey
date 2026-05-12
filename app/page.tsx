@@ -5,6 +5,7 @@ import Services from '@/components/Services'
 import Prozess from '@/components/Prozess'
 import Projects from '@/components/Projects'
 import Heizungsrechner from '@/components/Heizungsrechner'
+import EinsparRechner from '@/components/EinsparRechner'
 import About from '@/components/About'
 import FAQ from '@/components/FAQ'
 import Markenpartner from '@/components/Markenpartner'
@@ -21,6 +22,7 @@ export default function Home() {
       <Prozess />
       <Projects />
       <Heizungsrechner />
+      <EinsparRechner />
       <About />
       <Markenpartner />
       <FAQ />
