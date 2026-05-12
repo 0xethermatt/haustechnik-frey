@@ -397,21 +397,52 @@ export default function EinsparRechner() {
             </div>
 
             {/* CO2 savings */}
-            <div className="bg-white/8 backdrop-blur-sm border border-white/10 rounded-3xl p-5 flex items-center gap-4">
-              <div className="bg-brand-green/15 p-3 rounded-2xl">
-                <Leaf className="w-6 h-6 text-brand-green" />
+            <div className="bg-white/8 backdrop-blur-sm border border-white/10 rounded-3xl p-5 flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <div className="bg-brand-green/15 p-3 rounded-2xl flex-shrink-0">
+                  <Leaf className="w-6 h-6 text-brand-green" />
+                </div>
+                <div>
+                  <p className="text-xs text-white/50 uppercase tracking-wide font-semibold mb-0.5">
+                    CO₂-Einsparung
+                  </p>
+                  <p className="text-xl font-serif font-bold text-white">
+                    {fmt(result.co2Saved / 1000, 1)} Tonnen / Jahr
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-white/50 uppercase tracking-wide font-semibold mb-0.5">
-                  CO₂-Einsparung
-                </p>
-                <p className="text-xl font-serif font-bold text-white">
-                  {fmt(result.co2Saved / 1000, 1)} Tonnen / Jahr
-                </p>
-                <p className="text-xs text-white/40 mt-0.5">
-                  Vergleich {fuel === 'oel' ? 'Öl' : 'Gas'} vs. Ökostrom-Wärmepumpe
-                </p>
-              </div>
+              {/* Comparisons */}
+              {result.co2Saved > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    {
+                      icon: '🚗',
+                      value: fmt(Math.round(result.co2Saved / 0.21 / 100) * 100),
+                      label: 'km Auto­fahrten',
+                      sub: '(∅ 210 g CO₂/km)',
+                    },
+                    {
+                      icon: '🌳',
+                      value: fmt(Math.round(result.co2Saved / 12.5)),
+                      label: 'Bäume / Jahr',
+                      sub: '(∅ 12,5 kg/Baum)',
+                    },
+                    {
+                      icon: '✈️',
+                      value: fmt(Math.round((result.co2Saved / 1000) / 0.255 * 10) / 10, 1),
+                      label: 'Flüge MUC–NYC',
+                      sub: '(∅ 0,26 t/Flug)',
+                    },
+                  ].map((c) => (
+                    <div key={c.label} className="bg-white/5 rounded-2xl p-3 text-center">
+                      <div className="text-xl mb-1">{c.icon}</div>
+                      <div className="text-sm font-bold text-white">{c.value}</div>
+                      <div className="text-[10px] text-white/50 leading-tight mt-0.5">{c.label}</div>
+                      <div className="text-[9px] text-white/25 leading-tight mt-0.5">{c.sub}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Tech detail */}
