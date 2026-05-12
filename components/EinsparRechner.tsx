@@ -12,8 +12,10 @@ const GAS_KWH_PER_M3    = 10      // Erdgas
 const GAS_BOILER_EFF    = 0.90
 const COP               = 3.0
 const PV_KWH_PER_KWP    = 950     // ~Deutschland Süd
-const PV_SELFUSE_NO_BAT    = 0.32
-const PV_SELFUSE_BAT       = 0.65
+// Saisonaler Deckungsgrad: WP braucht Strom im Winter, PV erzeugt im Sommer
+// Batterie hilft stunden-, nicht monatsweise → realistisch 15–30% WP-Deckung
+const PV_HP_OVERLAP_NO_BAT = 0.15   // ~15% des WP-Stroms aus PV ohne Batterie
+const PV_HP_OVERLAP_BAT    = 0.28   // ~28% des WP-Stroms aus PV mit Batterie
 const EINSPEISEVERGUETUNG  = 0.0778  // €/kWh Einspeisung ≤10 kWp, 2026
 const CO2_OIL_KG_PER_L    = 2.65
 const CO2_GAS_KG_PER_KWH = 0.201
@@ -107,11 +109,12 @@ export default function EinsparRechner() {
     // Heat pump: electricity needed
     const hpElecKwh = heatKwh / COP
 
-    // PV self-coverage
-    const pvGenKwh       = pvKwp * PV_KWH_PER_KWP
-    const selfRate       = withBattery ? PV_SELFUSE_BAT : PV_SELFUSE_NO_BAT
-    const pvCovered      = Math.min(pvGenKwh * selfRate, hpElecKwh)
-    const hpElecNet      = hpElecKwh - pvCovered
+    // PV self-coverage — saisonaler Mismatch beachten:
+    // WP heizt im Winter, PV erzeugt im Sommer → Batterie hilft stunden-, nicht monatsweise
+    const pvGenKwh        = pvKwp * PV_KWH_PER_KWP
+    const overlapRate     = withBattery ? PV_HP_OVERLAP_BAT : PV_HP_OVERLAP_NO_BAT
+    const pvCovered       = Math.min(hpElecKwh * overlapRate, pvGenKwh * 0.65)
+    const hpElecNet       = hpElecKwh - pvCovered
 
     // Heat pump annual cost
     // Opportunity cost: PV-Eigenstrom ist nicht gratis — entgangene Einspeisung
@@ -416,13 +419,13 @@ export default function EinsparRechner() {
               <Info className="w-4 h-4 text-white/30 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-white/35 leading-relaxed">
                 {fuel === 'oel' ? `${fmt(consumption)} L × 10 kWh/L × 85%` : `${fmt(consumption)} m³ × 10 kWh/m³ × 90%`}
-                {' '}= {fmt(result.heatKwh)} kWh Wärme → WP: {fmt(result.hpElecKwh)} kWh Strom (÷ COP {COP})
-                {pvKwp > 0 && (
+                {' '}= {fmt(result.heatKwh)} kWh Wärme → WP: {fmt(result.hpElecKwh)} kWh Strom (÷ COP {COP}).
+                {pvKwp > 0 ? (
                   <>
-                    {' '}· PV deckt {fmt(result.pvCovered)} kWh (Netzstrom: {fmt(result.hpGridCost)} €
-                    {' '}+ entgangene Einspeisung {fmt(result.opportunityCost)} € @ {fmt(EINSPEISEVERGUETUNG * 100, 1)} ct/kWh)
+                    {' '}PV deckt realistisch {fmt(result.pvCovered)} kWh ({withBattery ? '28' : '15'} % — saisonaler Mismatch: WP heizt im Winter, PV erzeugt im Sommer).
+                    {' '}Netzstrom: {fmt(result.hpGridCost)} € + entgangene Einspeisung: {fmt(result.opportunityCost)} € @ {fmt(EINSPEISEVERGUETUNG * 100, 1)} ct/kWh.
                   </>
-                )}
+                ) : ' Ohne PV-Anlage.'}
               </p>
             </div>
 
