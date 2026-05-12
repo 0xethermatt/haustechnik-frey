@@ -142,7 +142,7 @@ export default function Navigation() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-0 left-0 right-0 bottom-0 z-40 bg-brand-purple-deep/97 backdrop-blur-md flex flex-col"
+            className="fixed top-0 left-0 right-0 bottom-0 z-40 bg-brand-purple-deep flex flex-col"
           >
             <div className="flex items-center justify-between px-4 py-5">
               <Link
