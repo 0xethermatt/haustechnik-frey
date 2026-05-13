@@ -13,11 +13,6 @@ interface EnergyAdvisorWidgetProps {
 export default function EnergyAdvisorWidget({ embedded = false }: EnergyAdvisorWidgetProps) {
   const [open, setOpen] = useState(false)
 
-  // Feature flag — NEXT_PUBLIC_ENERGY_ADVISOR_ENABLED must be "true"
-  if (process.env.NEXT_PUBLIC_ENERGY_ADVISOR_ENABLED !== 'true' && !embedded) {
-    return null
-  }
-
   if (embedded) {
     return (
       <div className="flex flex-col bg-brand-cream rounded-2xl overflow-hidden border border-brand-purple/10 shadow-card" style={{ minHeight: '520px', maxHeight: '700px' }}>
