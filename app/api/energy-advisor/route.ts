@@ -6,9 +6,8 @@ import { detectLeadIntent } from "@/lib/energy-advisor/leadSchema"
 import { selectModel } from "@/lib/energy-advisor/modelRouter"
 import type { EnergyAdvisorRequest, EnergyAdvisorResponse } from "@/lib/energy-advisor/types"
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-
 export async function POST(req: NextRequest) {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   try {
     const body = (await req.json()) as EnergyAdvisorRequest
     const { messages, currentPage, userContext } = body
