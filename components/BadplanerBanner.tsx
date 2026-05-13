@@ -5,20 +5,20 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Sparkles } from 'lucide-react'
 
 const STORAGE_KEY = 'ki_badplaner_banner_dismissed'
+const storage = () => (typeof window !== 'undefined' ? sessionStorage : null)
 
 export default function BadplanerBanner() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (localStorage.getItem(STORAGE_KEY)) return
+    if (storage()?.getItem(STORAGE_KEY)) return
     const timer = setTimeout(() => setVisible(true), 4000)
     return () => clearTimeout(timer)
   }, [])
 
   const dismiss = () => {
     setVisible(false)
-    localStorage.setItem(STORAGE_KEY, '1')
+    storage()?.setItem(STORAGE_KEY, '1')
   }
 
   return (
