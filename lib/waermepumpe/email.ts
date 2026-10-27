@@ -192,7 +192,7 @@ export function kundenEmail(ctx: EmailKontext): { subject: string; html: string;
     'Wir prüfen Ihre Angaben und melden uns in der Regel innerhalb von 1–2 Werktagen telefonisch bei Ihnen.',
     'Gemeinsam vereinbaren wir einen Vor-Ort-Termin, bei dem wir Heizlast, Aufstellort und Elektrik prüfen.',
     'Sie erhalten ein verbindliches Angebot mit Förderklausel und die Bestätigung zum Antrag (BzA) für die KfW.',
-    'Nach der Förderzusage bauen wir Ihre Wärmepumpe ein – meist in 3–5 Arbeitstagen.',
+    'Ab Antragstellung ist Ihr Fördersatz gesichert. Nach der Zusage haben Sie 36 Monate Zeit für den Einbau – wir stimmen den Termin mit Ihnen ab (Einbau meist in 3–5 Arbeitstagen).',
   ]
   const unterlagen = [
     'Heizkostenabrechnungen bzw. Verbrauch der letzten 2–3 Jahre',

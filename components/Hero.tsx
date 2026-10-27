@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, ChevronDown, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowRight, ChevronDown, ShieldCheck, Sparkles, Thermometer } from 'lucide-react'
 
 const heroImages = [
   {
@@ -119,6 +119,27 @@ export default function Hero() {
               Heizung, Sanitär, Lüftung und Solar aus einer Hand — persönlich, zuverlässig und
               regional. Faire Preise, pünktliche Ausführung, saubere Arbeit.
             </motion.p>
+
+            {/* Wärmepumpe hervorheben */}
+            <motion.div variants={itemVariants}>
+              <Link
+                href="/waermepumpe"
+                className="group flex items-center gap-3 bg-brand-green/15 hover:bg-brand-green/25 border border-brand-green/40 rounded-2xl px-4 py-3 max-w-xl transition-colors"
+              >
+                <span className="bg-brand-green text-white rounded-xl p-2 flex-shrink-0">
+                  <Thermometer className="w-5 h-5" aria-hidden="true" />
+                </span>
+                <span className="flex-1 min-w-0">
+                  <span className="block text-white font-bold text-sm sm:text-base leading-tight">
+                    Wärmepumpe mit bis zu 80&nbsp;% Förderung
+                  </span>
+                  <span className="block text-white/65 text-xs sm:text-sm mt-0.5">
+                    Eignung, Zuschuss &amp; Kosten in 5 Minuten prüfen
+                  </span>
+                </span>
+                <ArrowRight className="w-5 h-5 text-brand-green flex-shrink-0 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+              </Link>
+            </motion.div>
 
             {/* Services Tags */}
             <motion.div variants={itemVariants} className="flex flex-wrap gap-2">

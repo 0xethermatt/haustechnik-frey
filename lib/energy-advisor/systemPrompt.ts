@@ -19,6 +19,7 @@ function foerderWissen(): string {
 - Effizienzbonus für natürliche Kältemittel ist entfallen. Für 2027 angekündigt (noch nicht final): Grundförderung für Wärmepumpen 15 % plus Bonus für in der EU gefertigte Geräte.
 - Voraussetzungen u. a.: JAZ ≥ 3,0, Gerät auf der Förderliste, Luft-WP mind. 10 dB unter Lärmgrenzwert.
 - Ablauf: Vertrag mit Förderklausel (auflösende/aufschiebende Bedingung) + Bestätigung zum Antrag (BzA) vom Fachbetrieb → Antrag in „Meine KfW“ → Zusage abwarten → Einbau → Nachweis → Auszahlung. Nie ohne Förderklausel unterschreiben oder vor Antrag beginnen.
+- Wichtiges Verkaufsargument: Der Fördersatz richtet sich nach dem Antragsdatum. Wer jetzt beantragt, sichert sich die höheren Sätze und hat nach der Zusage 36 Monate Zeit für die Umsetzung.
 - Richtwerte Kosten: Luft-Wasser-WP im EFH-Bestand meist 25.000–40.000 € brutto inkl. Einbau, Erdwärme deutlich mehr.`
 }
 

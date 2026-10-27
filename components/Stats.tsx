@@ -87,9 +87,9 @@ function CountUp({
   }, [hasStarted, target, duration])
 
   return (
-    <span ref={ref} className={`text-4xl sm:text-5xl font-serif font-bold ${color}`}>
+    <span ref={ref} className={`text-2xl sm:text-5xl font-serif font-bold whitespace-nowrap ${color}`}>
       {count}
-      <span className="text-3xl sm:text-4xl">{suffix}</span>
+      <span className="text-xl sm:text-4xl">{suffix}</span>
     </span>
   )
 }
@@ -105,9 +105,9 @@ export default function Stats() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-50px' }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="bg-white rounded-3xl shadow-card-hover px-6 py-8 sm:px-10"
+        className="bg-white rounded-3xl shadow-card-hover px-2 py-5 sm:px-10 sm:py-8"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+        <div className="grid grid-cols-3 divide-x divide-gray-100">
           {stats.map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -115,17 +115,17 @@ export default function Stats() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="flex flex-col items-center text-center py-6 sm:py-4 sm:px-8 gap-3"
+              className="flex flex-col items-center text-center px-1 sm:py-4 sm:px-8 gap-1.5 sm:gap-3"
             >
-              <div className={`${stat.color} opacity-80`} aria-hidden="true">
+              <div className={`${stat.color} opacity-80 hidden sm:block`} aria-hidden="true">
                 {stat.icon}
               </div>
               <CountUp target={stat.value} suffix={stat.suffix} color={stat.color} />
               <div>
-                <div className="font-semibold text-brand-purple-deep text-lg leading-tight">
+                <div className="font-semibold text-brand-purple-deep text-xs sm:text-lg leading-tight">
                   {stat.label}
                 </div>
-                <div className="text-sm text-gray-400 mt-1">{stat.sublabel}</div>
+                <div className="hidden sm:block text-sm text-gray-400 mt-1">{stat.sublabel}</div>
               </div>
             </motion.div>
           ))}

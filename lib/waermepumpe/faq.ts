@@ -1,4 +1,4 @@
-import { FOERDER_STAND } from './foerderung'
+import { FOERDER_STAND, UMSETZUNGSFRIST_MONATE } from './foerderung'
 
 export interface WPFaqItem {
   category: 'Eignung' | 'Förderung' | 'Kosten' | 'Technik' | 'Ablauf'
@@ -35,6 +35,11 @@ export const WP_FAQ: WPFaqItem[] = [
     question: 'Sinkt die Förderung bald?',
     answer:
       'Ja. Der Klimageschwindigkeitsbonus sinkt halbjährlich: ab 01.02.2027 auf 12 %, ab 01.08.2027 auf 8 %, ab 01.02.2028 auf 4 % und entfällt ab 01.08.2028. Gleichzeitig sinken die förderfähigen Kosten der ersten Wohneinheit alle sechs Monate um 750 €. Für 2027 ist außerdem angekündigt, die Grundförderung für Wärmepumpen auf 15 % zu senken und einen Bonus für in der EU gefertigte Geräte einzuführen. Entscheidend ist der Zeitpunkt der Antragstellung – wer früher beantragt, sichert sich die höheren Sätze.',
+  },
+  {
+    category: 'Förderung',
+    question: 'Muss ich sofort einbauen, wenn ich die Förderung beantrage?',
+    answer: `Nein. Maßgeblich für die Förderhöhe ist der Zeitpunkt der Antragstellung – wer jetzt beantragt, sichert sich die aktuellen Sätze, bevor sie sinken. Nach der Förderzusage haben Sie ${UMSETZUNGSFRIST_MONATE} Monate Zeit, die Wärmepumpe einbauen zu lassen. Voraussetzung für den Antrag ist ein Liefer- und Leistungsvertrag mit Förderklausel: Kommt keine Zusage, ist der Vertrag hinfällig – Sie gehen also kein Risiko ein.`,
   },
   {
     category: 'Förderung',

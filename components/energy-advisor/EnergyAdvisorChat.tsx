@@ -25,11 +25,13 @@ export default function EnergyAdvisorChat({
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Nur den Nachrichtenbereich scrollen – scrollIntoView würde die ganze Seite mitziehen
+    const el = scrollRef.current
+    if (el && (messages.length > 0 || loading)) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
   }, [messages, loading])
 
   async function sendMessage(text: string) {
@@ -69,7 +71,7 @@ export default function EnergyAdvisorChat({
       setError('Entschuldigung, da ist etwas schiefgelaufen. Bitte versuche es erneut oder ruf uns direkt an.')
     } finally {
       setLoading(false)
-      setTimeout(() => inputRef.current?.focus(), 100)
+      setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 100)
     }
   }
 
@@ -85,7 +87,7 @@ export default function EnergyAdvisorChat({
   return (
     <div className="flex flex-col h-full">
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 min-h-0">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4 min-h-0">
         {/* Welcome */}
         {showStarters && (
           <div className="space-y-4">
@@ -189,7 +191,6 @@ export default function EnergyAdvisorChat({
           </div>
         )}
 
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}

@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Calculator, CheckCircle2, Clock, ShieldCheck } from 'lucide-react'
 import { scrollToId } from './WPContext'
 import {
+  UMSETZUNGSFRIST_MONATE,
   formatEuro,
   getNaechstePeriode,
   getPeriode,
@@ -64,14 +65,15 @@ export default function WPHero() {
           >
             <span className="inline-flex items-center gap-2 bg-brand-green/15 text-brand-green text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full mb-5">
               <ShieldCheck className="w-4 h-4" aria-hidden="true" />
-              Wärmepumpe vom Meisterbetrieb · Langenau, Ulm &amp; Umgebung
+              <span className="sm:hidden">Meisterbetrieb · Langenau &amp; Ulm</span>
+              <span className="hidden sm:inline">Wärmepumpe vom Meisterbetrieb · Langenau, Ulm &amp; Umgebung</span>
             </span>
             <h1
               id="wp-hero-heading"
               className="text-[2.1rem] leading-[1.1] sm:text-5xl lg:text-6xl font-serif font-bold text-white mb-6 text-balance"
             >
               Ihre Wärmepumpe —{' '}
-              <span className="text-brand-orange">bis zu 80 % gefördert.</span>{' '}
+              <span className="text-brand-orange">bis zu 80&nbsp;% gefördert.</span>{' '}
               Alles aus einer Hand.
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-white/70 leading-relaxed mb-8 max-w-2xl">
@@ -139,6 +141,9 @@ export default function WPHero() {
                     <strong>{letzterTagVor(naechste.ab)}</strong>
                     {tage !== null && <> – noch <strong>{tage} Tage</strong></>}. Danach{' '}
                     {naechste.klimaBonus} %.
+                  </p>
+                  <p className="text-xs text-brand-purple-deep/60 leading-snug mt-1">
+                    Jetzt beantragen, Satz sichern – und {UMSETZUNGSFRIST_MONATE} Monate Zeit für den Einbau.
                   </p>
                 </div>
               </div>

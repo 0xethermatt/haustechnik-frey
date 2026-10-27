@@ -23,7 +23,7 @@ const schritte = [
     icon: BadgeEuro,
     title: 'KfW-Antrag',
     dauer: 'Zusage meist in wenigen Wochen',
-    text: 'Sie stellen den Antrag in „Meine KfW“ – wir haben alle Daten vorbereitet und helfen am Telefon, wenn etwas unklar ist.',
+    text: 'Sie stellen den Antrag in „Meine KfW“ – wir haben alle Daten vorbereitet. Ab Antrag ist Ihr Fördersatz gesichert, nach der Zusage haben Sie 36 Monate Zeit für die Umsetzung.',
   },
   {
     icon: Wrench,
@@ -64,18 +64,20 @@ export default function WPAblauf() {
           </p>
         </div>
 
-        <ol className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" role="list">
+        <ol className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6" role="list">
           {schritte.map((s, i) => (
-            <li key={s.title} className="relative bg-white rounded-3xl p-6 border border-brand-purple/5 shadow-card">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="w-10 h-10 rounded-full bg-brand-purple text-white font-bold flex items-center justify-center">
+            <li key={s.title} className="relative flex gap-4 sm:block bg-white rounded-3xl p-4 sm:p-6 border border-brand-purple/5 shadow-card">
+              <div className="flex items-center gap-3 sm:mb-4 self-start">
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-brand-purple text-white font-bold flex items-center justify-center flex-shrink-0">
                   {i + 1}
                 </span>
-                <s.icon className="w-6 h-6 text-brand-orange-dark" aria-hidden="true" />
+                <s.icon className="hidden sm:block w-6 h-6 text-brand-orange-dark" aria-hidden="true" />
               </div>
-              <h3 className="text-lg font-bold text-brand-purple-deep">{s.title}</h3>
-              {s.dauer && <p className="text-xs font-semibold text-brand-orange-dark mt-1">{s.dauer}</p>}
-              <p className="text-sm text-brand-purple-deep/65 leading-relaxed mt-2">{s.text}</p>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-brand-purple-deep">{s.title}</h3>
+                {s.dauer && <p className="text-xs font-semibold text-brand-orange-dark mt-0.5 sm:mt-1">{s.dauer}</p>}
+                <p className="text-sm text-brand-purple-deep/65 leading-relaxed mt-1.5 sm:mt-2">{s.text}</p>
+              </div>
             </li>
           ))}
         </ol>

@@ -6,6 +6,9 @@ export const FOERDER_STAND = '21.07.2026'
 
 export const GRUNDFOERDERUNG = 30
 
+/** Nach der Förderzusage bleibt so viel Zeit für die Umsetzung – der Fördersatz gilt ab Antrag. */
+export const UMSETZUNGSFRIST_MONATE = 36
+
 export interface FoerderPeriode {
   ab: string
   klimaBonus: number

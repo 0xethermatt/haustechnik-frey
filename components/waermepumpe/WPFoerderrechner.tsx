@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { AlertTriangle, ArrowRight, BadgeEuro, Baby, Home, Info, Building2, Users } from 'lucide-react'
+import { AlertTriangle, ArrowRight, BadgeEuro, Baby, CalendarCheck, Home, Info, Building2, Users } from 'lucide-react'
 import { scrollToId, useWP } from './WPContext'
 import {
   ALTANLAGE_LABELS,
   EINKOMMEN_LABELS,
   FOERDER_STAND,
+  UMSETZUNGSFRIST_MONATE,
   berechneFoerderung,
   formatEuro,
   getNaechstePeriode,
@@ -315,6 +316,15 @@ export default function WPFoerderrechner() {
                 </p>
               </div>
             )}
+
+            <div className="bg-brand-green/15 border border-brand-green/30 rounded-2xl p-4 flex gap-3">
+              <CalendarCheck className="w-5 h-5 text-brand-green flex-shrink-0 mt-0.5" aria-hidden="true" />
+              <p className="text-sm text-white/85 leading-relaxed">
+                <strong className="text-white">Heute sichern, später einbauen:</strong> Der Fördersatz gilt ab
+                Antragstellung. Nach der Zusage haben Sie <strong className="text-brand-green">{UMSETZUNGSFRIST_MONATE} Monate Zeit</strong> für
+                die Umsetzung – der Vertrag mit Förderklausel ist ohne Zusage hinfällig.
+              </p>
+            </div>
 
             <div className="bg-white/10 border border-white/10 rounded-2xl p-4 flex gap-3">
               <Info className="w-5 h-5 text-white/50 flex-shrink-0 mt-0.5" aria-hidden="true" />

@@ -221,13 +221,15 @@ interface OptionCardProps {
   sublabel?: string
   selected: boolean
   onClick: () => void
+  /** Auf dem Handy als Zeile statt als Kachel darstellen */
+  rowOnMobile?: boolean
 }
 
-function OptionCard({ icon, label, sublabel, selected, onClick }: OptionCardProps) {
+function OptionCard({ icon, label, sublabel, selected, onClick, rowOnMobile }: OptionCardProps) {
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center gap-2.5 p-4 rounded-2xl border-2 transition-all duration-200 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange
+      className={`flex ${rowOnMobile ? 'flex-row text-left sm:flex-col sm:text-center' : 'flex-col text-center'} items-center gap-2.5 p-4 rounded-2xl border-2 transition-all duration-200 min-w-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange
         ${selected
           ? 'border-brand-orange bg-brand-orange/15 shadow-orange-glow/30'
           : 'border-white/10 bg-white/8 hover:border-white/25 hover:bg-white/12'
@@ -240,14 +242,16 @@ function OptionCard({ icon, label, sublabel, selected, onClick }: OptionCardProp
       >
         {icon}
       </div>
-      <span className={`font-semibold text-sm leading-tight ${selected ? 'text-white' : 'text-white/70'}`}>
-        {label}
-      </span>
-      {sublabel && (
-        <span className={`text-[11px] leading-tight ${selected ? 'text-brand-orange' : 'text-white/40'}`}>
-          {sublabel}
+      <span className={rowOnMobile ? 'flex flex-col gap-1 min-w-0 sm:items-center' : 'contents'}>
+        <span className={`font-semibold text-sm leading-tight break-words hyphens-auto ${selected ? 'text-white' : 'text-white/70'}`} lang="de">
+          {label}
         </span>
-      )}
+        {sublabel && (
+          <span className={`text-[11px] leading-tight ${selected ? 'text-brand-orange' : 'text-white/40'}`}>
+            {sublabel}
+          </span>
+        )}
+      </span>
     </button>
   )
 }
@@ -276,10 +280,11 @@ function Step1({
         </h3>
         <p className="text-sm text-white/50">Wählen Sie Ihren Gebäudetyp</p>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {options.map((o) => (
           <OptionCard
             key={o.value}
+            rowOnMobile
             icon={o.icon}
             label={o.label}
             sublabel={o.sublabel}

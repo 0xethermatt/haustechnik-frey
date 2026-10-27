@@ -114,7 +114,7 @@ export default function Contact() {
                 <div className="text-white/50 text-xs font-medium uppercase tracking-wide mb-0.5">
                   {item.label}
                 </div>
-                <div className="text-white font-semibold text-sm sm:text-base truncate group-hover:text-brand-orange transition-colors duration-200">
+                <div className="text-white font-semibold text-sm sm:text-base break-words sm:truncate group-hover:text-brand-orange transition-colors duration-200">
                   {item.value}
                 </div>
               </div>

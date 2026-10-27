@@ -199,20 +199,20 @@ export default function Services() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-50px' }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 overflow-x-auto sm:overflow-visible snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 pb-4 sm:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {services.map((service, i) => (
             <motion.article
               key={service.id}
               variants={cardVariants}
               whileHover={{ y: -6, transition: { duration: 0.2 } }}
-              className={`group bg-white rounded-3xl overflow-hidden shadow-card transition-all duration-300 border-2 border-transparent ${service.borderColor} hover:shadow-card-hover flex flex-col ${
+              className={`group w-[82%] flex-shrink-0 snap-center sm:w-auto bg-white rounded-3xl overflow-hidden shadow-card transition-all duration-300 border-2 border-transparent ${service.borderColor} hover:shadow-card-hover flex flex-col ${
                 i === 3 ? 'sm:col-start-1 lg:col-start-auto' : ''
               } ${i >= 3 && services.length === 5 ? 'lg:col-span-1' : ''}`}
               aria-label={`Leistung: ${service.title}`}
             >
               {/* Image */}
-              <div className="relative h-48 sm:h-56 overflow-hidden">
+              <div className="relative h-36 sm:h-56 overflow-hidden">
                 <Image
                   src={service.image}
                   alt={service.imageAlt}
@@ -275,13 +275,15 @@ export default function Services() {
           ))}
         </motion.div>
 
+        <p className="sm:hidden text-center text-xs text-gray-400 mt-1">← Wischen für weitere Leistungen →</p>
+
         {/* Bottom CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="text-center mt-12"
+          className="text-center mt-8 sm:mt-12"
         >
           <p className="text-gray-500 mb-4">
             Nicht sicher welche Lösung die richtige für Sie ist?
