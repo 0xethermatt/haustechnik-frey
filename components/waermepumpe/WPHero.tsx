@@ -31,7 +31,7 @@ export default function WPHero() {
     { value: 'bis 80 %', label: 'Förderung' },
     { value: formatEuro(periode.kostenErsteWE * 0.8), label: 'max. Zuschuss' },
     { value: '3–5 Tage', label: 'Einbauzeit' },
-    { value: '1 → 4', label: 'kWh Strom → Wärme' },
+    { value: 'seit 1994', label: 'Meisterbetrieb' },
   ]
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function WPHero() {
               viel Zuschuss Ihnen zusteht.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-3">
               <button
                 onClick={() => scrollToId('anfrage')}
                 className="group inline-flex items-center justify-center gap-2 whitespace-nowrap bg-brand-orange hover:bg-brand-orange-dark text-white font-bold px-7 py-4 rounded-full transition-all duration-200 shadow-orange-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
@@ -98,6 +98,20 @@ export default function WPHero() {
                 Förderung berechnen
               </button>
             </div>
+            <p className="text-xs sm:text-sm text-white/55 mb-6 sm:mb-8 text-center sm:text-left">
+              Kostenlos · unverbindlich · in 3–5 Minuten erledigt
+            </p>
+
+            {/* Handy: Dringlichkeit schon im ersten Bildschirm zeigen */}
+            {naechste && periode.klimaBonus > 0 && (
+              <p className="lg:hidden flex items-center gap-2 text-sm text-white bg-brand-orange/20 border border-brand-orange/30 rounded-2xl px-4 py-3 mb-6">
+                <Clock className="w-4 h-4 text-brand-orange flex-shrink-0" aria-hidden="true" />
+                <span>
+                  Klimabonus <strong>{periode.klimaBonus} %</strong> nur noch bis {letzterTagVor(naechste.ab)}
+                  {tage !== null && <> ({tage} Tage)</>} – danach {naechste.klimaBonus} %.
+                </span>
+              </p>
+            )}
 
             <ul className="flex flex-col sm:flex-row sm:flex-wrap gap-x-6 gap-y-2" role="list">
               {trust.map((t) => (
@@ -128,7 +142,7 @@ export default function WPHero() {
             </div>
 
             {naechste && periode.klimaBonus > 0 && (
-              <div className="absolute -bottom-6 left-4 right-4 sm:left-6 sm:right-auto sm:max-w-sm bg-white rounded-2xl shadow-card-hover p-4 flex gap-3 items-start">
+              <div className="hidden lg:flex absolute -bottom-6 left-6 max-w-sm bg-white rounded-2xl shadow-card-hover p-4 gap-3 items-start">
                 <div className="bg-brand-orange/15 text-brand-orange-dark p-2.5 rounded-xl flex-shrink-0">
                   <Clock className="w-5 h-5" aria-hidden="true" />
                 </div>
@@ -151,7 +165,7 @@ export default function WPHero() {
           </motion.div>
         </div>
 
-        <div className="mt-16 sm:mt-20 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="mt-10 lg:mt-20 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {kpis.map((k) => (
             <div key={k.label} className="bg-white/10 border border-white/10 rounded-2xl px-4 py-4 sm:py-5 text-center">
               <div className="text-xl sm:text-3xl font-serif font-bold text-white">{k.value}</div>

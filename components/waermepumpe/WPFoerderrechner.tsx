@@ -231,6 +231,12 @@ export default function WPFoerderrechner() {
                 {r.satzSelbstgenutzt} % Fördersatz
                 {wohneinheiten > 1 && ` für die erste WE, ${r.grund} % für weitere`} · förderfähig {formatEuro(r.foerderfaehig)}
               </p>
+              {selbstnutzer && einkommen === 'keineAngabe' && (
+                <p className="mt-3 text-sm text-brand-orange-dark bg-brand-orange/10 rounded-xl px-3 py-2">
+                  Tipp: Bei einem zu versteuernden Einkommen bis 50.000 € gibt es bis zu 40 % extra – geben Sie es
+                  links an.
+                </p>
+              )}
 
               <div className="mt-6">
                 <div className="relative h-4 rounded-full bg-brand-warm overflow-hidden flex" aria-hidden="true">

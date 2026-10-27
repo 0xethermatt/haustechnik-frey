@@ -11,6 +11,7 @@ import {
   ImagePlus,
   Loader2,
   Lock,
+  MapPin,
   Phone,
   Send,
   Trash2,
@@ -341,18 +342,21 @@ export default function WPAnfrage() {
       <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-brand-orange/10 blur-3xl pointer-events-none" aria-hidden="true" />
       <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-brand-blue/10 blur-3xl pointer-events-none" aria-hidden="true" />
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1fr_1.4fr] gap-10 lg:gap-12 items-start">
-        <div className="lg:sticky lg:top-36">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1fr_1.4fr] gap-8 lg:gap-x-12 lg:gap-y-8 items-start">
+        <div className="lg:col-start-1 lg:row-start-1">
           <span className="inline-block text-brand-orange font-semibold text-sm tracking-widest uppercase mb-4">
             Kostenloser Wärmepumpen-Check
           </span>
-          <h2 id="anfrage-heading" className="text-3xl sm:text-4xl font-serif font-bold text-white leading-tight mb-5">
-            In 5 Minuten zu Ihrem persönlichen Angebot
+          <h2 id="anfrage-heading" className="text-3xl sm:text-4xl font-serif font-bold text-white leading-tight mb-3 sm:mb-5">
+            In wenigen Minuten zu Ihrem Angebot
           </h2>
-          <p className="text-white/70 leading-relaxed mb-6">
-            Je mehr Sie uns vorab verraten, desto schneller und genauer können wir planen – oft
-            sparen wir uns dadurch sogar einen Termin. Alle Angaben außer Kontakt sind freiwillig.
+          <p className="text-white/70 leading-relaxed">
+            Je mehr Sie uns verraten, desto genauer wird Ihr Angebot – oft sparen wir uns dadurch sogar einen Termin.
+            Alle Angaben außer Kontakt sind freiwillig.
           </p>
+        </div>
+
+        <div className="lg:col-start-1 lg:row-start-2 order-last lg:order-none">
           <ul className="space-y-3 text-white/75 text-sm" role="list">
             {[
               'Rückmeldung in der Regel innerhalb von 1–2 Werktagen',
@@ -366,18 +370,33 @@ export default function WPAnfrage() {
               </li>
             ))}
           </ul>
-          <a href="tel:+4973453286" className="mt-8 inline-flex items-center gap-2 text-white/80 hover:text-white text-sm">
-            <Phone className="w-4 h-4 text-brand-orange" aria-hidden="true" />
-            Lieber telefonisch? <strong>07345 3286</strong>
-          </a>
+          <div className="mt-8 flex items-center gap-4 rounded-2xl bg-white/10 border border-white/10 p-4">
+            <div className="w-14 h-14 rounded-full bg-brand-orange text-white font-bold text-lg flex items-center justify-center flex-shrink-0" aria-hidden="true">
+              AF
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-white/50">Ihr Ansprechpartner</p>
+              <p className="font-bold text-white">Andreas Frey</p>
+              <p className="text-xs text-white/60">Inhaber &amp; SHK-Meister</p>
+              <a href="tel:+4973453286" className="mt-1 inline-flex items-center gap-1.5 text-sm text-white hover:text-brand-orange">
+                <Phone className="w-4 h-4 text-brand-orange" aria-hidden="true" />
+                07345 3286
+              </a>
+            </div>
+          </div>
+          <p className="mt-4 flex gap-2 text-xs text-white/50 leading-relaxed">
+            <MapPin className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+            Im Einsatz in Langenau, Ulm, Neu-Ulm, Heidenheim, Blaubeuren, Herbrechtingen &amp; Umgebung
+          </p>
         </div>
 
-        <div ref={cardRef} className="scroll-mt-32 bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div ref={cardRef} className="scroll-mt-32 lg:col-start-2 lg:row-start-1 lg:row-span-2 bg-white rounded-3xl shadow-2xl overflow-hidden">
           {status !== 'success' && (
             <div className="px-5 sm:px-8 pt-5 pb-4 border-b border-brand-purple/10">
               <div className="flex items-center justify-between text-xs font-semibold text-brand-purple-deep/50 uppercase tracking-wide mb-3">
                 <span>
                   Schritt {posInVisible + 1} von {visibleSteps.length} · {STEPS[step]}
+                  {posInVisible === 0 && <span className="normal-case tracking-normal font-normal"> · ca. 3 Min.</span>}
                 </span>
                 {posInVisible > 0 && (
                   <button type="button" onClick={back} className="flex items-center gap-1 hover:text-brand-purple normal-case tracking-normal">
