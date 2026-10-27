@@ -125,7 +125,8 @@ export default function FAQAccordion({ showAll = false, showHeading = true }: Pr
 
   const toggle = (i: number) => setOpenIndex(openIndex === i ? null : i)
 
-  const visibleItems = showAll ? faqItems : faqItems.slice(0, 5)
+  // Gerade Anzahl in der Vorschau, damit das 2-Spalten-Raster aufgeht
+  const visibleItems = showAll ? faqItems : faqItems.slice(0, 6)
 
   return (
     <section className="py-12 sm:py-16 lg:py-20 bg-brand-warm" aria-labelledby="faq-accordion-heading">
@@ -174,6 +175,8 @@ export default function FAQAccordion({ showAll = false, showHeading = true }: Pr
                 viewport={{ once: true, margin: '-20px' }}
                 transition={{ duration: 0.45, delay: Math.min(i * 0.04, 0.3) }}
                 className={`bg-white rounded-2xl border-2 transition-all duration-200 overflow-hidden ${
+                  visibleItems.length % 2 === 1 && i === visibleItems.length - 1 ? 'md:col-span-2' : ''
+                } ${
                   isOpen
                     ? 'border-brand-orange/40 shadow-card border-l-2 border-l-brand-orange'
                     : 'border-transparent shadow-card hover:border-brand-orange/20 border-l-2 border-l-transparent'
@@ -240,7 +243,7 @@ export default function FAQAccordion({ showAll = false, showHeading = true }: Pr
               href="/faq"
               className="inline-flex items-center gap-2 border-2 border-brand-purple text-brand-purple hover:bg-brand-purple hover:text-white font-semibold px-8 py-3 rounded-full transition-all"
             >
-              Alle 15 Fragen ansehen →
+              Alle {faqItems.length} Fragen ansehen →
             </Link>
           </motion.div>
         )}

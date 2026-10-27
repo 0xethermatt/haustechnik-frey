@@ -7,14 +7,11 @@ import { Menu, X, Phone } from 'lucide-react'
 import Link from 'next/link'
 import Logo from './Logo'
 
-type NavLink = { label: string; href: string; accent?: boolean; isPage?: boolean; isExternal?: boolean; wideOnly?: boolean }
+type NavLink = { label: string; href: string; accent?: boolean; isPage?: boolean; isExternal?: boolean }
 
 const navLinks: NavLink[] = [
   { label: 'Leistungen', href: '#leistungen' },
   { label: 'Wärmepumpe', href: '/waermepumpe', isPage: true, accent: true },
-  { label: 'So läufts ab', href: '#prozess', wideOnly: true },
-  { label: 'Projekte', href: '#projekte' },
-  { label: 'Über uns', href: '#ueber-uns', wideOnly: true },
   { label: 'Rechner', href: '/rechner', isPage: true },
   { label: 'KI-Badplaner', href: '/bad-designer', isPage: true },
 ]
@@ -87,7 +84,7 @@ export default function Navigation() {
             {/* Desktop Nav Links */}
             <ul className="hidden lg:flex items-center gap-5 xl:gap-7" role="list">
               {navLinks.map((link) => (
-                <li key={link.href} className={`whitespace-nowrap ${link.wideOnly ? 'hidden xl:block' : ''}`}>
+                <li key={link.href} className="whitespace-nowrap">
                   {link.isPage ? (
                     <Link
                       href={link.href}

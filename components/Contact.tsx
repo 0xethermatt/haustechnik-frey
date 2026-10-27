@@ -211,32 +211,71 @@ export default function Contact() {
           </p>
         </div>
 
-        <div className="lg:col-start-1 lg:row-start-2 order-last lg:order-none space-y-3">
-          <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
-            {contactItems.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                target={item.label === 'Adresse' ? '_blank' : undefined}
-                rel={item.label === 'Adresse' ? 'noopener noreferrer' : undefined}
-                className={`group flex items-center gap-3 bg-white/10 hover:bg-white/20 border border-white/15 rounded-2xl px-4 py-3 transition-colors ${
-                  item.label === 'E-Mail' || item.label === 'Adresse' ? 'col-span-2 lg:col-span-1' : ''
-                }`}
-              >
-                <item.icon className="w-5 h-5 text-brand-orange flex-shrink-0" aria-hidden="true" />
-                <span className="min-w-0">
-                  <span className="block text-white/50 text-xs">{item.label}</span>
-                  <span className="block text-white font-semibold text-sm break-words group-hover:text-brand-orange">
-                    {item.value}
+        {/* Desktop: Spalte auf Formularhöhe strecken, Ansprechpartner schließt unten bündig ab */}
+        <div className="lg:col-start-1 lg:row-start-2 order-last lg:order-none lg:self-stretch flex flex-col gap-4 lg:gap-6">
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              {contactItems.map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  target={item.label === 'Adresse' ? '_blank' : undefined}
+                  rel={item.label === 'Adresse' ? 'noopener noreferrer' : undefined}
+                  className={`group flex items-center gap-3 bg-white/10 hover:bg-white/20 border border-white/15 rounded-2xl px-4 py-3 lg:py-4 transition-colors ${
+                    item.label === 'E-Mail' || item.label === 'Adresse' ? 'col-span-2' : ''
+                  }`}
+                >
+                  <item.icon className="w-5 h-5 text-brand-orange flex-shrink-0" aria-hidden="true" />
+                  <span className="min-w-0">
+                    <span className="block text-white/50 text-xs">{item.label}</span>
+                    <span className="block text-white font-semibold text-sm break-words group-hover:text-brand-orange">
+                      {item.value}
+                    </span>
                   </span>
-                </span>
-              </a>
-            ))}
+                </a>
+              ))}
+            </div>
+            <p className="flex items-center gap-2 text-white/55 text-sm px-1">
+              <Clock className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+              Mo–Sa erreichbar · Notdienst auch am Sonntag
+            </p>
           </div>
-          <p className="flex items-center gap-2 text-white/55 text-sm px-1">
-            <Clock className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-            Mo–Sa erreichbar · Notdienst auch am Sonntag
-          </p>
+
+          {/* Desktop: unten bündig mit dem Formular */}
+          <div className="lg:mt-auto space-y-3 lg:space-y-4">
+            <div className="rounded-2xl border border-white/15 p-4 lg:p-5">
+              <p className="text-white font-semibold text-sm mb-3">So geht es weiter</p>
+              <ol className="space-y-2.5 lg:space-y-3.5" role="list">
+                {[
+                  'Sie senden uns Ihre Anfrage – gerne mit Fotos.',
+                  'Wir rufen Sie zurück, meist innerhalb von 1–2 Werktagen.',
+                  'Termin vor Ort und ein faires, verbindliches Angebot.',
+                ].map((t, i) => (
+                  <li key={t} className="flex gap-3 text-sm text-white/70">
+                    <span className="w-6 h-6 rounded-full bg-brand-orange/20 text-brand-orange text-xs font-bold flex items-center justify-center flex-shrink-0">
+                      {i + 1}
+                    </span>
+                    {t}
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <div className="flex items-center gap-4 rounded-2xl bg-white/10 border border-white/15 p-4 lg:p-5">
+              <div className="w-12 h-12 rounded-full bg-brand-orange text-white font-bold flex items-center justify-center flex-shrink-0" aria-hidden="true">
+                AF
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-white/50">Ihr Ansprechpartner</p>
+                <p className="font-bold text-white leading-tight">Andreas Frey</p>
+                <p className="text-xs text-white/60">Inhaber &amp; SHK-Meister · seit 1994</p>
+                <a href="tel:+4973453286" className="mt-1 inline-flex items-center gap-1.5 text-sm text-white hover:text-brand-orange">
+                  <Phone className="w-4 h-4 text-brand-orange" aria-hidden="true" />
+                  07345 3286
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
 
         <form
