@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import CookieBanner from '@/components/CookieBanner'
-import BadplanerBanner from '@/components/BadplanerBanner'
+import WaermepumpeBanner from '@/components/WaermepumpeBanner'
 import EnergyAdvisorWidget from '@/components/energy-advisor/EnergyAdvisorWidget'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
@@ -154,7 +154,7 @@ export default function RootLayout({
       <body className="font-sans bg-brand-cream text-brand-purple-deep antialiased">
         {children}
         <CookieBanner />
-        <BadplanerBanner />
+        <WaermepumpeBanner />
         {process.env.NEXT_PUBLIC_ENERGY_ADVISOR_ENABLED === 'true' && <EnergyAdvisorWidget />}
         <Analytics />
         <SpeedInsights />
