@@ -91,7 +91,7 @@ const faqItems: FAQItem[] = [
     category: 'Solar & Energie',
     question: 'Gibt es Förderung für Solarthermie?',
     answer:
-      'Ja — über die BEG EM (Einzelmaßnahmen) gibt es eine Grundförderung von 25 % der förderfähigen Kosten. Zusätzlich können Landes- oder Kommunalprogramme weitere Zuschüsse bieten. Wir beraten Sie kostenlos zu allen verfügbaren Fördermöglichkeiten und helfen beim Antragsverfahren.',
+      'Ja — Solarthermieanlagen werden über die KfW-Heizungsförderung (Programm 458) mit 30 % Grundförderung bezuschusst. Selbstnutzende Eigentümer können zusätzlich den Einkommensbonus erhalten und – wenn dabei eine alte fossile Heizung ersetzt wird – den Klimageschwindigkeitsbonus. Insgesamt sind bis zu 70 % bzw. 80 % möglich. Ob und in welcher Höhe es bei Ihnen passt, prüfen wir kostenlos und helfen beim Antrag.',
   },
   // Allgemein
   {

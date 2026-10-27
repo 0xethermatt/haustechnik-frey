@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     description:
       'Badsanierung & Sanitärinstallation in Langenau. Traumbad, barrierefreies Bad, Markenhersteller.',
     url: 'https://haustechnik-frey.de/leistungen/sanitaer',
+    images: [{ url: '/opengraph-image.jpg', width: 1200, height: 630, alt: 'Haustechnik Frey – Meisterbetrieb in Langenau' }],
   },
   alternates: { canonical: 'https://haustechnik-frey.de/leistungen/sanitaer' },
 }

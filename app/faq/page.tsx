@@ -5,7 +5,7 @@ import FAQAccordion from '@/components/FAQAccordion'
 export const metadata = {
   title: 'FAQ — Häufige Fragen zu Heizung, Bad & Förderung | Haustechnik Frey',
   description:
-    'Antworten zu Heizungskosten, BEG-Förderung, Badsanierung, Solarthermie und mehr. Haustechnik Frey — Meisterbetrieb in Langenau.',
+    'Antworten zu Heizungskosten, Förderung, Badsanierung, Solarthermie und mehr. Haustechnik Frey — Meisterbetrieb in Langenau.',
   keywords: [
     'FAQ Heizung',
     'BEG Förderung Fragen',

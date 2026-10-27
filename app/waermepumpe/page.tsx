@@ -47,7 +47,6 @@ export const metadata: Metadata = {
     url: PAGE_URL,
     title: 'Wärmepumpe – bis zu 80 % gefördert | Haustechnik Frey Langenau',
     description: 'Eignungs-Check, Förderrechner und kostenloser Wärmepumpen-Check vom Meisterbetrieb.',
-    images: [{ url: '/images/waermepumpe-2.jpg', width: 1205, height: 1205, alt: 'Wärmepumpe – Haustechnik Frey' }],
   },
 }
 

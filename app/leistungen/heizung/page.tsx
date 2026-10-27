@@ -26,6 +26,7 @@ export const metadata: Metadata = {
     description:
       'Heizungsinstallation in Langenau. Wärmepumpe, Pellet, Gas — mit bis zu 80 % KfW-Förderung.',
     url: 'https://haustechnik-frey.de/leistungen/heizung',
+    images: [{ url: '/opengraph-image.jpg', width: 1200, height: 630, alt: 'Haustechnik Frey – Meisterbetrieb in Langenau' }],
   },
   alternates: { canonical: 'https://haustechnik-frey.de/leistungen/heizung' },
 }

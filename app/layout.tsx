@@ -41,14 +41,12 @@ export const metadata: Metadata = {
     title: 'Haustechnik Andreas Frey | Heizung · Sanitär · Lüftung · Solar',
     description:
       'Meisterbetrieb für Heizung, Sanitär, Lüftung und Solar in Langenau. Seit über 30 Jahren selbständig — 24/6 erreichbar.',
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Haustechnik Frey Langenau' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Haustechnik Andreas Frey | Heizung · Sanitär · Lüftung · Solar in Langenau',
     description:
       'Meisterbetrieb für Heizung, Sanitär, Lüftung und Solar in Langenau. Seit über 30 Jahren selbständig — 24/6 erreichbar.',
-    images: ['/og-image.jpg'],
   },
   robots: {
     index: true,
