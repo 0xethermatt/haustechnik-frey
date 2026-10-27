@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Sparkles } from 'lucide-react'
 
@@ -9,12 +10,18 @@ const storage = () => (typeof window !== 'undefined' ? sessionStorage : null)
 
 export default function BadplanerBanner() {
   const [visible, setVisible] = useState(false)
+  const pathname = usePathname()
 
   useEffect(() => {
+    // Auf der Wärmepumpen-Landingpage nicht vom Ziel ablenken
+    if (pathname === '/waermepumpe') {
+      setVisible(false)
+      return
+    }
     if (storage()?.getItem(STORAGE_KEY)) return
     const timer = setTimeout(() => setVisible(true), 4000)
     return () => clearTimeout(timer)
-  }, [])
+  }, [pathname])
 
   const dismiss = () => {
     setVisible(false)

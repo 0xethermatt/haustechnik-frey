@@ -1,28 +1,39 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, MessageCircle, Zap } from 'lucide-react'
 import EnergyAdvisorChat from './EnergyAdvisorChat'
+import type { StarterQuestion } from './starterQuestions'
+
+// Seiten, die den Berater bereits eingebettet zeigen
+const EMBEDDED_PATHS = ['/waermepumpe']
 
 interface EnergyAdvisorWidgetProps {
   /** Embedded mode: renders the full chat without the floating bubble */
   embedded?: boolean
+  starters?: StarterQuestion[]
+  welcome?: string
+  title?: string
 }
 
-export default function EnergyAdvisorWidget({ embedded = false }: EnergyAdvisorWidgetProps) {
+export default function EnergyAdvisorWidget({ embedded = false, starters, welcome, title }: EnergyAdvisorWidgetProps) {
   const [open, setOpen] = useState(false)
+  const pathname = usePathname()
 
   if (embedded) {
     return (
-      <div className="flex flex-col bg-brand-cream rounded-2xl overflow-hidden border border-brand-purple/10 shadow-card" style={{ minHeight: '520px', maxHeight: '700px' }}>
-        <ChatHeader onClose={undefined} />
+      <div className="flex flex-col bg-brand-cream rounded-2xl overflow-hidden border border-brand-purple/10 shadow-card h-[560px] sm:h-[620px]">
+        <ChatHeader onClose={undefined} title={title} />
         <div className="flex-1 min-h-0">
-          <EnergyAdvisorChat />
+          <EnergyAdvisorChat starters={starters} welcome={welcome} />
         </div>
       </div>
     )
   }
+
+  if (EMBEDDED_PATHS.includes(pathname)) return null
 
   return (
     <>
@@ -65,14 +76,14 @@ export default function EnergyAdvisorWidget({ embedded = false }: EnergyAdvisorW
   )
 }
 
-function ChatHeader({ onClose }: { onClose?: () => void }) {
+function ChatHeader({ onClose, title = 'Energieberater' }: { onClose?: () => void; title?: string }) {
   return (
     <div className="flex items-center gap-3 px-4 py-3 bg-brand-purple-deep text-white flex-shrink-0">
       <div className="w-8 h-8 rounded-full bg-brand-orange/20 flex items-center justify-center">
         <MessageCircle className="w-4 h-4 text-brand-orange" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm leading-none">Energieberater</p>
+        <p className="font-semibold text-sm leading-none">{title}</p>
         <p className="text-white/50 text-xs mt-0.5">Haustechnik Frey · Langenau</p>
       </div>
       {onClose && (

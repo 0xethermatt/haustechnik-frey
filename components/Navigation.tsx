@@ -7,13 +7,14 @@ import { Menu, X, Phone } from 'lucide-react'
 import Link from 'next/link'
 import Logo from './Logo'
 
-type NavLink = { label: string; href: string; accent?: boolean; isPage?: boolean; isExternal?: boolean }
+type NavLink = { label: string; href: string; accent?: boolean; isPage?: boolean; isExternal?: boolean; wideOnly?: boolean }
 
 const navLinks: NavLink[] = [
   { label: 'Leistungen', href: '#leistungen' },
-  { label: 'So läufts ab', href: '#prozess' },
+  { label: 'Wärmepumpe', href: '/waermepumpe', isPage: true, accent: true },
+  { label: 'So läufts ab', href: '#prozess', wideOnly: true },
   { label: 'Projekte', href: '#projekte' },
-  { label: 'Über uns', href: '#ueber-uns' },
+  { label: 'Über uns', href: '#ueber-uns', wideOnly: true },
   { label: 'Rechner', href: '/rechner', isPage: true },
   { label: 'KI-Badplaner', href: '/bad-designer', isPage: true },
 ]
@@ -29,6 +30,17 @@ export default function Navigation() {
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  const isWPPage = pathname === '/waermepumpe'
+  const ctaLabel = isWPPage ? 'Wärmepumpen-Check' : 'Kontakt aufnehmen'
+  const handleCta = () => {
+    if (isWPPage) {
+      setMenuOpen(false)
+      document.getElementById('anfrage')?.scrollIntoView({ behavior: 'smooth' })
+    } else {
+      handleNavClick('#kontakt')
+    }
+  }
 
   const handleNavClick = (href: string) => {
     setMenuOpen(false)
@@ -73,15 +85,17 @@ export default function Navigation() {
             </Link>
 
             {/* Desktop Nav Links */}
-            <ul className="hidden md:flex items-center gap-5 lg:gap-7" role="list">
+            <ul className="hidden lg:flex items-center gap-5 xl:gap-7" role="list">
               {navLinks.map((link) => (
-                <li key={link.href}>
+                <li key={link.href} className={`whitespace-nowrap ${link.wideOnly ? 'hidden xl:block' : ''}`}>
                   {link.isPage ? (
                     <Link
                       href={link.href}
                       target={link.isExternal ? "_blank" : undefined}
                       rel={link.isExternal ? "noopener noreferrer" : undefined}
-                      className="font-medium text-sm tracking-wide transition-colors duration-200 relative group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded text-white/80 hover:text-white"
+                      className={`font-medium text-sm tracking-wide transition-colors duration-200 relative group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded ${
+                        link.accent ? 'text-brand-orange hover:text-brand-orange-light' : 'text-white/80 hover:text-white'
+                      }`}
                     >
                       {link.label}
                       <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-orange rounded-full transition-all duration-300 group-hover:w-full" />
@@ -104,27 +118,27 @@ export default function Navigation() {
             </ul>
 
             {/* Desktop CTA */}
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-3">
               <a
                 href="tel:+4973453286"
                 className="flex items-center gap-2 text-white/80 hover:text-white text-sm transition-colors duration-200"
                 aria-label="Anrufen"
               >
                 <Phone className="w-4 h-4" />
-                <span className="hidden lg:inline">07345 3286</span>
+                <span className="hidden xl:inline">07345 3286</span>
               </a>
               <button
-                onClick={() => handleNavClick('#kontakt')}
-                className="bg-brand-orange hover:bg-brand-orange-dark text-white font-semibold text-sm px-5 py-2.5 rounded-full transition-all duration-200 hover:shadow-orange-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
+                onClick={handleCta}
+                className="whitespace-nowrap bg-brand-orange hover:bg-brand-orange-dark text-white font-semibold text-sm px-5 py-2.5 rounded-full transition-all duration-200 hover:shadow-orange-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
               >
-                Kontakt aufnehmen
+                {ctaLabel}
               </button>
             </div>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden text-white p-2 rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+              className="lg:hidden text-white p-2 rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
               aria-label={menuOpen ? 'Menü schließen' : 'Menü öffnen'}
               aria-expanded={menuOpen}
             >
@@ -170,7 +184,9 @@ export default function Navigation() {
                       target={link.isExternal ? "_blank" : undefined}
                       rel={link.isExternal ? "noopener noreferrer" : undefined}
                       onClick={() => setMenuOpen(false)}
-                      className="block text-left text-2xl font-serif font-bold py-4 border-b border-white/10 hover:text-brand-orange transition-colors focus:outline-none text-white"
+                      className={`block text-left text-2xl font-serif font-bold py-4 border-b border-white/10 hover:text-brand-orange transition-colors focus:outline-none ${
+                        link.accent ? 'text-brand-orange' : 'text-white'
+                      }`}
                     >
                       {link.label}
                     </Link>
@@ -201,10 +217,10 @@ export default function Navigation() {
                 07345 3286
               </a>
               <button
-                onClick={() => handleNavClick('#kontakt')}
+                onClick={handleCta}
                 className="bg-brand-orange text-white font-bold px-6 py-4 rounded-2xl hover:bg-brand-orange-dark transition-colors text-lg"
               >
-                Kontakt aufnehmen
+                {ctaLabel}
               </button>
             </div>
           </motion.div>

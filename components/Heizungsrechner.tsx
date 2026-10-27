@@ -22,6 +22,8 @@ import {
   AlertCircle,
   CheckCircle2,
 } from 'lucide-react'
+import Link from 'next/link'
+import { FOERDER_STAND, GRUNDFOERDERUNG, foerderfaehigeKosten, getPeriode } from '@/lib/waermepumpe/foerderung'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -106,15 +108,17 @@ function getBeg(
   if (loesung === 'gas-brennwert') {
     return {
       pct: 0,
-      note: 'Gas-Brennwert ist seit 2024 nicht mehr über die BEG förderfähig.',
+      note: 'Gas-Brennwert ist nicht über die KfW-Heizungsförderung förderfähig.',
     }
   }
-  let pct = 30
-  if (['oel', 'gas', 'nachtspeicher'].includes(current)) pct += 5
-  if (['oel', 'nachtspeicher'].includes(current)) pct += 5
+  const { klimaBonus } = getPeriode()
+  const klima = ['oel', 'gas', 'nachtspeicher'].includes(current) ? klimaBonus : 0
+  const pct = GRUNDFOERDERUNG + klima
   return {
     pct,
-    note: `BEG EM ${pct}% (inkl. Boni für Heizungstausch)`,
+    note: klima
+      ? `KfW 458: ${GRUNDFOERDERUNG} % Grundförderung + ${klima} % Klimabonus (Gas ab 20 Jahren). Mit Einkommensbonus bis 80 % möglich.`
+      : `KfW 458: ${GRUNDFOERDERUNG} % Grundförderung. Mit Einkommensbonus bis 70 % möglich.`,
   }
 }
 
@@ -134,7 +138,7 @@ function calcResult(s: WizardState): CalcResult {
 
   const { pct: begPct, note: begNote } = getBeg(heizloesung, aktuellesSystem)
 
-  const maxFundable = gebaeudetyp === 'mehrfamilienhaus' ? 75000 : 30000
+  const maxFundable = foerderfaehigeKosten(gebaeudetyp === 'mehrfamilienhaus' ? 6 : 1, getPeriode())
   const subsidyCap = maxFundable * (begPct / 100)
   const subsidyMid = Math.min(bruttoMid * (begPct / 100), subsidyCap)
   const subsidyMin = Math.round(subsidyMid * 0.88 / 100) * 100
@@ -176,7 +180,7 @@ function calcResult(s: WizardState): CalcResult {
   if (heizloesung === 'gas-brennwert') {
     recommendation = `Die ${loesungLabel[heizloesung]} ist die günstigste Option in der Anschaffung. Beachten Sie jedoch: Sie erhalten keine staatliche Förderung und ab 2045 dürfen fossile Heizungen nicht mehr betrieben werden. Für eine langfristige Planung empfehlen wir eine erneuerbare Alternative.`
   } else if (heizloesung === 'waermepumpe' && baujahr === 'vor1978') {
-    recommendation = `Für ein Gebäude aus ${bajrLabel[baujahr]} lohnt sich eine Wärmepumpe besonders in Kombination mit einer Gebäudedämmung. Mit ${begPct}% BEG-Förderung und dem Tausch der ${currentLabel[aktuellesSystem]} erzielen Sie die maximale Einsparung.`
+    recommendation = `Für ein Gebäude aus ${bajrLabel[baujahr]} lohnt sich eine Wärmepumpe besonders in Kombination mit einer Gebäudedämmung. Mit ${begPct}% KfW-Förderung (ggf. mehr mit Einkommensbonus) und dem Tausch der ${currentLabel[aktuellesSystem]} erzielen Sie die maximale Einsparung.`
   } else {
     recommendation = `Die ${loesungLabel[heizloesung]} ist eine ausgezeichnete Wahl für Ihr ${gebaeudetyp === 'einfamilienhaus' ? 'Einfamilienhaus' : gebaeudetyp === 'wohnung' ? 'Wohnung' : 'Gebäude'} (Baujahr ${bajrLabel[baujahr]}). Mit ${begPct > 0 ? `${begPct}% staatlicher Förderung und ` : ''}${annualSavings > 0 ? `ca. ${annualSavings.toLocaleString('de-DE')} € jährlicher Ersparnis` : 'modernen Betriebskosten'} ist diese Lösung wirtschaftlich attraktiv.`
   }
@@ -457,7 +461,7 @@ function Step5({
       label: 'Wärmepumpe',
       sublabel: 'Effizient & zukunftssicher',
       icon: <Thermometer className="w-6 h-6" />,
-      tag: 'BEG bis 40 %',
+      tag: 'KfW bis 80 %',
       tagColor: 'bg-brand-green/20 text-brand-green',
     },
     {
@@ -465,7 +469,7 @@ function Step5({
       label: 'Pelletheizung',
       sublabel: 'CO₂-neutral & günstig',
       icon: <Leaf className="w-6 h-6" />,
-      tag: 'BEG bis 35 %',
+      tag: 'KfW bis 80 %',
       tagColor: 'bg-brand-green/20 text-brand-green',
     },
     {
@@ -481,7 +485,7 @@ function Step5({
       label: 'Solar-Kombi',
       sublabel: 'WP + Solarthermie',
       icon: <Sun className="w-6 h-6" />,
-      tag: 'BEG bis 40 %',
+      tag: 'KfW bis 80 %',
       tagColor: 'bg-brand-green/20 text-brand-green',
     },
   ]
@@ -542,7 +546,7 @@ function Step6({ state, reset }: { state: WizardState; reset: () => void }) {
     },
     {
       icon: <Percent className="w-5 h-5" />,
-      label: r.noSubsidy ? 'Förderung (BEG)' : `BEG-Förderung (${r.begPct} %)`,
+      label: r.noSubsidy ? 'Förderung (KfW)' : `KfW-Förderung (${r.begPct} %)`,
       value: r.noSubsidy ? 'Keine' : `${fmt(r.subsidyMin)} – ${fmt(r.subsidyMax)}`,
       color: r.noSubsidy ? 'text-white/40' : 'text-brand-green',
       bg: r.noSubsidy ? 'bg-white/10' : 'bg-brand-green/20',
@@ -626,10 +630,19 @@ function Step6({ state, reset }: { state: WizardState; reset: () => void }) {
       <div className="flex items-start gap-2 text-white/40">
         <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
         <p className="text-xs leading-relaxed">
-          Richtwerte auf Basis aktueller Marktpreise und BEG-Fördersätze (2025). Verbindliche
-          Planung erst nach Vor-Ort-Besichtigung.
+          Richtwerte auf Basis aktueller Marktpreise und der KfW-Heizungsförderung (Stand {FOERDER_STAND}),
+          ohne Einkommensbonus. Verbindliche Planung erst nach Vor-Ort-Besichtigung.
         </p>
       </div>
+
+      {state.heizloesung === 'waermepumpe' && (
+        <Link
+          href="/waermepumpe#foerderrechner"
+          className="flex items-center justify-center gap-2 bg-brand-green/20 hover:bg-brand-green/30 border border-brand-green/40 text-white font-semibold px-5 py-3.5 rounded-full transition-colors"
+        >
+          Förderung inkl. Einkommensbonus genau berechnen <ArrowRight className="w-4 h-4" />
+        </Link>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3">
         <a
@@ -726,7 +739,7 @@ export default function Heizungsrechner() {
           </h2>
           <p className="mt-4 text-sm sm:text-lg text-white/65 max-w-xl mx-auto leading-relaxed">
             In 5 Schritten zu Ihrer persönlichen Kostenschätzung — inklusive aktueller
-            BEG-Fördermöglichkeiten.
+            Fördermöglichkeiten.
           </p>
         </motion.div>
 
@@ -815,7 +828,7 @@ export default function Heizungsrechner() {
 
         <p className="text-white/25 text-xs text-center mt-4">
           * Alle Angaben sind unverbindliche Richtwerte. Förderbedingungen gelten für selbst
-          genutzte Wohngebäude (BEG EM, Stand 2025).
+          genutzte Wohngebäude (KfW 458, Stand {FOERDER_STAND}).
         </p>
       </div>
     </section>

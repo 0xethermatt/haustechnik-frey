@@ -136,6 +136,40 @@ export default function Datenschutz() {
               Bearbeitung Ihres Anliegens bei uns gespeichert und verarbeitet. Diese Daten geben
               wir nicht ohne Ihre Einwilligung weiter. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.
             </p>
+            <h3 className="font-semibold text-gray-800 mb-2 mt-4">Wärmepumpen-Check (Online-Anfrageformular)</h3>
+            <p className="leading-relaxed">
+              Wenn Sie den Wärmepumpen-Check auf haustechnik-frey.de/waermepumpe nutzen, verarbeiten wir
+              die von Ihnen eingegebenen Angaben (Kontaktdaten, Angaben zu Gebäude, Heizung und
+              Förderfähigkeit) sowie freiwillig hochgeladene Fotos ausschließlich zur Bearbeitung Ihrer
+              Anfrage und zur Erstellung eines Angebots. Fotos werden vor dem Versand in Ihrem Browser
+              verkleinert. Die Anfrage wird per E-Mail an uns übermittelt; Sie erhalten eine
+              Eingangsbestätigung an die angegebene E-Mail-Adresse. Rechtsgrundlage ist Art. 6 Abs. 1
+              lit. b DSGVO (vorvertragliche Maßnahmen) sowie Ihre Einwilligung nach Art. 6 Abs. 1 lit. a
+              DSGVO. Die Daten werden gelöscht, sobald sie für die Bearbeitung nicht mehr erforderlich
+              sind und keine gesetzlichen Aufbewahrungspflichten entgegenstehen. Ein noch nicht
+              abgeschickter Formularentwurf (ohne Fotos) wird lokal in Ihrem Browser gespeichert und
+              nach dem Absenden gelöscht.
+            </p>
+            <p className="leading-relaxed mt-2">
+              Für den Versand der E-Mails nutzen wir den Dienst Resend (Resend Inc., USA). Die
+              Übermittlung erfolgt auf Grundlage der EU-Standardvertragsklauseln bzw. des EU-U.S. Data
+              Privacy Frameworks.{' '}
+              <a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-brand-purple hover:underline">
+                Datenschutzerklärung Resend
+              </a>
+            </p>
+            <h3 className="font-semibold text-gray-800 mb-2 mt-4">KI-Berater (Chat)</h3>
+            <p className="leading-relaxed">
+              Wenn Sie unseren KI-Berater nutzen, werden Ihre Chat-Nachrichten zur Erzeugung einer Antwort
+              an OpenAI (OpenAI, L.L.C., USA) übermittelt. Bitte geben Sie im Chat keine sensiblen
+              personenbezogenen Daten ein. Die Übermittlung erfolgt auf Grundlage der
+              EU-Standardvertragsklauseln bzw. des EU-U.S. Data Privacy Frameworks. Rechtsgrundlage ist
+              Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer schnellen Beantwortung von
+              Kundenanfragen); die Nutzung ist freiwillig.{' '}
+              <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-brand-purple hover:underline">
+                Datenschutzerklärung OpenAI
+              </a>
+            </p>
           </section>
 
           <section aria-labelledby="ds-5">
