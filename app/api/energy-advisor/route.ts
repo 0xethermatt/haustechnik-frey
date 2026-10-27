@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("EnergyAdvisor API Error:", error)
     return NextResponse.json(
-      { error: "Ein Fehler ist aufgetreten. Bitte versuche es erneut oder ruf uns direkt an: 07345 3286." },
+      { error: "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut oder rufen Sie uns direkt an: 07345 3286." },
       { status: 500 }
     )
   }

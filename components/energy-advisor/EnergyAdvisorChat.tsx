@@ -79,7 +79,7 @@ export default function EnergyAdvisorChat({
       }
       setMessages((prev) => [...prev, assistantMsg])
     } catch {
-      setError('Entschuldigung, da ist etwas schiefgelaufen. Bitte versuche es erneut oder ruf uns direkt an.')
+      setError('Entschuldigung, da ist etwas schiefgelaufen. Bitte versuchen Sie es erneut oder rufen Sie uns direkt an: 07345 3286.')
     } finally {
       setLoading(false)
       setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 100)
