@@ -2,12 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { AlertTriangle, ArrowRight, BadgeEuro, Baby, CalendarCheck, Home, Info, Building2, Users } from 'lucide-react'
+import { ArrowRight, BadgeEuro, Baby, CalendarCheck, Home, Info, Building2, Users } from 'lucide-react'
 import { scrollToId, useWP } from './WPContext'
 import {
   ALTANLAGE_LABELS,
   EINKOMMEN_LABELS,
-  FOERDER_STAND,
   UMSETZUNGSFRIST_MONATE,
   berechneFoerderung,
   formatEuro,
@@ -56,6 +55,7 @@ function Label({ children, hint }: { children: React.ReactNode; hint?: string })
   )
 }
 
+// Wird in WPRechner eingebettet (Reiter „Zuschuss“)
 export default function WPFoerderrechner() {
   const { setFoerder } = useWP()
   const [investition, setInvestition] = useState(32000)
@@ -103,28 +103,6 @@ export default function WPFoerderrechner() {
     })
 
   return (
-    <section
-      id="foerderrechner"
-      className="scroll-mt-32 py-16 sm:py-20 lg:py-24 bg-[#3B1560] relative overflow-clip"
-      aria-labelledby="foerder-heading"
-    >
-      <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-brand-orange/10 blur-3xl pointer-events-none" aria-hidden="true" />
-      <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full bg-brand-green/10 blur-3xl pointer-events-none" aria-hidden="true" />
-
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10 sm:mb-12">
-          <span className="inline-block text-brand-orange font-semibold text-sm tracking-widest uppercase mb-4">
-            Förderrechner KfW 458
-          </span>
-          <h2 id="foerder-heading" className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-white">
-            Wie viel Zuschuss bekommen Sie?
-          </h2>
-          <p className="mt-4 text-sm sm:text-lg text-white/65 max-w-2xl mx-auto leading-relaxed">
-            Nach den aktuellen Förderregeln (Stand {FOERDER_STAND}) – mit allen Boni, Deckelungen und
-            dem Familienzuschlag. Ergebnis in Echtzeit.
-          </p>
-        </div>
-
         <div className="grid lg:grid-cols-[1.1fr_1fr] gap-6">
           {/* Inputs */}
           <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-3xl p-5 sm:p-7 flex flex-col gap-7">
@@ -306,44 +284,31 @@ export default function WPFoerderrechner() {
               </p>
             </div>
 
-            {naechste && verlust > 0 && (
-              <div className="bg-brand-orange/15 border border-brand-orange/30 rounded-2xl p-4 flex gap-3">
-                <AlertTriangle className="w-5 h-5 text-brand-orange flex-shrink-0 mt-0.5" aria-hidden="true" />
-                <p className="text-sm text-white/85 leading-relaxed">
-                  Bei Antrag ab dem {formatDatum(naechste.ab)}{' '}
-                  bekommen Sie voraussichtlich <strong className="text-brand-orange">{formatEuro(verlust)} weniger</strong>.
-                  Maßgeblich ist das Datum der Antragstellung.
-                </p>
-              </div>
-            )}
-
             <div className="bg-brand-green/15 border border-brand-green/30 rounded-2xl p-4 flex gap-3">
               <CalendarCheck className="w-5 h-5 text-brand-green flex-shrink-0 mt-0.5" aria-hidden="true" />
               <p className="text-sm text-white/85 leading-relaxed">
-                <strong className="text-white">Heute sichern, später einbauen:</strong> Der Fördersatz gilt ab
-                Antragstellung. Nach der Zusage haben Sie <strong className="text-brand-green">{UMSETZUNGSFRIST_MONATE} Monate Zeit</strong> für
-                die Umsetzung – der Vertrag mit Förderklausel ist ohne Zusage hinfällig.
+                <strong className="text-white">Heute sichern, später einbauen:</strong> Der Fördersatz gilt ab Antrag,
+                danach haben Sie <strong className="text-brand-green">{UMSETZUNGSFRIST_MONATE} Monate Zeit</strong> für den Einbau.
+                {naechste && verlust > 0 && (
+                  <>
+                    {' '}Bei Antrag ab {formatDatum(naechste.ab)}:{' '}
+                    <strong className="text-brand-orange">ca. {formatEuro(verlust)} weniger</strong>.
+                  </>
+                )}
               </p>
             </div>
 
-            <div className="bg-white/10 border border-white/10 rounded-2xl p-4 flex gap-3">
-              <Info className="w-5 h-5 text-white/50 flex-shrink-0 mt-0.5" aria-hidden="true" />
-              <div className="text-xs text-white/55 leading-relaxed space-y-1.5">
-                {r.einkommen > 0 && (
-                  <p>Für den Einkommensbonus benötigen Sie die Steuerbescheide {r.steuerjahre[0]} und {r.steuerjahre[1]}.</p>
-                )}
+            <p className="flex gap-2 text-xs text-white/45 leading-relaxed px-1">
+              <Info className="w-4 h-4 flex-shrink-0 mt-0.5" aria-hidden="true" />
+              <span>
+                {r.einkommen > 0 && <>Einkommensbonus: Steuerbescheide {r.steuerjahre[0]} und {r.steuerjahre[1]} bereithalten. </>}
                 {!r.klimaBerechtigt && selbstnutzer && altanlage === 'gas-neu' && (
-                  <p>Gasheizungen unter 20 Jahren erhalten keinen Klimabonus – Alter steht auf dem Typenschild.</p>
+                  <>Gasheizungen unter 20 Jahren erhalten keinen Klimabonus. </>
                 )}
-                <p>
-                  Für 2027 sind weitere Änderungen angekündigt (u. a. niedrigere Grundförderung, Bonus für in der EU
-                  gefertigte Wärmepumpen). Unverbindliche Schätzung – keine Förderzusage.
-                </p>
-              </div>
-            </div>
+                Für 2027 sind weitere Änderungen angekündigt. Unverbindliche Schätzung – keine Förderzusage.
+              </span>
+            </p>
           </div>
         </div>
-      </div>
-    </section>
   )
 }

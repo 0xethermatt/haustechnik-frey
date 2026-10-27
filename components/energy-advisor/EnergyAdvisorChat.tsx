@@ -15,11 +15,14 @@ const DEFAULT_WELCOME =
 interface EnergyAdvisorChatProps {
   starters?: StarterQuestion[]
   welcome?: string
+  /** Wird beim Öffnen automatisch gesendet, z. B. eine angeklickte Startfrage */
+  initialMessage?: string
 }
 
 export default function EnergyAdvisorChat({
   starters = STARTER_QUESTIONS,
   welcome = DEFAULT_WELCOME,
+  initialMessage,
 }: EnergyAdvisorChatProps) {
   const [messages, setMessages] = useState<DisplayMessage[]>([])
   const [input, setInput] = useState('')
@@ -33,6 +36,14 @@ export default function EnergyAdvisorChat({
     const el = scrollRef.current
     if (el && (messages.length > 0 || loading)) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
   }, [messages, loading])
+
+  const initialSent = useRef(false)
+  useEffect(() => {
+    if (initialMessage && !initialSent.current) {
+      initialSent.current = true
+      sendMessage(initialMessage)
+    }
+  }, [initialMessage]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function sendMessage(text: string) {
     if (!text.trim() || loading) return

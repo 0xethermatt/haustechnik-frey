@@ -79,7 +79,7 @@ function SliderRow({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function EinsparRechner() {
+export default function EinsparRechner({ embedded = false }: { embedded?: boolean }) {
   const [fuel, setFuel] = useState<'oel' | 'gas'>('oel')
   const [consumption, setConsumption] = useState(2000)
   const [fuelPrice, setFuelPrice] = useState(fuel === 'oel' ? 1.05 : 1.10)
@@ -155,40 +155,8 @@ export default function EinsparRechner() {
     ? Math.max(Math.round((result.hpCost / result.currentCost) * 100), 4)
     : 50
 
-  return (
-    <section
-      id="einsparrechner"
-      className="scroll-mt-32 py-12 sm:py-16 lg:py-24 bg-brand-purple-deep relative overflow-hidden"
-      aria-labelledby="einspar-heading"
-    >
-      {/* Decorative blobs */}
-      <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full bg-brand-green/8 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-72 h-72 rounded-full bg-brand-orange/8 blur-3xl pointer-events-none" />
-
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-10"
-        >
-          <span className="inline-block text-brand-orange font-semibold text-sm tracking-widest uppercase mb-4">
-            Kostenloser Rechner
-          </span>
-          <h2
-            id="einspar-heading"
-            className="text-2xl sm:text-3xl lg:text-5xl font-serif font-bold text-white"
-          >
-            Wechsel-Einsparrechner
-          </h2>
-          <p className="mt-4 text-sm sm:text-lg text-white/65 max-w-xl mx-auto leading-relaxed">
-            Wie viel sparen Sie beim Wechsel von Öl oder Gas zur Wärmepumpe? Berechnen Sie
-            Ihre persönliche Ersparnis — optional mit PV-Anlage.
-          </p>
-        </motion.div>
-
+  const body = (
+      <>
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -506,8 +474,48 @@ export default function EinsparRechner() {
 
         <p className="text-white/20 text-xs text-center mt-6">
           * Richtwerte. Öl: 10 kWh/L, Wirkungsgrad 85 %. Gas: 10 kWh/m³, Wirkungsgrad 90 %.
-          WP COP 3,0. PV: 950 kWh/kWp/Jahr (Süddeutschland).
+          WP: Jahresarbeitszahl lt. Regler. PV: 950 kWh/kWp/Jahr (Süddeutschland).
         </p>
+      </>
+  )
+
+  if (embedded) return body
+
+  return (
+    <section
+      id="einsparrechner"
+      className="scroll-mt-32 py-12 sm:py-16 lg:py-24 bg-brand-purple-deep relative overflow-hidden"
+      aria-labelledby="einspar-heading"
+    >
+      {/* Decorative blobs */}
+      <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full bg-brand-green/8 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-72 h-72 rounded-full bg-brand-orange/8 blur-3xl pointer-events-none" />
+
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-10"
+        >
+          <span className="inline-block text-brand-orange font-semibold text-sm tracking-widest uppercase mb-4">
+            Kostenloser Rechner
+          </span>
+          <h2
+            id="einspar-heading"
+            className="text-2xl sm:text-3xl lg:text-5xl font-serif font-bold text-white"
+          >
+            Wechsel-Einsparrechner
+          </h2>
+          <p className="mt-4 text-sm sm:text-lg text-white/65 max-w-xl mx-auto leading-relaxed">
+            Wie viel sparen Sie beim Wechsel von Öl oder Gas zur Wärmepumpe? Berechnen Sie
+            Ihre persönliche Ersparnis — optional mit PV-Anlage.
+          </p>
+        </motion.div>
+
+        {body}
       </div>
     </section>
   )

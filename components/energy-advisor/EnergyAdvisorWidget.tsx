@@ -16,9 +16,10 @@ interface EnergyAdvisorWidgetProps {
   starters?: StarterQuestion[]
   welcome?: string
   title?: string
+  initialMessage?: string
 }
 
-export default function EnergyAdvisorWidget({ embedded = false, starters, welcome, title }: EnergyAdvisorWidgetProps) {
+export default function EnergyAdvisorWidget({ embedded = false, starters, welcome, title, initialMessage }: EnergyAdvisorWidgetProps) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -27,7 +28,7 @@ export default function EnergyAdvisorWidget({ embedded = false, starters, welcom
       <div className="flex flex-col bg-brand-cream rounded-2xl overflow-hidden border border-brand-purple/10 shadow-card h-[560px] sm:h-[620px]">
         <ChatHeader onClose={undefined} title={title} />
         <div className="flex-1 min-h-0">
-          <EnergyAdvisorChat starters={starters} welcome={welcome} />
+          <EnergyAdvisorChat starters={starters} welcome={welcome} initialMessage={initialMessage} />
         </div>
       </div>
     )

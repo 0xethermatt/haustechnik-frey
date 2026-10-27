@@ -117,7 +117,7 @@ export default function WPEignungsCheck() {
   const q = QUESTIONS[Math.min(step, QUESTIONS.length - 1)]
 
   return (
-    <section id="eignung" className="scroll-mt-32 py-16 sm:py-20 lg:py-24 bg-brand-cream" aria-labelledby="eignung-heading">
+    <section id="eignung" className="scroll-mt-32 py-12 sm:py-20 lg:py-24 bg-brand-cream" aria-labelledby="eignung-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1fr_1.2fr] gap-10 lg:gap-16 items-start">
         <div>
           <span className="inline-block text-brand-orange-dark font-semibold text-sm tracking-widest uppercase mb-4">
@@ -126,11 +126,11 @@ export default function WPEignungsCheck() {
           <h2 id="eignung-heading" className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-brand-purple-deep leading-tight mb-5">
             Passt eine Wärmepumpe zu meinem Haus?
           </h2>
-          <p className="text-base sm:text-lg text-brand-purple-deep/70 leading-relaxed mb-6">
+          <p className="text-base sm:text-lg text-brand-purple-deep/70 leading-relaxed sm:mb-6">
             Die kurze Antwort: in den allermeisten Fällen ja – auch im Altbau und mit Heizkörpern.
             Vier Fragen, 30 Sekunden, und Sie wissen, wo Sie stehen.
           </p>
-          <ul className="space-y-3" role="list">
+          <ul className="hidden sm:block space-y-3" role="list">
             {[
               'Feldtests (u. a. Fraunhofer ISE) zeigen: Wärmepumpen arbeiten auch im Bestand effizient',
               'Heizkörper reichen meist aus – Fußbodenheizung ist kein Muss',

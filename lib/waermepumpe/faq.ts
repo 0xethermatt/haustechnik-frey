@@ -8,6 +8,22 @@ export interface WPFaqItem {
 
 export const WP_FAQ: WPFaqItem[] = [
   {
+    category: 'Förderung',
+    question: 'Wie viel Förderung bekomme ich für eine Wärmepumpe?',
+    answer: `Über die KfW-Heizungsförderung (Programm 458, Stand ${FOERDER_STAND}) gibt es 30 % Grundförderung. Selbstnutzende Eigentümer erhalten zusätzlich den Klimageschwindigkeitsbonus von aktuell 16 %, wenn eine funktionierende Öl-, Kohle-, Nachtspeicher- oder Gasetagenheizung oder eine mindestens 20 Jahre alte Gasheizung ersetzt wird. Dazu kommt ein Einkommensbonus von 40 %, 30 % oder 10 % bei einem zu versteuernden Haushaltseinkommen bis 30.000, 40.000 bzw. 50.000 €. Insgesamt sind maximal 70 % möglich, bei niedrigem Einkommen 80 %. Förderfähig sind bis zu 28.000 € für die erste Wohneinheit – also bis zu 22.400 € Zuschuss.`,
+  },
+  {
+    category: 'Förderung',
+    question: 'Muss ich sofort einbauen, wenn ich die Förderung beantrage?',
+    answer: `Nein. Maßgeblich für die Förderhöhe ist der Zeitpunkt der Antragstellung – wer jetzt beantragt, sichert sich die aktuellen Sätze, bevor sie sinken. Nach der Förderzusage haben Sie ${UMSETZUNGSFRIST_MONATE} Monate Zeit, die Wärmepumpe einbauen zu lassen. Voraussetzung für den Antrag ist ein Liefer- und Leistungsvertrag mit Förderklausel: Kommt keine Zusage, ist der Vertrag hinfällig – Sie gehen also kein Risiko ein.`,
+  },
+  {
+    category: 'Kosten',
+    question: 'Was kostet eine Wärmepumpe inklusive Einbau?',
+    answer:
+      'Für ein typisches Einfamilienhaus im Bestand liegt eine Luft-Wasser-Wärmepumpe inklusive Demontage der Altanlage, Speicher, Elektroanschluss und Inbetriebnahme meist zwischen 25.000 und 40.000 € vor Förderung. Erdwärmepumpen mit Bohrung kosten mehr, arbeiten dafür noch effizienter. Nach Abzug von 50–70 % Förderung bleibt oft ein Eigenanteil im Bereich einer neuen Gas- oder Ölheizung. Ein verbindliches Angebot erstellen wir nach dem Vor-Ort-Termin.',
+  },
+  {
     category: 'Eignung',
     question: 'Funktioniert eine Wärmepumpe auch im Altbau?',
     answer:
@@ -27,19 +43,9 @@ export const WP_FAQ: WPFaqItem[] = [
   },
   {
     category: 'Förderung',
-    question: 'Wie viel Förderung bekomme ich für eine Wärmepumpe?',
-    answer: `Über die KfW-Heizungsförderung (Programm 458, Stand ${FOERDER_STAND}) gibt es 30 % Grundförderung. Selbstnutzende Eigentümer erhalten zusätzlich den Klimageschwindigkeitsbonus von aktuell 16 %, wenn eine funktionierende Öl-, Kohle-, Nachtspeicher- oder Gasetagenheizung oder eine mindestens 20 Jahre alte Gasheizung ersetzt wird. Dazu kommt ein Einkommensbonus von 40 %, 30 % oder 10 % bei einem zu versteuernden Haushaltseinkommen bis 30.000, 40.000 bzw. 50.000 €. Insgesamt sind maximal 70 % möglich, bei niedrigem Einkommen 80 %. Förderfähig sind bis zu 28.000 € für die erste Wohneinheit – also bis zu 22.400 € Zuschuss.`,
-  },
-  {
-    category: 'Förderung',
     question: 'Sinkt die Förderung bald?',
     answer:
       'Ja. Der Klimageschwindigkeitsbonus sinkt halbjährlich: ab 01.02.2027 auf 12 %, ab 01.08.2027 auf 8 %, ab 01.02.2028 auf 4 % und entfällt ab 01.08.2028. Gleichzeitig sinken die förderfähigen Kosten der ersten Wohneinheit alle sechs Monate um 750 €. Für 2027 ist außerdem angekündigt, die Grundförderung für Wärmepumpen auf 15 % zu senken und einen Bonus für in der EU gefertigte Geräte einzuführen. Entscheidend ist der Zeitpunkt der Antragstellung – wer früher beantragt, sichert sich die höheren Sätze.',
-  },
-  {
-    category: 'Förderung',
-    question: 'Muss ich sofort einbauen, wenn ich die Förderung beantrage?',
-    answer: `Nein. Maßgeblich für die Förderhöhe ist der Zeitpunkt der Antragstellung – wer jetzt beantragt, sichert sich die aktuellen Sätze, bevor sie sinken. Nach der Förderzusage haben Sie ${UMSETZUNGSFRIST_MONATE} Monate Zeit, die Wärmepumpe einbauen zu lassen. Voraussetzung für den Antrag ist ein Liefer- und Leistungsvertrag mit Förderklausel: Kommt keine Zusage, ist der Vertrag hinfällig – Sie gehen also kein Risiko ein.`,
   },
   {
     category: 'Förderung',
@@ -52,12 +58,6 @@ export const WP_FAQ: WPFaqItem[] = [
     question: 'Wer stellt den Förderantrag – und wann?',
     answer:
       'Den Antrag stellen Sie selbst im KfW-Portal „Meine KfW“ – wir bereiten alles vor. Die Reihenfolge ist wichtig: Zuerst schließen wir einen Liefer- und Leistungsvertrag mit einer Förderklausel (auflösende oder aufschiebende Bedingung) und stellen Ihnen die „Bestätigung zum Antrag“ (BzA) aus. Dann stellen Sie den Antrag, und erst nach der Zusage beginnen wir mit dem Einbau. So tragen Sie kein Risiko.',
-  },
-  {
-    category: 'Kosten',
-    question: 'Was kostet eine Wärmepumpe inklusive Einbau?',
-    answer:
-      'Für ein typisches Einfamilienhaus im Bestand liegt eine Luft-Wasser-Wärmepumpe inklusive Demontage der Altanlage, Speicher, Elektroanschluss und Inbetriebnahme meist zwischen 25.000 und 40.000 € vor Förderung. Erdwärmepumpen mit Bohrung kosten mehr, arbeiten dafür noch effizienter. Nach Abzug von 50–70 % Förderung bleibt oft ein Eigenanteil im Bereich einer neuen Gas- oder Ölheizung. Ein verbindliches Angebot erstellen wir nach dem Vor-Ort-Termin.',
   },
   {
     category: 'Kosten',

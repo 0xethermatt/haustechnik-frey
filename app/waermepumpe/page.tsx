@@ -1,14 +1,15 @@
 import type { Metadata } from 'next'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
-import EinsparRechner from '@/components/EinsparRechner'
 import { WPProvider } from '@/components/waermepumpe/WPContext'
 import WPHero from '@/components/waermepumpe/WPHero'
 import WPSubNav from '@/components/waermepumpe/WPSubNav'
 import WPEignungsCheck from '@/components/waermepumpe/WPEignungsCheck'
 import WPVorteile from '@/components/waermepumpe/WPVorteile'
 import WPSysteme from '@/components/waermepumpe/WPSysteme'
-import WPFoerderrechner from '@/components/waermepumpe/WPFoerderrechner'
+import WPRechner from '@/components/waermepumpe/WPRechner'
+import WPWissen from '@/components/waermepumpe/WPWissen'
+import WPMythen from '@/components/waermepumpe/WPMythen'
 import WPKosten from '@/components/waermepumpe/WPKosten'
 import WPAblauf from '@/components/waermepumpe/WPAblauf'
 import WPReferenz from '@/components/waermepumpe/WPReferenz'
@@ -97,12 +98,8 @@ const jsonLd = [
 
 const SUBNAV = [
   { id: 'eignung', label: 'Eignung' },
-  { id: 'vorteile', label: 'Vorteile' },
-  { id: 'systeme', label: 'Technik' },
   { id: 'foerderrechner', label: 'Förderung' },
-  { id: 'einsparrechner', label: 'Ersparnis' },
-  { id: 'kosten', label: 'Kosten' },
-  { id: 'ablauf', label: 'Ablauf' },
+  { id: 'wissen', label: 'Kosten & Ablauf' },
   { id: 'referenz', label: 'Praxis' },
   { id: 'ki-berater', label: 'KI-Berater' },
   { id: 'faq', label: 'FAQ' },
@@ -127,11 +124,15 @@ export default function WaermepumpePage() {
           />
           <WPEignungsCheck />
           <WPVorteile />
-          <WPSysteme />
-          <WPFoerderrechner />
-          <EinsparRechner />
-          <WPKosten />
-          <WPAblauf />
+          <WPRechner />
+          <WPWissen
+            tabs={[
+              { id: 'kosten', label: 'Kosten', content: <WPKosten /> },
+              { id: 'ablauf', label: 'Ablauf', content: <WPAblauf /> },
+              { id: 'technik', label: 'Technik', content: <WPSysteme /> },
+              { id: 'mythen', label: 'Mythen', content: <WPMythen /> },
+            ]}
+          />
           <WPReferenz />
           {advisorEnabled && <WPKIBerater />}
           <WPFAQ />

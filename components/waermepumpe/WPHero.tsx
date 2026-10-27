@@ -115,7 +115,7 @@ export default function WPHero() {
             transition={{ duration: 0.8, delay: 0.15 }}
             className="relative"
           >
-            <div className="relative aspect-[4/5] sm:aspect-[5/4] lg:aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-white/10">
+            <div className="relative aspect-[4/3] sm:aspect-[5/4] lg:aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-white/10">
               <Image
                 src="/images/waermepumpe-3.jpg"
                 alt="Luft-Wasser-Wärmepumpe im Garten eines Einfamilienhauses"

@@ -6,17 +6,20 @@ import { ChevronDown } from 'lucide-react'
 import { WP_FAQ, type WPFaqItem } from '@/lib/waermepumpe/faq'
 
 const CATEGORIES: WPFaqItem['category'][] = ['Eignung', 'Förderung', 'Kosten', 'Technik', 'Ablauf']
+const TOP_N = 5
 
 export default function WPFAQ() {
   const [filter, setFilter] = useState<WPFaqItem['category'] | 'Alle'>('Alle')
-  const [open, setOpen] = useState<number | null>(0)
+  const [open, setOpen] = useState<number | null>(null)
+  const [alle, setAlle] = useState(false)
 
-  const items = WP_FAQ.map((item, index) => ({ ...item, index })).filter(
+  const gefiltert = WP_FAQ.map((item, index) => ({ ...item, index })).filter(
     (i) => filter === 'Alle' || i.category === filter
   )
+  const items = alle || filter !== 'Alle' ? gefiltert : gefiltert.slice(0, TOP_N)
 
   return (
-    <section id="faq" className="scroll-mt-32 py-16 sm:py-20 lg:py-24 bg-brand-cream" aria-labelledby="wp-faq-heading">
+    <section id="faq" className="scroll-mt-32 py-14 sm:py-20 bg-brand-cream" aria-labelledby="wp-faq-heading">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <span className="inline-block text-brand-orange-dark font-semibold text-sm tracking-widest uppercase mb-4">
@@ -78,6 +81,18 @@ export default function WPFAQ() {
             )
           })}
         </div>
+
+        {filter === 'Alle' && !alle && gefiltert.length > TOP_N && (
+          <div className="text-center mt-6">
+            <button
+              onClick={() => setAlle(true)}
+              className="inline-flex items-center gap-2 text-brand-purple font-semibold border-2 border-brand-purple/30 hover:border-brand-purple rounded-full px-6 py-3 transition-colors"
+            >
+              Alle {gefiltert.length} Fragen anzeigen
+              <ChevronDown className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </div>
+        )}
       </div>
     </section>
   )
