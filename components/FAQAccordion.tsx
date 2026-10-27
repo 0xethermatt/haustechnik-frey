@@ -39,9 +39,9 @@ const faqItems: FAQItem[] = [
   },
   {
     category: 'Heizung',
-    question: 'Wie hoch ist die BEG-Förderung für Wärmepumpen?',
+    question: 'Wie hoch ist die Förderung für Wärmepumpen?',
     answer:
-      'Die Bundesförderung für effiziente Gebäude (BEG) bietet eine Grundförderung von 30 %. Wer eine alte Öl-, Gas- oder Nachtspeicherheizung ersetzt, erhält zusätzlich den Klimabonus von 5 % — also 35 %. Bei einem jährlichen Haushaltseinkommen von max. €40.000 kommt nochmals ein Einkommensbonus von 5 % dazu, was 40 % ergibt. Die maximal förderfähigen Kosten betragen €30.000 für Ein- und Zweifamilienhäuser und €75.000 für Mehrfamilienhäuser. Der Antrag läuft über die BAFA. Wir unterstützen Sie dabei.',
+      'Über die KfW-Heizungsförderung (Programm 458) gibt es 30 % Grundförderung. Selbstnutzende Eigentümer erhalten beim Ersatz einer funktionierenden Öl-, Kohle-, Nachtspeicher- oder mindestens 20 Jahre alten Gasheizung zusätzlich den Klimageschwindigkeitsbonus (aktuell 16 %, sinkt ab 01.02.2027). Dazu kommt ein Einkommensbonus von 10–40 % bei einem zu versteuernden Haushaltseinkommen bis 50.000 €. Maximal sind 70 % möglich, bei niedrigem Einkommen 80 % – bei förderfähigen Kosten von bis zu 28.000 € für die erste Wohneinheit. Den Antrag stellen Sie bei der KfW, wir bereiten alles vor. Ihren persönlichen Zuschuss berechnen Sie auf haustechnik-frey.de/waermepumpe.',
   },
   {
     category: 'Heizung',

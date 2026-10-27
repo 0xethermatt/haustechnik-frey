@@ -3,11 +3,14 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
+import { FOERDER_STAND, GRUNDFOERDERUNG, formatEuro, getPeriode } from '@/lib/waermepumpe/foerderung'
+
+export const revalidate = 86400
 
 export const metadata: Metadata = {
   title: 'Heizung Langenau — Wärmepumpe, Pellet & Gas | Haustechnik Frey',
   description:
-    'Heizungsinstallation & -modernisierung in Langenau. Wärmepumpe, Pelletheizung, Gasheizung, Fußbodenheizung — mit BEG-Förderung bis 70%. Meisterbetrieb seit 1994.',
+    'Heizungsinstallation & -modernisierung in Langenau. Wärmepumpe, Pelletheizung, Gasheizung, Fußbodenheizung — mit bis zu 80 % KfW-Förderung. Meisterbetrieb seit 1994.',
   keywords: [
     'Heizung Langenau',
     'Wärmepumpe Langenau',
@@ -21,7 +24,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Heizung Langenau — Wärmepumpe, Pellet & Gas | Haustechnik Frey',
     description:
-      'Heizungsinstallation in Langenau. Wärmepumpe, Pellet, Gas — mit BEG-Förderung bis 70%.',
+      'Heizungsinstallation in Langenau. Wärmepumpe, Pellet, Gas — mit bis zu 80 % KfW-Förderung.',
     url: 'https://haustechnik-frey.de/leistungen/heizung',
   },
   alternates: { canonical: 'https://haustechnik-frey.de/leistungen/heizung' },
@@ -50,7 +53,7 @@ const systems = [
     description:
       'Die Wärmepumpe nutzt kostenlose Umgebungsenergie aus Luft, Erde oder Wasser und wandelt sie effizient in Heizwärme um. Mit einem COP von 3–5 erzeugt sie aus 1 kWh Strom bis zu 5 kWh Wärme.',
     pros: [
-      'Bis zu 70 % BEG-Förderung möglich',
+      'Bis zu 80 % KfW-Förderung möglich',
       'Sehr niedrige Betriebskosten',
       'Klimaneutral mit Ökostrom',
       'Kühlfunktion im Sommer (reversibel)',
@@ -71,7 +74,7 @@ const systems = [
       'Hoher Komfort dank Vollautomatik',
       'Günstiger Brennstoffpreis (Pellets)',
       'Unabhängig von Gas- & Ölpreisen',
-      'BEG-Förderung möglich',
+      'KfW-Förderung möglich',
     ],
     when: 'Perfekt für alle, die erneuerbar heizen möchten, aber keinen Platz/Budget für eine Wärmepumpe haben oder auf bewährte Verbrennungstechnik setzen.',
   },
@@ -112,6 +115,7 @@ const systems = [
 ]
 
 export default function HeizungPage() {
+  const periode = getPeriode()
   return (
     <>
       <script
@@ -249,6 +253,15 @@ export default function HeizungPage() {
                       <span className="text-brand-purple-deep font-semibold text-sm">Wann sinnvoll?</span>
                       <p className="text-gray-600 text-sm mt-1 leading-relaxed">{sys.when}</p>
                     </div>
+
+                    {sys.id === 'waermepumpe' && (
+                      <Link
+                        href="/waermepumpe"
+                        className="self-start inline-flex items-center gap-2 bg-brand-green hover:bg-brand-green/90 text-white font-bold px-6 py-3 rounded-full transition-colors text-sm"
+                      >
+                        Alles zur Wärmepumpe: Eignung, Förderung &amp; Kosten →
+                      </Link>
+                    )}
                   </div>
                 </article>
               ))}
@@ -268,17 +281,17 @@ export default function HeizungPage() {
                 </div>
                 <div className="flex-1">
                   <h2 id="foerderung-heading" className="text-2xl sm:text-3xl font-serif font-bold text-brand-purple-deep mb-4">
-                    BEG-Förderung: bis zu 70 % Zuschuss
+                    KfW-Heizungsförderung: bis zu 80 % Zuschuss
                   </h2>
                   <p className="text-gray-700 leading-relaxed mb-6">
-                    Die Bundesförderung für effiziente Gebäude (BEG) unterstützt den Einbau
-                    erneuerbarer Heizungssysteme mit attraktiven Zuschüssen:
+                    Die KfW-Heizungsförderung (Programm 458) unterstützt den Einbau
+                    erneuerbarer Heizungssysteme mit attraktiven Zuschüssen (Stand {FOERDER_STAND}):
                   </p>
                   <div className="grid sm:grid-cols-3 gap-4 mb-6">
                     {[
-                      { label: 'Grundförderung', value: '30 %', note: 'Für alle förderfähigen Systeme' },
-                      { label: '+ Klimabonus', value: '+ 5 %', note: 'Beim Ersatz von Öl / Gas / Nachtspeicher' },
-                      { label: '+ Einkommensbonus', value: '+ 5 %', note: 'Haushaltseinkommen ≤ €40.000 / Jahr' },
+                      { label: 'Grundförderung', value: `${GRUNDFOERDERUNG} %`, note: 'Für alle förderfähigen Systeme' },
+                      { label: '+ Klimabonus', value: `+ ${periode.klimaBonus} %`, note: 'Ersatz von Öl, Kohle, Nachtspeicher oder Gas ab 20 Jahren (Selbstnutzer)' },
+                      { label: '+ Einkommensbonus', value: '+ 10–40 %', note: 'zvE bis 50.000 € / Jahr, gestaffelt' },
                     ].map((row) => (
                       <div key={row.label} className="bg-white rounded-2xl p-4 text-center border border-brand-orange/20">
                         <div className="text-2xl font-serif font-bold text-brand-orange mb-1">{row.value}</div>
@@ -288,16 +301,24 @@ export default function HeizungPage() {
                     ))}
                   </div>
                   <p className="text-sm text-gray-600 leading-relaxed mb-6">
-                    <strong>Max. förderfähige Kosten:</strong> €30.000 (EFH) bzw. €75.000 (MFH).
-                    Der Antrag läuft über die BAFA. <strong>Wir unterstützen Sie dabei</strong> und
-                    stellen sicher, dass Sie keinen Cent verschenken.
+                    <strong>Max. förderfähige Kosten:</strong> {formatEuro(periode.kostenErsteWE)} für die erste
+                    Wohneinheit, maximal 70 % bzw. 80 % bei niedrigem Einkommen. Der Antrag läuft über die KfW.{' '}
+                    <strong>Wir bereiten alles vor</strong> und stellen sicher, dass Sie keinen Cent verschenken.
                   </p>
-                  <a
-                    href="tel:+4973453286"
-                    className="inline-flex items-center gap-2 bg-brand-orange hover:bg-brand-orange-dark text-white font-bold px-8 py-3.5 rounded-full transition-all duration-200 shadow-orange-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange text-sm"
-                  >
-                    Förderberatung vereinbaren
-                  </a>
+                  <div className="flex flex-wrap gap-3">
+                    <Link
+                      href="/waermepumpe#foerderrechner"
+                      className="inline-flex items-center gap-2 bg-brand-orange hover:bg-brand-orange-dark text-white font-bold px-8 py-3.5 rounded-full transition-all duration-200 shadow-orange-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange text-sm"
+                    >
+                      Förderung berechnen
+                    </Link>
+                    <a
+                      href="tel:+4973453286"
+                      className="inline-flex items-center gap-2 bg-white hover:bg-brand-warm text-brand-purple-deep font-bold px-8 py-3.5 rounded-full border border-brand-orange/30 transition-all duration-200 text-sm"
+                    >
+                      Förderberatung vereinbaren
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

@@ -122,7 +122,7 @@ const structuredData = {
     name: 'Haustechnik-Leistungen',
     itemListElement: [
       { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Heizungsinstallation', url: 'https://haustechnik-frey.de/leistungen/heizung' } },
-      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Wärmepumpe Installation', url: 'https://haustechnik-frey.de/leistungen/heizung' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Wärmepumpe Installation', url: 'https://haustechnik-frey.de/waermepumpe' } },
       { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Pelletheizung', url: 'https://haustechnik-frey.de/leistungen/heizung' } },
       { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Badsanierung', url: 'https://haustechnik-frey.de/leistungen/sanitaer' } },
       { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Sanitärinstallation', url: 'https://haustechnik-frey.de/leistungen/sanitaer' } },

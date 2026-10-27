@@ -2,14 +2,25 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Send, Phone, AlertTriangle, ChevronRight, Loader2 } from 'lucide-react'
-import { STARTER_QUESTIONS } from './starterQuestions'
+import { STARTER_QUESTIONS, type StarterQuestion } from './starterQuestions'
 import type { ChatMessage, EnergyAdvisorResponse } from '@/lib/energy-advisor/types'
 
 interface DisplayMessage extends ChatMessage {
   meta?: Pick<EnergyAdvisorResponse, 'suggestedNextStep' | 'emergency' | 'leadIntent'>
 }
 
-export default function EnergyAdvisorChat() {
+const DEFAULT_WELCOME =
+  'Hallo! Ich bin Ihr digitaler Energie- und Sanierungsberater von Haustechnik Frey. Womit kann ich Ihnen helfen?'
+
+interface EnergyAdvisorChatProps {
+  starters?: StarterQuestion[]
+  welcome?: string
+}
+
+export default function EnergyAdvisorChat({
+  starters = STARTER_QUESTIONS,
+  welcome = DEFAULT_WELCOME,
+}: EnergyAdvisorChatProps) {
   const [messages, setMessages] = useState<DisplayMessage[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -84,14 +95,14 @@ export default function EnergyAdvisorChat() {
               </div>
               <div className="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-card max-w-xs">
                 <p className="text-sm text-brand-purple-deep leading-relaxed">
-                  Hallo! Ich bin Ihr digitaler Energie- und Sanierungsberater von Haustechnik Frey. Womit kann ich Ihnen helfen?
+                  {welcome}
                 </p>
               </div>
             </div>
 
             {/* Starter questions */}
             <div className="pl-11 flex flex-col gap-2">
-              {STARTER_QUESTIONS.map((q) => (
+              {starters.map((q) => (
                 <button
                   key={q.label}
                   onClick={() => sendMessage(q.message)}

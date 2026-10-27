@@ -36,10 +36,10 @@ export default function FAQPage() {
               },
               {
                 '@type': 'Question',
-                name: 'Wie hoch ist die BEG-Förderung für Wärmepumpen?',
+                name: 'Wie hoch ist die Förderung für Wärmepumpen?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Grundförderung 30%, +5% Klimabonus beim Heizungstausch = 35%, +5% Einkommensbonus bis 40.000€ Jahreseinkommen = 40%. Max. förderfähig: 30.000€ EFH.',
+                  text: 'KfW 458: 30 % Grundförderung, +16 % Klimabonus beim Ersatz alter fossiler Heizungen (Selbstnutzer, sinkt ab 01.02.2027), +10–40 % Einkommensbonus bis 50.000 € zvE. Maximal 70 %, bei niedrigem Einkommen 80 % von bis zu 28.000 € förderfähigen Kosten.',
                 },
               },
               {

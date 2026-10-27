@@ -83,8 +83,8 @@ export default function EinsparRechner() {
   const [fuel, setFuel] = useState<'oel' | 'gas'>('oel')
   const [consumption, setConsumption] = useState(2000)
   const [fuelPrice, setFuelPrice] = useState(fuel === 'oel' ? 1.05 : 1.10)
-  const [strompreis, setStrompreis] = useState(0.32)
-  const [cop, setCop] = useState(3.0)
+  const [strompreis, setStrompreis] = useState(0.28)
+  const [cop, setCop] = useState(3.3)
   const [pvKwp, setPvKwp] = useState(0)
   const [withBattery, setWithBattery] = useState(false)
 
@@ -158,7 +158,7 @@ export default function EinsparRechner() {
   return (
     <section
       id="einsparrechner"
-      className="py-12 sm:py-16 lg:py-24 bg-brand-purple-deep relative overflow-hidden"
+      className="scroll-mt-32 py-12 sm:py-16 lg:py-24 bg-brand-purple-deep relative overflow-hidden"
       aria-labelledby="einspar-heading"
     >
       {/* Decorative blobs */}
@@ -246,14 +246,14 @@ export default function EinsparRechner() {
             />
 
             <SliderRow
-              label="Strompreis"
+              label="Strompreis (Wärmepumpentarif)"
               value={strompreis}
               min={0.18}
               max={0.50}
               step={0.01}
               unit="€/kWh"
               onChange={setStrompreis}
-              hint="~0,32 € typisch"
+              hint="WP-Tarif ~0,28 €"
               decimals={2}
             />
 
