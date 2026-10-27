@@ -1,12 +1,13 @@
+// Notfall-Erkennung vor jedem Modell-Aufruf. Muster bewusst eng gefasst:
+// Teilwörter wie „Haushalt“ (… aus …), „Verbrauch“ (… rauch …) oder „Brandschutz“
+// dürfen normale Beratungsfragen nicht als Notfall abfangen.
 const EMERGENCY_PATTERNS = [
-  /gas.*geruch|geruch.*gas|gasleitung|gasleck|riecht.*gas|gas.*riecht/i,
-  /wasserrohrbruch|rohrbruch|rohr.*gebrochen|gebrochen.*rohr/i,
-  /wasserschaden|wasser.*läuft.*aus|wasser.*läuft aus|überschwemmung/i,
-  /heizung.*ausgefallen|heizung.*kaputt|heizung.*aus|keine.*heizung|heizungsausfall/i,
-  /brand|feuer|rauch.*heizung|heizung.*rauch/i,
-  /schimmel.*gesundheit|gesundheit.*schimmel|schimmel.*schlimm/i,
-  /stromausfall|kurzschluss|strom.*gefahr|elektrisch.*gefahr/i,
-  /notfall|notdienst|sofort.*hilfe|dringend.*hilfe/i,
+  /gas\s*geruch|riecht\w*\s+(?:\w+\s+){0,3}nach\s+gas\b|gasleck|gas\s+(?:tritt|strömt)\s+aus/i,
+  /wasserrohrbruch|\brohrbruch|rohr\w*\s+(?:ist\s+)?(?:geplatzt|gebrochen)|wasserschaden|wasser\s+läuft\s+aus|überschwemm/i,
+  /heizung\w*\s+(?:ist\s+|geht\s+)?(?:ausgefallen|kaputt|defekt)\b|heizungsausfall|heizung\w*\s+(?:geht|springt)\s+nicht\s+(?:mehr\s+)?an\b|\bkein(?:e|en)?\s+warm\w*\s*wasser\b|\bkein(?:e)?\s+heizung\s+mehr\b/i,
+  /\bbrennt\b|\bbrand\b|\bfeuer\b|riecht\s+(?:\w+\s+)?verbrannt|\bqualm|rauch\s+(?:kommt|steigt|aus)\b/i,
+  /stromausfall|kurzschluss|stromschlag/i,
+  /\bnotfall\b|\bnotdienst\b|sofort\s+hilfe|dringend\s+hilfe/i,
 ]
 
 export function detectEmergency(text: string): boolean {
