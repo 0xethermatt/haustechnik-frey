@@ -11,11 +11,13 @@ import WPSysteme from '@/components/waermepumpe/WPSysteme'
 import WPFoerderrechner from '@/components/waermepumpe/WPFoerderrechner'
 import WPKosten from '@/components/waermepumpe/WPKosten'
 import WPAblauf from '@/components/waermepumpe/WPAblauf'
+import WPReferenz from '@/components/waermepumpe/WPReferenz'
 import WPKIBerater from '@/components/waermepumpe/WPKIBerater'
 import WPFAQ from '@/components/waermepumpe/WPFAQ'
 import WPAnfrage from '@/components/waermepumpe/WPAnfrage'
 import WPMobileCTA from '@/components/waermepumpe/WPMobileCTA'
 import { WP_FAQ } from '@/lib/waermepumpe/faq'
+import { REFERENZ } from '@/lib/waermepumpe/referenz'
 
 // Förder-Countdown und Fördersätze sind datumsabhängig → täglich neu rendern
 export const revalidate = 86400
@@ -101,6 +103,7 @@ const SUBNAV = [
   { id: 'einsparrechner', label: 'Ersparnis' },
   { id: 'kosten', label: 'Kosten' },
   { id: 'ablauf', label: 'Ablauf' },
+  { id: 'referenz', label: 'Praxis' },
   { id: 'ki-berater', label: 'KI-Berater' },
   { id: 'faq', label: 'FAQ' },
   { id: 'anfrage', label: 'Check starten' },
@@ -117,7 +120,11 @@ export default function WaermepumpePage() {
       <WPProvider>
         <main>
           <WPHero />
-          <WPSubNav items={advisorEnabled ? SUBNAV : SUBNAV.filter((i) => i.id !== 'ki-berater')} />
+          <WPSubNav
+            items={SUBNAV.filter(
+              (i) => (advisorEnabled || i.id !== 'ki-berater') && (REFERENZ.schritte.length > 0 || i.id !== 'referenz')
+            )}
+          />
           <WPEignungsCheck />
           <WPVorteile />
           <WPSysteme />
@@ -125,6 +132,7 @@ export default function WaermepumpePage() {
           <EinsparRechner />
           <WPKosten />
           <WPAblauf />
+          <WPReferenz />
           {advisorEnabled && <WPKIBerater />}
           <WPFAQ />
           <WPAnfrage />
