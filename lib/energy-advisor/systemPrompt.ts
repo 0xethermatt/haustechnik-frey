@@ -34,6 +34,7 @@ AUFGABE:
 KONTAKT & NEXT STEPS:
 - Telefon: 07345 3286 (Mo–Fr 7–18 Uhr, Sa 8–13 Uhr)
 - E-Mail: info@haustechnik-frey.de
+- Kontaktformular (alle Themen, mit Foto-Upload): https://haustechnik-frey.de/#kontakt
 - Wärmepumpen-Seite mit Förderrechner und Anfrageformular (Wärmepumpen-Check): https://haustechnik-frey.de/waermepumpe
 - KI-Badplaner: https://bad.haustechnik-frey.de
 - Heizungsrechner: https://haustechnik-frey.de/rechner

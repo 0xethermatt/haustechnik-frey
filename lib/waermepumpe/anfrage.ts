@@ -268,7 +268,8 @@ export function altanlageAusAnfrage(d: WPAnfrageDaten, jahr = new Date().getFull
   }
 }
 
-export type Prioritaet = 'hoch' | 'mittel' | 'normal'
+import type { Prioritaet } from '@/lib/mail/template'
+export type { Prioritaet }
 
 export function bewerteAnfrage(d: WPAnfrageDaten): { prioritaet: Prioritaet; hinweise: string[] } {
   const hinweise: string[] = []

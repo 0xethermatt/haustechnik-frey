@@ -114,7 +114,7 @@ export default function Prozess() {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-5 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-5 relative z-10">
             {steps.map((step, i) => (
               <motion.div
                 key={step.number}
@@ -125,7 +125,7 @@ export default function Prozess() {
                 className="flex flex-col items-center lg:items-center text-left lg:text-center"
               >
                 {/* Number badge + icon stack */}
-                <div className="flex lg:flex-col items-center gap-4 lg:gap-3 mb-5 w-full lg:w-auto">
+                <div className="hidden sm:flex lg:flex-col items-center gap-4 lg:gap-3 mb-5 w-full lg:w-auto">
                   {/* Vertical line for mobile/tablet */}
                   <div className="hidden sm:flex lg:hidden flex-col items-center self-stretch">
                     {i < steps.length - 1 && (
@@ -153,15 +153,18 @@ export default function Prozess() {
 
                 {/* Card */}
                 <div
-                  className={`bg-white rounded-3xl border-2 ${step.border} shadow-card hover:shadow-card-hover transition-all duration-300 p-6 w-full`}
+                  className={`bg-white rounded-3xl border-2 ${step.border} shadow-card hover:shadow-card-hover transition-all duration-300 p-4 sm:p-6 w-full`}
                 >
-                  <h3 className="font-serif font-bold text-brand-purple-deep text-xl mb-1">
+                  <h3 className="flex items-center gap-3 font-serif font-bold text-brand-purple-deep text-lg sm:text-xl mb-1">
+                    <span className={`sm:hidden w-8 h-8 rounded-xl ${step.numBg} flex items-center justify-center text-sm flex-shrink-0`}>
+                      {step.number}
+                    </span>
                     {step.title}
                   </h3>
-                  <p className={`text-xs font-semibold uppercase tracking-wide ${step.color} mb-3`}>
+                  <p className={`text-xs font-semibold uppercase tracking-wide ${step.color} sm:mb-3 pl-11 sm:pl-0`}>
                     {step.subtitle}
                   </p>
-                  <p className="text-sm text-gray-500 leading-relaxed">{step.description}</p>
+                  <p className="hidden sm:block text-sm text-gray-500 leading-relaxed">{step.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -174,7 +177,7 @@ export default function Prozess() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.5 }}
-          className="text-center mt-14"
+          className="text-center mt-8 sm:mt-14"
         >
           <p className="text-gray-400 text-sm mb-4">
             Bereit für Schritt 1? Es kostet Sie nichts.

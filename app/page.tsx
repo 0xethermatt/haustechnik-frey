@@ -5,8 +5,7 @@ import Services from '@/components/Services'
 import WaermepumpeTeaser from '@/components/WaermepumpeTeaser'
 import Prozess from '@/components/Prozess'
 import Projects from '@/components/Projects'
-import Heizungsrechner from '@/components/Heizungsrechner'
-import EinsparRechner from '@/components/EinsparRechner'
+import RechnerTeaser from '@/components/RechnerTeaser'
 import About from '@/components/About'
 import FAQ from '@/components/FAQ'
 import Markenpartner from '@/components/Markenpartner'
@@ -26,8 +25,7 @@ export default function Home() {
       <Services />
       <Prozess />
       <Projects />
-      <Heizungsrechner />
-      <EinsparRechner />
+      <RechnerTeaser />
       <About />
       <Markenpartner />
       <FAQ />

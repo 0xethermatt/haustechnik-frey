@@ -10,7 +10,17 @@ const storage = () => (typeof window !== 'undefined' ? sessionStorage : null)
 
 export default function BadplanerBanner() {
   const [visible, setVisible] = useState(false)
+  const [formImBlick, setFormImBlick] = useState(false)
   const pathname = usePathname()
+
+  // Nicht über dem Kontaktformular einblenden – sonst verdeckt der Banner „Anfrage senden“
+  useEffect(() => {
+    const form = document.getElementById('kontakt')
+    if (!form) return
+    const observer = new IntersectionObserver(([e]) => setFormImBlick(e.isIntersecting))
+    observer.observe(form)
+    return () => observer.disconnect()
+  }, [pathname])
 
   useEffect(() => {
     // Auf der Wärmepumpen-Landingpage nicht vom Ziel ablenken
@@ -30,7 +40,7 @@ export default function BadplanerBanner() {
 
   return (
     <AnimatePresence>
-      {visible && (
+      {visible && !formImBlick && (
         <motion.div
           initial={{ y: 120, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}

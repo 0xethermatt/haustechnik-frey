@@ -136,9 +136,9 @@ export default function Datenschutz() {
               Bearbeitung Ihres Anliegens bei uns gespeichert und verarbeitet. Diese Daten geben
               wir nicht ohne Ihre Einwilligung weiter. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.
             </p>
-            <h3 className="font-semibold text-gray-800 mb-2 mt-4">Wärmepumpen-Check (Online-Anfrageformular)</h3>
+            <h3 className="font-semibold text-gray-800 mb-2 mt-4">Online-Anfrageformulare (Kontaktformular und Wärmepumpen-Check)</h3>
             <p className="leading-relaxed">
-              Wenn Sie den Wärmepumpen-Check auf haustechnik-frey.de/waermepumpe nutzen, verarbeiten wir
+              Wenn Sie das Kontaktformular oder den Wärmepumpen-Check auf haustechnik-frey.de/waermepumpe nutzen, verarbeiten wir
               die von Ihnen eingegebenen Angaben (Kontaktdaten, Angaben zu Gebäude, Heizung und
               Förderfähigkeit) sowie freiwillig hochgeladene Fotos ausschließlich zur Bearbeitung Ihrer
               Anfrage und zur Erstellung eines Angebots. Fotos werden vor dem Versand in Ihrem Browser

@@ -15,23 +15,11 @@ import {
   ZAEHLERSCHRANK,
   ZEITRAUM,
   labelOf,
-  type Prioritaet,
   type WPAnfrageDaten,
 } from './anfrage'
 import { EINKOMMEN_LABELS, formatEuro, type FoerderErgebnis } from './foerderung'
+import { BRAND, PRIO_STYLE, esc, layout, table, type Prioritaet, type Row } from '@/lib/mail/template'
 
-const BRAND = '#6B2D8B'
-const ORANGE = '#E8A030'
-
-function esc(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-}
-
-type Row = [string, string]
 
 function sections(d: WPAnfrageDaten): { title: string; rows: Row[] }[] {
   return [
@@ -92,33 +80,6 @@ function sections(d: WPAnfrageDaten): { title: string; rows: Row[] }[] {
   ]
 }
 
-function table(rows: Row[]): string {
-  return rows
-    .map(
-      ([k, v]) =>
-        `<tr><td style="padding:6px 12px 6px 0;color:#6b7280;font-size:13px;vertical-align:top;white-space:nowrap">${esc(k)}</td><td style="padding:6px 0;color:#111827;font-size:14px">${esc(v)}</td></tr>`
-    )
-    .join('')
-}
-
-function layout(inner: string): string {
-  return `<!doctype html><html lang="de"><body style="margin:0;background:#FAF8F6;font-family:Arial,Helvetica,sans-serif;color:#2D1140">
-<div style="max-width:640px;margin:0 auto;padding:24px 16px">
-<div style="background:#2D1140;color:#fff;padding:20px 24px;border-radius:16px 16px 0 0">
-<div style="font-size:13px;letter-spacing:2px;text-transform:uppercase;color:${ORANGE};font-weight:bold">Haustechnik Frey</div>
-<div style="font-size:20px;font-weight:bold;margin-top:4px">Wärmepumpen-Check</div>
-</div>
-<div style="background:#fff;padding:24px;border-radius:0 0 16px 16px;border:1px solid #eee;border-top:0">${inner}</div>
-<p style="font-size:11px;color:#9ca3af;text-align:center;margin-top:16px">Haustechnik Andreas Frey · Schammenstraße 19 · 89129 Langenau · 07345 3286</p>
-</div></body></html>`
-}
-
-const PRIO_STYLE: Record<Prioritaet, { label: string; bg: string; fg: string }> = {
-  hoch: { label: 'PRIORITÄT HOCH', bg: '#FEE2E2', fg: '#B91C1C' },
-  mittel: { label: 'Priorität mittel', bg: '#FEF3C7', fg: '#92400E' },
-  normal: { label: 'Priorität normal', bg: '#E5E7EB', fg: '#374151' },
-}
-
 function foerderBlock(f: FoerderErgebnis | null, investition: number): Row[] {
   if (!f) return []
   return [
@@ -147,7 +108,7 @@ export function buroEmail(ctx: EmailKontext): { subject: string; html: string; t
   const blocks = sections(d)
   const foerderRows = foerderBlock(foerderung, investitionAnnahme)
 
-  const html = layout(`
+  const html = layout('Wärmepumpen-Check', `
 <div style="display:inline-block;background:${prio.bg};color:${prio.fg};font-weight:bold;font-size:12px;padding:4px 10px;border-radius:999px">${prio.label}</div>
 <h2 style="margin:12px 0 4px;font-size:20px">${esc(d.vorname)} ${esc(d.nachname)} · ${esc(d.plz)} ${esc(d.ort)}</h2>
 <p style="margin:0 0 16px;font-size:14px"><a href="tel:${esc(d.telefon.replace(/[^\d+]/g, ''))}" style="color:${BRAND};font-weight:bold">${esc(d.telefon)}</a> · <a href="mailto:${esc(d.email)}" style="color:${BRAND}">${esc(d.email)}</a> · erreichbar: ${esc(labelOf(ERREICHBARKEIT, d.erreichbarkeit))}</p>
@@ -211,7 +172,7 @@ export function kundenEmail(ctx: EmailKontext): { subject: string; html: string;
 </div>`
     : ''
 
-  const html = layout(`
+  const html = layout('Wärmepumpen-Check', `
 <p style="font-size:15px;margin:0 0 12px">Guten Tag ${esc(d.vorname)} ${esc(d.nachname)},</p>
 <p style="font-size:14px;line-height:1.6;margin:0 0 12px">vielen Dank für Ihre Anfrage zur Wärmepumpe! Ihre Angaben sind bei uns angekommen – Sie müssen nichts weiter tun.</p>
 ${foerderHtml}

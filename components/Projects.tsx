@@ -301,7 +301,7 @@ export default function Projects() {
         {/* Gallery Grid */}
         <motion.div
           layout
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+          className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4"
         >
           <AnimatePresence mode="popLayout">
             {visibleProjects.map((project, index) => (
@@ -332,7 +332,7 @@ export default function Projects() {
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full self-start mb-2 ${project.tagColor}`}>
                     {project.categoryLabel}
                   </span>
-                  <h3 className="text-white font-semibold text-sm leading-tight">
+                  <h3 className="text-white font-semibold text-sm leading-tight break-words hyphens-auto" lang="de">
                     {project.title}
                   </h3>
                 </div>

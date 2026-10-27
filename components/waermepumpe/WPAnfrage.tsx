@@ -42,6 +42,7 @@ import {
   type WPAnfrageDaten,
 } from '@/lib/waermepumpe/anfrage'
 import { EINKOMMEN_LABELS, type Altanlage, type Einkommen } from '@/lib/waermepumpe/foerderung'
+import { compressImage } from '@/lib/bildkompression'
 
 const DRAFT_KEY = 'wp-anfrage-entwurf'
 
@@ -63,19 +64,6 @@ interface Foto {
   blob: Blob
   url: string
   kategorie: string
-}
-
-async function compressImage(file: File, maxSize = 1600, quality = 0.75): Promise<Blob> {
-  const bitmap = await createImageBitmap(file)
-  const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height))
-  const canvas = document.createElement('canvas')
-  canvas.width = Math.round(bitmap.width * scale)
-  canvas.height = Math.round(bitmap.height * scale)
-  canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
-  bitmap.close()
-  return new Promise((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('toBlob failed'))), 'image/jpeg', quality)
-  )
 }
 
 function Choice<T extends string>({
@@ -342,7 +330,7 @@ export default function WPAnfrage() {
       <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-brand-orange/10 blur-3xl pointer-events-none" aria-hidden="true" />
       <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-brand-blue/10 blur-3xl pointer-events-none" aria-hidden="true" />
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1fr_1.4fr] gap-8 lg:gap-x-12 lg:gap-y-8 items-start">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1fr_1.4fr] lg:grid-rows-[auto_1fr] gap-8 lg:gap-x-12 lg:gap-y-8 items-start">
         <div className="lg:col-start-1 lg:row-start-1">
           <span className="inline-block text-brand-orange font-semibold text-sm tracking-widest uppercase mb-4">
             Kostenloser Wärmepumpen-Check

@@ -127,7 +127,7 @@ export default function Markenpartner() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-8 sm:mb-12"
         >
           <span className="inline-block text-brand-orange font-semibold text-sm tracking-widest uppercase mb-4">
             Unsere Partner
@@ -150,16 +150,16 @@ export default function Markenpartner() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-50px' }}
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
+          className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-4"
         >
           {brands.map((brand) => (
             <motion.div
               key={brand.name}
               variants={itemVariants}
               whileHover={{ y: -5, transition: { duration: 0.2 } }}
-              className={`group flex flex-col items-center justify-between gap-3 bg-white rounded-2xl border-2 ${brand.border} px-4 py-5 hover:shadow-card transition-all duration-200 cursor-default`}
+              className={`group flex flex-col items-center justify-between gap-3 bg-white rounded-2xl border-2 ${brand.border} px-2 py-3 sm:px-4 sm:py-5 hover:shadow-card transition-all duration-200 cursor-default`}
             >
-              <div className="relative w-full h-12 flex items-center justify-center">
+              <div className="relative w-full h-9 sm:h-12 flex items-center justify-center">
                 <Image
                   src={brand.logo}
                   alt={`${brand.name} Logo`}
@@ -168,10 +168,10 @@ export default function Markenpartner() {
                   sizes="160px"
                 />
               </div>
-              <span className="font-semibold text-brand-purple-deep text-xs text-center leading-tight">
+              <span className="hidden sm:block font-semibold text-brand-purple-deep text-xs text-center leading-tight">
                 {brand.name}
               </span>
-              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${brand.tag}`}>
+              <span className={`hidden sm:inline text-[10px] font-semibold px-2 py-0.5 rounded-full ${brand.tag}`}>
                 {brand.category}
               </span>
             </motion.div>

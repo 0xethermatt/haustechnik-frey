@@ -3,7 +3,8 @@
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, ChevronDown, ShieldCheck, Sparkles, Thermometer } from 'lucide-react'
+import { ArrowRight, Bath, Phone, ShieldCheck, Thermometer, Wrench } from 'lucide-react'
+import { zumKontakt } from './Contact'
 
 const heroImages = [
   {
@@ -26,6 +27,12 @@ const heroImages = [
   },
 ]
 
+const entryTiles = [
+  { icon: Thermometer, title: 'Wärmepumpe', sub: 'bis zu 80 % Förderung', href: '/waermepumpe', color: 'bg-brand-green' },
+  { icon: Bath, title: 'Bad modernisieren', sub: 'Planung bis Fliese', href: '/leistungen/sanitaer', color: 'bg-brand-blue' },
+  { icon: Wrench, title: 'Reparatur & Wartung', sub: 'schnelle Hilfe vom Meister', href: '', color: 'bg-brand-orange' },
+]
+
 const containerVariants = {
   hidden: {},
   visible: {
@@ -43,12 +50,6 @@ const itemVariants = {
 }
 
 export default function Hero() {
-  const scrollToLeistungen = () => {
-    document.getElementById('leistungen')?.scrollIntoView({ behavior: 'smooth' })
-  }
-  const scrollToKontakt = () => {
-    document.getElementById('kontakt')?.scrollIntoView({ behavior: 'smooth' })
-  }
 
   return (
     <section
@@ -82,7 +83,7 @@ export default function Hero() {
       <div className="absolute bottom-1/3 left-1/4 w-64 h-64 rounded-full bg-brand-blue/8 blur-3xl z-10 pointer-events-none" />
 
       {/* Content */}
-      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-36 pb-28 sm:pt-40 sm:pb-24 lg:pt-48 lg:pb-32 w-full">
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-36 pb-28 sm:pt-40 sm:pb-24 lg:pt-36 lg:pb-28 w-full">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           {/* Left: Text */}
           <motion.div
@@ -102,7 +103,7 @@ export default function Hero() {
             {/* Headline */}
             <motion.h1
               variants={itemVariants}
-              className="text-4xl sm:text-5xl lg:text-7xl font-serif font-bold text-white leading-[1.1] text-balance"
+              className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.1] text-balance"
             >
               Ihr Partner für{' '}
               <span className="text-brand-orange">Wärme</span>{' '}
@@ -120,69 +121,56 @@ export default function Hero() {
               regional. Faire Preise, pünktliche Ausführung, saubere Arbeit.
             </motion.p>
 
-            {/* Wärmepumpe hervorheben */}
+            {/* Einstieg nach Anliegen */}
             <motion.div variants={itemVariants}>
-              <Link
-                href="/waermepumpe"
-                className="group flex items-center gap-3 bg-brand-green/15 hover:bg-brand-green/25 border border-brand-green/40 rounded-2xl px-4 py-3 max-w-xl transition-colors"
-              >
-                <span className="bg-brand-green text-white rounded-xl p-2 flex-shrink-0">
-                  <Thermometer className="w-5 h-5" aria-hidden="true" />
-                </span>
-                <span className="flex-1 min-w-0">
-                  <span className="block text-white font-bold text-sm sm:text-base leading-tight">
-                    Wärmepumpe mit bis zu 80&nbsp;% Förderung
-                  </span>
-                  <span className="block text-white/65 text-xs sm:text-sm mt-0.5">
-                    Eignung, Zuschuss &amp; Kosten in 5 Minuten prüfen
-                  </span>
-                </span>
-                <ArrowRight className="w-5 h-5 text-brand-green flex-shrink-0 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-              </Link>
-            </motion.div>
-
-            {/* Services Tags */}
-            <motion.div variants={itemVariants} className="flex flex-wrap gap-2">
-              {[
-                { label: 'Heizung', color: 'bg-brand-orange/20 text-brand-orange border-brand-orange/30' },
-                { label: 'Sanitär', color: 'bg-brand-blue/20 text-brand-blue border-brand-blue/30' },
-                { label: 'Lüftung', color: 'bg-brand-teal/20 text-brand-teal border-brand-teal/30' },
-                { label: 'Solar', color: 'bg-brand-green/20 text-brand-green border-brand-green/30' },
-                { label: 'Kundendienst', color: 'bg-white/20 text-white border-white/40' },
-              ].map((tag) => (
-                <span
-                  key={tag.label}
-                  className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${tag.color}`}
-                >
-                  {tag.label}
-                </span>
-              ))}
-              <Link
-                href="https://bad.haustechnik-frey.de"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border bg-white/10 text-white border-white/30 hover:bg-white/20 hover:border-white/50 transition-colors duration-200"
-              >
-                <Sparkles className="w-3 h-3" aria-hidden="true" />
-                KI-Badplaner
-              </Link>
+              <p className="text-white/60 text-xs sm:text-sm font-semibold uppercase tracking-widest mb-3">
+                Wobei dürfen wir helfen?
+              </p>
+              <div className="grid gap-2.5 sm:grid-cols-3 max-w-2xl">
+                {entryTiles.map((t) => {
+                  const inner = (
+                    <>
+                      <span className={`${t.color} text-white rounded-xl p-2 flex-shrink-0`}>
+                        <t.icon className="w-5 h-5" aria-hidden="true" />
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-white font-bold text-sm leading-tight">{t.title}</span>
+                        <span className="block text-white/60 text-xs mt-0.5">{t.sub}</span>
+                      </span>
+                      <ArrowRight className="w-4 h-4 text-white/50 flex-shrink-0 transition-transform group-hover:translate-x-1 sm:hidden" aria-hidden="true" />
+                    </>
+                  )
+                  const cls =
+                    'group flex sm:flex-col sm:items-start items-center gap-3 text-left bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl px-4 py-3 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange'
+                  return t.href ? (
+                    <Link key={t.title} href={t.href} className={cls}>
+                      {inner}
+                    </Link>
+                  ) : (
+                    <button key={t.title} onClick={() => zumKontakt('reparatur')} className={cls}>
+                      {inner}
+                    </button>
+                  )
+                })}
+              </div>
             </motion.div>
 
             {/* CTAs */}
-            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
+            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
               <button
-                onClick={scrollToKontakt}
+                onClick={() => zumKontakt()}
                 className="group flex items-center justify-center gap-2 bg-brand-orange hover:bg-brand-orange-dark text-white font-bold px-7 py-4 rounded-full transition-all duration-200 hover:shadow-orange-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2 w-full sm:w-auto"
               >
-                Projekt besprechen
+                Kostenlos anfragen
                 <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
               </button>
-              <button
-                onClick={scrollToLeistungen}
-                className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold px-7 py-4 rounded-full transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white w-full sm:w-auto"
+              <a
+                href="tel:+4973453286"
+                className="flex items-center justify-center gap-2 text-white/80 hover:text-white font-semibold px-4 py-3"
               >
-                Unsere Leistungen
-              </button>
+                <Phone className="w-4 h-4 text-brand-orange" aria-hidden="true" />
+                07345 3286
+              </a>
             </motion.div>
 
           </motion.div>
