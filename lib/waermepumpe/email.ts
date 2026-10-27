@@ -80,10 +80,10 @@ function sections(d: WPAnfrageDaten): { title: string; rows: Row[] }[] {
   ]
 }
 
-function foerderBlock(f: FoerderErgebnis | null, investition: number): Row[] {
+function foerderBlock(f: FoerderErgebnis | null, investition: number, vomKunden: boolean): Row[] {
   if (!f) return []
   return [
-    ['Annahme Investition', formatEuro(investition)],
+    [vomKunden ? 'Investition (Angabe Kunde)' : 'Investition (Standardannahme)', formatEuro(investition)],
     ['Fördersatz (selbstgenutzt)', `${f.satzSelbstgenutzt} % (Grund ${f.grund} % + Klima ${f.klima} % + Einkommen ${f.einkommen} %)`],
     ['Geschätzter Zuschuss', formatEuro(f.zuschuss)],
     ['Eigenanteil', formatEuro(f.eigenanteil)],
@@ -96,17 +96,19 @@ export interface EmailKontext {
   hinweise: string[]
   foerderung: FoerderErgebnis | null
   investitionAnnahme: number
+  /** false = Standardannahme, der Kunde hat keinen Betrag im Förderrechner eingegeben */
+  investitionVomKunden: boolean
   eignung?: string
   fotoNamen: string[]
 }
 
 export function buroEmail(ctx: EmailKontext): { subject: string; html: string; text: string } {
-  const { daten: d, prioritaet, hinweise, foerderung, investitionAnnahme, eignung, fotoNamen } = ctx
+  const { daten: d, prioritaet, hinweise, foerderung, investitionAnnahme, investitionVomKunden, eignung, fotoNamen } = ctx
   const prio = PRIO_STYLE[prioritaet]
   const subject = `${prioritaet === 'hoch' ? '[DRINGEND] ' : ''}Wärmepumpen-Anfrage: ${d.vorname} ${d.nachname}, ${d.plz} ${d.ort} – ${labelOf(ANLIEGEN, d.anliegen)}`
 
   const blocks = sections(d)
-  const foerderRows = foerderBlock(foerderung, investitionAnnahme)
+  const foerderRows = foerderBlock(foerderung, investitionAnnahme, investitionVomKunden)
 
   const html = layout('Wärmepumpen-Check', `
 <div style="display:inline-block;background:${prio.bg};color:${prio.fg};font-weight:bold;font-size:12px;padding:4px 10px;border-radius:999px">${prio.label}</div>
@@ -146,7 +148,7 @@ ${d.nachricht ? `<h3 style="font-size:13px;text-transform:uppercase;letter-spaci
 }
 
 export function kundenEmail(ctx: EmailKontext): { subject: string; html: string; text: string } {
-  const { daten: d, foerderung, investitionAnnahme } = ctx
+  const { daten: d, foerderung, investitionAnnahme, investitionVomKunden } = ctx
   const subject = 'Ihre Wärmepumpen-Anfrage bei Haustechnik Frey'
 
   const schritte = [
@@ -164,11 +166,18 @@ export function kundenEmail(ctx: EmailKontext): { subject: string; html: string;
       : []),
   ]
 
+  // Euro-Betrag nur, wenn der Kunde selbst eine Investition angegeben hat – sonst nur den Fördersatz
   const foerderHtml = foerderung
     ? `<div style="background:#F3F0EC;border-radius:12px;padding:16px;margin:20px 0">
 <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:${BRAND};font-weight:bold">Ihre erste Förderschätzung</div>
-<div style="font-size:26px;font-weight:bold;margin:6px 0">ca. ${formatEuro(foerderung.zuschuss)} Zuschuss</div>
-<div style="font-size:13px;color:#4b5563">${foerderung.satzSelbstgenutzt} % Fördersatz bei angenommenen ${formatEuro(investitionAnnahme)} Investition. Unverbindlicher Richtwert – die genaue Höhe ergibt sich aus Angebot und KfW-Zusage.</div>
+<div style="font-size:26px;font-weight:bold;margin:6px 0">${
+        investitionVomKunden ? `ca. ${formatEuro(foerderung.zuschuss)} Zuschuss` : `ca. ${foerderung.satzSelbstgenutzt} % Förderung`
+      }</div>
+<div style="font-size:13px;color:#4b5563">${
+        investitionVomKunden
+          ? `${foerderung.satzSelbstgenutzt} % Fördersatz bei Ihren angegebenen ${formatEuro(investitionAnnahme)} Investition.`
+          : 'Den genauen Betrag nennen wir Ihnen mit dem Angebot nach dem Vor-Ort-Termin.'
+      } Unverbindlicher Richtwert – maßgeblich sind Angebot und KfW-Zusage.</div>
 </div>`
     : ''
 
@@ -191,7 +200,12 @@ ${foerderHtml}
     'vielen Dank für Ihre Anfrage zur Wärmepumpe! Ihre Angaben sind bei uns angekommen.',
     '',
     ...(foerderung
-      ? [`Erste Förderschätzung: ca. ${formatEuro(foerderung.zuschuss)} Zuschuss (${foerderung.satzSelbstgenutzt} %, unverbindlich).`, '']
+      ? [
+          investitionVomKunden
+            ? `Erste Förderschätzung: ca. ${formatEuro(foerderung.zuschuss)} Zuschuss (${foerderung.satzSelbstgenutzt} %, unverbindlich).`
+            : `Erste Förderschätzung: ca. ${foerderung.satzSelbstgenutzt} % Förderung (unverbindlich).`,
+          '',
+        ]
       : []),
     'So geht es weiter:',
     ...schritte.map((s, i) => `${i + 1}. ${s}`),

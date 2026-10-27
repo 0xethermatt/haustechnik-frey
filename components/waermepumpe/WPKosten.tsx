@@ -1,14 +1,14 @@
-import { Check, ChevronDown, Info } from 'lucide-react'
-import { berechneFoerderung, formatEuro } from '@/lib/waermepumpe/foerderung'
+'use client'
 
-// Richtwerte für ein typisches Einfamilienhaus im Bestand (brutto, inkl. Montage)
-const POSITIONEN = [
-  { label: 'Wärmepumpe inkl. Warmwasser- und Pufferspeicher', von: 14000, bis: 22000 },
-  { label: 'Montage, Hydraulik & Inbetriebnahme', von: 5000, bis: 8000 },
-  { label: 'Demontage & Entsorgung Altanlage / Öltank', von: 1000, bis: 3000 },
-  { label: 'Elektroanschluss, Zählerplatz, Smart-Meter-Vorbereitung', von: 1500, bis: 4000 },
-  { label: 'Fundament, Kondensatablauf, Leitungen nach außen', von: 1000, bis: 2000 },
-  { label: 'Optional: Heizkörpertausch (je Heizkörper)', von: 600, bis: 1500, optional: true },
+import { ArrowRight, BadgeEuro, Check, Gauge, Home, Plug, MapPin } from 'lucide-react'
+import { scrollToId } from './WPContext'
+
+// Bewusst ohne Preisliste: Die Kosten sind bei jedem Haus anders
+const FAKTOREN = [
+  { icon: Gauge, title: 'Heizlast des Hauses', text: 'Größe, Baujahr und Dämmung bestimmen die nötige Leistung.' },
+  { icon: Home, title: 'Heizkörper & Heizraum', text: 'Ob Heizflächen passen und wie viel Umbau nötig ist.' },
+  { icon: MapPin, title: 'Aufstellort', text: 'Wege nach draußen, Fundament und Schallschutz.' },
+  { icon: Plug, title: 'Elektrik', text: 'Zustand von Zählerschrank und Hausanschluss.' },
 ]
 
 const INKLUSIVE = [
@@ -21,79 +21,33 @@ const INKLUSIVE = [
 ]
 
 export default function WPKosten() {
-  const summeVon = POSITIONEN.filter((p) => !p.optional).reduce((s, p) => s + p.von, 0)
-  const summeBis = POSITIONEN.filter((p) => !p.optional).reduce((s, p) => s + p.bis, 0)
-
-  const beispielInvest = 32000
-  const beispiele = [
-    {
-      title: 'Öl, Einkommen über 50.000 €',
-      r: berechneFoerderung({ investition: beispielInvest, wohneinheiten: 1, selbstnutzer: true, altanlage: 'oel', einkommen: 'ueber60', kindImHaushalt: false }),
-    },
-    {
-      title: 'Gas (20+ Jahre), zvE 35.000 €',
-      r: berechneFoerderung({ investition: beispielInvest, wohneinheiten: 1, selbstnutzer: true, altanlage: 'gas-alt', einkommen: 'bis40', kindImHaushalt: false }),
-    },
-    {
-      title: 'Öl, zvE 38.000 € + Kind',
-      r: berechneFoerderung({ investition: beispielInvest, wohneinheiten: 1, selbstnutzer: true, altanlage: 'oel', einkommen: 'bis40', kindImHaushalt: true }),
-    },
-  ]
-
   return (
     <div className="space-y-5">
-      <div className="rounded-3xl bg-brand-purple-deep text-white p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <div>
-          <p className="text-xs uppercase tracking-widest text-white/50 font-semibold">Luft-Wasser-WP im Einfamilienhaus</p>
-          <p className="text-2xl sm:text-3xl font-serif font-bold mt-1">
-            {formatEuro(summeVon)} – {formatEuro(summeBis)}
-          </p>
-        </div>
-        <p className="text-sm text-white/60">vor Förderung, inkl. Einbau &amp; MwSt.</p>
+      <div className="rounded-3xl bg-brand-purple-deep text-white p-5 sm:p-6">
+        <p className="text-lg sm:text-xl font-serif font-bold leading-snug">
+          Jedes Haus ist anders – deshalb gibt es bei uns keinen Pauschalpreis, sondern ein ehrliches Angebot nach dem
+          Vor-Ort-Termin.
+        </p>
+        <p className="text-sm text-white/65 mt-2 leading-relaxed">
+          Wie viel davon die KfW übernimmt, können Sie schon jetzt im Förderrechner sehen – bis zu 80 % der
+          förderfähigen Kosten.
+        </p>
       </div>
 
       <div>
-        <p className="text-sm font-semibold text-brand-purple-deep mb-3">
-          Was Sie nach Förderung zahlen (Beispiel: {formatEuro(beispielInvest)} Investition)
-        </p>
-        <div className="grid sm:grid-cols-3 gap-3">
-          {beispiele.map((b) => (
-            <div key={b.title} className="bg-white rounded-2xl p-4 border border-brand-purple/10">
-              <p className="text-sm font-semibold text-brand-purple-deep mb-2">{b.title}</p>
-              <div className="flex items-end justify-between gap-3">
-                <div>
-                  <p className="text-xs text-brand-purple-deep/50">Zuschuss {b.r.satzSelbstgenutzt} %</p>
-                  <p className="font-bold text-brand-green">− {formatEuro(b.r.zuschuss)}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-brand-purple-deep/50">Eigenanteil</p>
-                  <p className="text-xl font-serif font-bold text-brand-purple-deep">{formatEuro(b.r.eigenanteil)}</p>
-                </div>
+        <p className="text-sm font-semibold text-brand-purple-deep mb-3">Davon hängt der Preis ab</p>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {FAKTOREN.map((f) => (
+            <div key={f.title} className="flex gap-3 bg-white rounded-2xl p-4 border border-brand-purple/10">
+              <f.icon className="w-5 h-5 text-brand-purple flex-shrink-0 mt-0.5" aria-hidden="true" />
+              <div>
+                <p className="font-semibold text-brand-purple-deep text-sm">{f.title}</p>
+                <p className="text-sm text-brand-purple-deep/60 mt-0.5">{f.text}</p>
               </div>
             </div>
           ))}
         </div>
       </div>
-
-      <details className="group rounded-2xl border border-brand-purple/10 bg-white overflow-hidden">
-        <summary className="flex items-center justify-between gap-3 cursor-pointer list-none px-5 py-4 font-semibold text-brand-purple-deep [&::-webkit-details-marker]:hidden">
-          Einzelpositionen anzeigen
-          <ChevronDown className="w-5 h-5 text-brand-purple transition-transform group-open:rotate-180" aria-hidden="true" />
-        </summary>
-        <table className="w-full text-sm">
-          <caption className="sr-only">Kostenpositionen einer Luft-Wasser-Wärmepumpe</caption>
-          <tbody className="divide-y divide-brand-purple/10 border-t border-brand-purple/10">
-            {POSITIONEN.map((p) => (
-              <tr key={p.label} className={p.optional ? 'text-brand-purple-deep/55' : 'text-brand-purple-deep'}>
-                <td className="px-5 py-3">{p.label}</td>
-                <td className="px-5 py-3 text-right whitespace-nowrap font-semibold">
-                  {formatEuro(p.von)} – {formatEuro(p.bis)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </details>
 
       <div>
         <p className="text-sm font-semibold text-brand-purple-deep mb-2">Bei uns immer inklusive</p>
@@ -107,11 +61,22 @@ export default function WPKosten() {
         </ul>
       </div>
 
-      <p className="flex gap-2 text-xs text-brand-purple-deep/50">
-        <Info className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-        Richtwerte. Der tatsächliche Preis hängt von Heizlast, Gerät, Aufstellort und Elektrik ab – Ihr
-        verbindliches Angebot erhalten Sie nach dem Vor-Ort-Termin.
-      </p>
+      <div className="flex flex-col sm:flex-row gap-3 pt-1">
+        <button
+          onClick={() => scrollToId('anfrage')}
+          className="inline-flex items-center justify-center gap-2 bg-brand-orange hover:bg-brand-orange-dark text-white font-bold px-6 py-3.5 rounded-full transition-colors"
+        >
+          Persönliches Angebot anfordern
+          <ArrowRight className="w-4 h-4" aria-hidden="true" />
+        </button>
+        <button
+          onClick={() => scrollToId('foerderrechner')}
+          className="inline-flex items-center justify-center gap-2 bg-white hover:bg-brand-warm text-brand-purple-deep font-semibold px-6 py-3.5 rounded-full border border-brand-purple/15 transition-colors"
+        >
+          <BadgeEuro className="w-4 h-4" aria-hidden="true" />
+          Zuschuss berechnen
+        </button>
+      </div>
     </div>
   )
 }

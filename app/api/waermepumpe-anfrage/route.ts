@@ -59,10 +59,8 @@ export async function POST(req: NextRequest) {
   }
 
   const investitionRaw = Number(form.get('investition'))
-  const investitionAnnahme =
-    Number.isFinite(investitionRaw) && investitionRaw >= 5000 && investitionRaw <= 500000
-      ? Math.round(investitionRaw)
-      : DEFAULT_INVESTITION
+  const investitionVomKunden = Number.isFinite(investitionRaw) && investitionRaw >= 5000 && investitionRaw <= 500000
+  const investitionAnnahme = investitionVomKunden ? Math.round(investitionRaw) : DEFAULT_INVESTITION
   const eignung = String(form.get('eignung') ?? '').slice(0, 300) || undefined
 
   const wohneinheiten = Math.min(Math.max(parseInt(daten.wohneinheiten, 10) || 1, 1), 50)
@@ -86,6 +84,7 @@ export async function POST(req: NextRequest) {
     hinweise,
     foerderung,
     investitionAnnahme,
+    investitionVomKunden,
     eignung,
     fotoNamen: attachments.map((a) => a.filename),
   }

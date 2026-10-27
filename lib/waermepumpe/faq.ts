@@ -21,7 +21,7 @@ export const WP_FAQ: WPFaqItem[] = [
     category: 'Kosten',
     question: 'Was kostet eine Wärmepumpe inklusive Einbau?',
     answer:
-      'Für ein typisches Einfamilienhaus im Bestand liegt eine Luft-Wasser-Wärmepumpe inklusive Demontage der Altanlage, Speicher, Elektroanschluss und Inbetriebnahme meist zwischen 25.000 und 40.000 € vor Förderung. Erdwärmepumpen mit Bohrung kosten mehr, arbeiten dafür noch effizienter. Nach Abzug von 50–70 % Förderung bleibt oft ein Eigenanteil im Bereich einer neuen Gas- oder Ölheizung. Ein verbindliches Angebot erstellen wir nach dem Vor-Ort-Termin.',
+      'Das ist von Haus zu Haus sehr unterschiedlich – entscheidend sind Heizlast, vorhandene Heizkörper, Aufstellort und Elektrik. Seriös lässt sich der Preis deshalb erst nach einem Vor-Ort-Termin nennen; den bieten wir kostenlos an. Klar ist: Die KfW übernimmt bis zu 70 %, bei niedrigem Einkommen bis zu 80 % der förderfähigen Kosten. Nach Förderung liegt der Eigenanteil oft im Bereich einer neuen Gas- oder Ölheizung.',
   },
   {
     category: 'Eignung',

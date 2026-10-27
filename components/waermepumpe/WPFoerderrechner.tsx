@@ -134,7 +134,7 @@ export default function WPFoerderrechner() {
               />
               <div className="flex justify-between text-xs text-white/35 mt-1.5">
                 <span>15.000 €</span>
-                <span className="italic">Luft-WP im EFH meist 25–40 T€</span>
+                <span className="italic">Schätzwert – Ihr Preis nach dem Vor-Ort-Termin</span>
                 <span>60.000 €</span>
               </div>
             </div>

@@ -20,7 +20,7 @@ function foerderWissen(): string {
 - Voraussetzungen u. a.: JAZ ≥ 3,0, Gerät auf der Förderliste, Luft-WP mind. 10 dB unter Lärmgrenzwert.
 - Ablauf: Vertrag mit Förderklausel (auflösende/aufschiebende Bedingung) + Bestätigung zum Antrag (BzA) vom Fachbetrieb → Antrag in „Meine KfW“ → Zusage abwarten → Einbau → Nachweis → Auszahlung. Nie ohne Förderklausel unterschreiben oder vor Antrag beginnen.
 - Wichtiges Verkaufsargument: Der Fördersatz richtet sich nach dem Antragsdatum. Wer jetzt beantragt, sichert sich die höheren Sätze und hat nach der Zusage 36 Monate Zeit für die Umsetzung.
-- Richtwerte Kosten: Luft-Wasser-WP im EFH-Bestand meist 25.000–40.000 € brutto inkl. Einbau, Erdwärme deutlich mehr.`
+- Kosten Wärmepumpe: KEINE konkreten Preise oder Preisspannen nennen – die Kosten sind sehr fallabhängig (Heizlast, Heizkörper, Aufstellort, Elektrik). Stattdessen erklären, wovon der Preis abhängt, auf den kostenlosen Vor-Ort-Termin bzw. Wärmepumpen-Check verweisen und den Förderrechner für den Zuschuss empfehlen. Nach Förderung liegt der Eigenanteil oft im Bereich einer neuen Gas- oder Ölheizung.`
 }
 
 export const SYSTEM_PROMPT = `Du bist der digitale Energie- und Sanierungsberater von Haustechnik Andreas Frey, einem SHK-Meisterbetrieb aus Langenau (Baden-Württemberg). Du bist freundlich, kompetent und vertrauenswürdig.
