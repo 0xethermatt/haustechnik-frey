@@ -18,7 +18,7 @@ import WPFAQ from '@/components/waermepumpe/WPFAQ'
 import WPAnfrage from '@/components/waermepumpe/WPAnfrage'
 import WPMobileCTA from '@/components/waermepumpe/WPMobileCTA'
 import { WP_FAQ } from '@/lib/waermepumpe/faq'
-import { REFERENZ } from '@/lib/waermepumpe/referenz'
+import { referenzVorhanden } from '@/lib/waermepumpe/referenz'
 
 // Förder-Countdown und Fördersätze sind datumsabhängig → täglich neu rendern
 export const revalidate = 86400
@@ -120,7 +120,7 @@ export default function WaermepumpePage() {
           <WPHero />
           <WPSubNav
             items={SUBNAV.filter(
-              (i) => (advisorEnabled || i.id !== 'ki-berater') && (REFERENZ.schritte.length > 0 || i.id !== 'referenz')
+              (i) => (advisorEnabled || i.id !== 'ki-berater') && (referenzVorhanden || i.id !== 'referenz')
             )}
           />
           <WPEignungsCheck />
