@@ -69,22 +69,33 @@ export default function WPReferenz() {
         )}
 
         {schritte.length > 0 && (
-          <ol className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10" role="list">
-            {schritte.map((s, i) => (
-              <li key={s.bild} className="rounded-3xl overflow-hidden border border-brand-purple/10 bg-brand-cream flex flex-col">
-                <div className="relative aspect-[4/3]">
-                  <Image src={s.bild} alt={s.bildAlt} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" />
-                  <span className="absolute top-3 left-3 w-9 h-9 rounded-full bg-brand-purple text-white font-bold flex items-center justify-center shadow">
-                    {i + 1}
-                  </span>
-                </div>
-                <div className="p-5">
-                  <h3 className="font-bold text-brand-purple-deep mb-1">{s.titel}</h3>
-                  <p className="text-sm text-brand-purple-deep/65 leading-relaxed">{s.text}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
+          <div className="mt-12 sm:mt-14">
+            <h3 className="text-xl sm:text-2xl font-serif font-bold text-brand-purple-deep mb-5">
+              So lief der Einbau ab
+            </h3>
+            <ol
+              className="flex lg:grid lg:grid-cols-5 gap-4 overflow-x-auto lg:overflow-visible snap-x snap-mandatory -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 pb-2 lg:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              role="list"
+            >
+              {schritte.map((s, i) => (
+                <li
+                  key={s.bild}
+                  className="w-[70%] sm:w-[38%] flex-shrink-0 snap-center lg:w-auto rounded-2xl overflow-hidden border border-brand-purple/10 bg-brand-cream flex flex-col"
+                >
+                  <div className="relative aspect-[4/3]">
+                    <Image src={s.bild} alt={s.bildAlt} fill sizes="(max-width: 640px) 70vw, (max-width: 1024px) 38vw, 20vw" className="object-cover" />
+                    <span className="absolute top-2.5 left-2.5 w-8 h-8 rounded-full bg-brand-purple text-white text-sm font-bold flex items-center justify-center shadow">
+                      {i + 1}
+                    </span>
+                  </div>
+                  <div className="p-4">
+                    <h4 className="font-bold text-brand-purple-deep text-sm mb-0.5">{s.titel}</h4>
+                    <p className="text-xs sm:text-sm text-brand-purple-deep/65 leading-snug">{s.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
         )}
 
         {zitat && (

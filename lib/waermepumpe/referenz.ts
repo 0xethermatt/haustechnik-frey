@@ -71,8 +71,39 @@ export const REFERENZ: Referenz = {
       text: 'Platzsparend an der Wand montiert.',
     },
   ],
-  // Optional später: Bauablauf, z. B. { titel: 'Ausgangslage', text: '…', bild: '/images/referenz-weishaupt/…', bildAlt: '…' }
-  schritte: [],
+  // Bauablauf eines Projekts (Gastherme → Weishaupt-Wärmepumpe)
+  schritte: [
+    {
+      titel: 'Ausgangslage',
+      text: 'Die alte Gastherme hat ausgedient – wir bauen sie fachgerecht aus.',
+      bild: '/images/referenz-weishaupt/ablauf-1-vorher.jpg',
+      bildAlt: 'Monteur demontiert die alte Gas-Brennwerttherme',
+    },
+    {
+      titel: 'Fundament',
+      text: 'Aushub, Schotterbett, exakt nivelliert – die Basis fürs Außengerät.',
+      bild: '/images/referenz-weishaupt/ablauf-2-fundament.jpg',
+      bildAlt: 'Aushub und Schotterbett für das Fundament der Wärmepumpe',
+    },
+    {
+      titel: 'Montage im Keller',
+      text: 'Inneneinheit ausgerichtet, Leitungen verlegt und gedämmt.',
+      bild: '/images/referenz-weishaupt/ablauf-3-montage.jpg',
+      bildAlt: 'Neu montierte Inneneinheit mit Wasserwaage und frisch verlegten Leitungen',
+    },
+    {
+      titel: 'Außengerät',
+      text: 'Auf Betonsockeln, mit freiem Ablauf fürs Kondensat.',
+      bild: '/images/referenz-weishaupt/ablauf-4-aussengeraet.jpg',
+      bildAlt: 'Weishaupt-Außengerät auf Betonsockeln vor der Hauswand',
+    },
+    {
+      titel: 'Fertig',
+      text: 'Inneneinheit, Speicher und Ausdehnungsgefäß – sauber übergeben.',
+      bild: '/images/referenz-weishaupt/ablauf-5-fertig.jpg',
+      bildAlt: 'Fertiger Technikraum mit Weishaupt-Inneneinheit und Warmwasserspeicher',
+    },
+  ],
 }
 
 export const referenzVorhanden = REFERENZ.bilder.length > 0 || REFERENZ.schritte.length > 0
