@@ -8,7 +8,7 @@ const values = [
   {
     icon: Heart,
     title: 'Persönlich',
-    description: 'Ihr direkter Ansprechpartner ist Andreas Frey selbst.',
+    description: 'Ein festes Team, das Sie kennt – vom Büro bis zur Baustelle.',
     color: 'text-brand-orange',
     bg: 'bg-brand-orange/15',
   },
@@ -73,7 +73,7 @@ export default function About() {
                 Sanitär, Lüftung und Solar in Langenau und Umgebung.
               </p>
               <p>
-                Kein Call-Center, keine langen Wartezeiten: Sie sprechen direkt mit dem Chef. Und weil gutes Handwerk
+                Kein Call-Center, keine langen Wartezeiten: Unser Büro nimmt sich Zeit für Ihr Anliegen und koordiniert alles bis zum Termin. Und weil gutes Handwerk
                 Zukunft braucht, bilden wir auch selbst aus.
               </p>
             </div>
@@ -92,32 +92,32 @@ export default function About() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="hidden lg:block relative h-[520px]"
+            className="relative pb-[9%]"
           >
-            <div className="absolute inset-y-0 right-0 w-[78%] rounded-3xl overflow-hidden shadow-2xl border-2 border-white/10">
+            <div className="relative aspect-[3/2] rounded-3xl overflow-hidden shadow-2xl border-2 border-white/10">
               <Image
-                src="/images/heizraum-2.jpg"
-                alt="Heizraum – Haustechnik Andreas Frey Langenau"
+                src="/images/team/firmenwagen.jpg"
+                alt="Firmenwagen von Haustechnik Frey – Wärmepumpen und moderne Heiztechnik aus Langenau"
                 fill
                 className="object-cover"
-                sizes="(max-width: 1280px) 40vw, 480px"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-purple-deep/50 to-transparent" aria-hidden="true" />
-            </div>
-            <div className="absolute bottom-10 left-0 w-[46%] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-brand-purple-deep z-10">
-              <Image
-                src="/images/bad-2.jpg"
-                alt="Badsanierung – Meisterbetrieb Haustechnik Frey Langenau"
-                fill
-                className="object-cover"
-                sizes="280px"
+                sizes="(max-width: 1024px) 100vw, 600px"
                 loading="lazy"
               />
             </div>
-            <div className="absolute top-8 left-[10%] z-20 bg-brand-orange rounded-2xl px-5 py-4 shadow-orange-glow">
-              <div className="text-white/80 text-xs font-medium">Meisterbetrieb</div>
-              <div className="text-white font-serif font-bold text-lg mt-0.5">Seit 1994</div>
+            {/* Projektfoto überlappt bewusst die Mobilnummer auf dem Wagen – Anrufe sollen ins Büro gehen */}
+            <div className="absolute bottom-0 left-[22%] w-[44%] aspect-[4/3] rounded-2xl lg:rounded-3xl overflow-hidden shadow-2xl border-4 border-brand-purple-deep z-10">
+              <Image
+                src="/images/referenz-weishaupt/03-technikraum-hell.jpg"
+                alt="Von Haustechnik Frey installierte Weishaupt-Wärmepumpe im Technikraum"
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 44vw, 270px"
+                loading="lazy"
+              />
+            </div>
+            <div className="absolute top-3 left-3 lg:top-4 lg:left-4 z-20 bg-brand-orange rounded-2xl px-3.5 py-2.5 lg:px-5 lg:py-3.5 shadow-orange-glow">
+              <div className="text-white/80 text-[11px] lg:text-xs font-medium">Meisterbetrieb</div>
+              <div className="text-white font-serif font-bold text-sm lg:text-lg mt-0.5">Seit 1994</div>
             </div>
           </motion.div>
         </div>

@@ -56,11 +56,6 @@ export default function Impressum() {
                 +49 7345 3286
               </a>
               <br />
-              Mobil:{' '}
-              <a href="tel:+491727309901" className="text-brand-purple hover:underline">
-                +49 172 7309901
-              </a>
-              <br />
               E-Mail:{' '}
               <a href="mailto:info@haustechnik-frey.de" className="text-brand-purple hover:underline">
                 info@haustechnik-frey.de

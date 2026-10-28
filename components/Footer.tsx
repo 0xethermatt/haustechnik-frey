@@ -29,13 +29,6 @@ export default function Footer() {
                 className="hover:text-white/70 transition-colors"
               >
                 07345 3286
-              </a>{' '}
-              · Mobil:{' '}
-              <a
-                href="tel:+491727309901"
-                className="hover:text-white/70 transition-colors"
-              >
-                0172 7309901
               </a>
             </address>
           </div>

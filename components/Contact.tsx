@@ -14,7 +14,6 @@ import {
   MapPin,
   Phone,
   Send,
-  Smartphone,
   Trash2,
 } from 'lucide-react'
 import {
@@ -39,8 +38,7 @@ export function zumKontakt(thema?: Thema) {
 }
 
 const contactItems = [
-  { icon: Phone, label: 'Telefon', value: '07345 3286', href: 'tel:+4973453286' },
-  { icon: Smartphone, label: 'Mobil', value: '0172 7309901', href: 'tel:+491727309901' },
+  { icon: Phone, label: 'Telefon (Büro)', value: '07345 3286', href: 'tel:+4973453286' },
   { icon: Mail, label: 'E-Mail', value: 'info@haustechnik-frey.de', href: 'mailto:info@haustechnik-frey.de' },
   {
     icon: MapPin,
@@ -214,16 +212,14 @@ export default function Contact() {
         {/* Desktop: Spalte auf Formularhöhe strecken, Ansprechpartner schließt unten bündig ab */}
         <div className="lg:col-start-1 lg:row-start-2 order-last lg:order-none lg:self-stretch flex flex-col gap-4 lg:gap-6">
           <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-3">
               {contactItems.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
                   target={item.label === 'Adresse' ? '_blank' : undefined}
                   rel={item.label === 'Adresse' ? 'noopener noreferrer' : undefined}
-                  className={`group flex items-center gap-3 bg-white/10 hover:bg-white/20 border border-white/15 rounded-2xl px-4 py-3 lg:py-4 transition-colors ${
-                    item.label === 'E-Mail' || item.label === 'Adresse' ? 'col-span-2' : ''
-                  }`}
+                  className="group flex items-center gap-3 bg-white/10 hover:bg-white/20 border border-white/15 rounded-2xl px-4 py-3 lg:py-4 transition-colors"
                 >
                   <item.icon className="w-5 h-5 text-brand-orange flex-shrink-0" aria-hidden="true" />
                   <span className="min-w-0">
