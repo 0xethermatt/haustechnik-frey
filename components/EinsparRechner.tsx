@@ -231,7 +231,7 @@ export default function EinsparRechner({ embedded = false }: { embedded?: boolea
                 label="Jahresarbeitszahl (COP)"
                 value={cop}
                 min={2.0}
-                max={5.0}
+                max={4.5}
                 step={0.1}
                 unit=""
                 onChange={setCop}
@@ -248,12 +248,12 @@ export default function EinsparRechner({ embedded = false }: { embedded?: boolea
                 </span>
                 <span>
                   {cop < 2.8
-                    ? 'Luft-WP bei Kälte / älteres Modell'
+                    ? 'Ungünstige Bedingungen (hohe Vorlauftemperatur)'
                     : cop < 3.5
-                    ? 'Luft-Wasser-Wärmepumpe (Standard)'
+                    ? 'Luft-Wasser-WP im Altbau mit Heizkörpern (typisch)'
                     : cop < 4.2
-                    ? 'Luft-WP modern / Sole-Wasser-WP'
-                    : 'Sole- oder Wasser-Wasser-WP (Erdwärme)'}
+                    ? 'Gut geplant / saniert oder mit Fußbodenheizung'
+                    : 'Sehr gute Bedingungen (Neubau, Fußbodenheizung)'}
                 </span>
               </div>
             </div>

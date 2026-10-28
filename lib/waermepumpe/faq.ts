@@ -67,9 +67,9 @@ export const WP_FAQ: WPFaqItem[] = [
   },
   {
     category: 'Technik',
-    question: 'Luft-Wasser oder Erdwärme – was ist besser?',
+    question: 'Funktioniert eine Luft-Wasser-Wärmepumpe auch im Winter?',
     answer:
-      'Die Luft-Wasser-Wärmepumpe ist für die meisten Bestandsgebäude die wirtschaftlichste Lösung: geringere Investition, keine Bohrung, schnelle Installation. Erdwärme (Sole-Wasser) ist effizienter und leiser, braucht aber eine genehmigungspflichtige Bohrung und ein ausreichend großes Grundstück. Wir beraten Sie ehrlich, was sich für Ihr Haus rechnet.',
+      'Ja. Moderne Luft-Wasser-Wärmepumpen heizen zuverlässig bis etwa −20 °C – auch in der Region Ulm und auf der Alb. Entscheidend ist die richtige Auslegung: Wir berechnen die Heizlast Ihres Hauses raumweise und wählen das Gerät so, dass es auch an den kältesten Tagen genug Wärme liefert. Der elektrische Heizstab springt nur an wenigen Extremtagen kurz an. Deshalb setzen wir ausschließlich auf Luft-Wasser-Wärmepumpen: keine Bohrung, keine Genehmigung, schneller Einbau.',
   },
   {
     category: 'Technik',

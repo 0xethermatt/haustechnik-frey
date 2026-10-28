@@ -52,7 +52,7 @@ const systems = [
     image: '/images/waermepumpe-2.jpg',
     imageAlt: 'Wärmepumpe Außeneinheit — Haustechnik Frey Langenau',
     description:
-      'Die Wärmepumpe nutzt kostenlose Umgebungsenergie aus Luft, Erde oder Wasser und wandelt sie effizient in Heizwärme um. Mit einem COP von 3–5 erzeugt sie aus 1 kWh Strom bis zu 5 kWh Wärme.',
+      'Unsere Luft-Wasser-Wärmepumpen nutzen kostenlose Energie aus der Außenluft und wandeln sie effizient in Heizwärme um – aus 1 kWh Strom werden 3 bis 4 kWh Wärme. Ohne Bohrung, ohne Genehmigung, Einbau in wenigen Tagen.',
     pros: [
       'Bis zu 80 % KfW-Förderung möglich',
       'Sehr niedrige Betriebskosten',

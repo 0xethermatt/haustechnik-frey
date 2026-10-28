@@ -15,7 +15,7 @@ Haustechnik Andreas Frey ist ein SHK-Meisterbetrieb (Sanitär, Heizung, Klima) a
 
 ## Leistungen
 - Heizungsinstallation & Modernisierung (Wärmepumpe, Pellet, Gas/Öl-Ersatz)
-- Wärmepumpen (Luft-Wasser, Erdwärme)
+- Luft-Wasser-Wärmepumpen
 - Badsanierung & Badmodernisierung
 - Sanitärinstallation
 - Lüftungsanlagen (kontrollierte Wohnraumlüftung)

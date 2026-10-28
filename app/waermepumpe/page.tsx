@@ -38,6 +38,8 @@ export const metadata: Metadata = {
     'Wärmepumpe Altbau',
     'Wärmepumpe Kosten',
     'Luft-Wasser-Wärmepumpe',
+    'Luft-Wasser-Wärmepumpe Langenau',
+    'Luftwärmepumpe Ulm',
     'Heizungstausch Förderung',
     'Wärmepumpe Installateur',
   ],
@@ -55,7 +57,7 @@ const jsonLd = [
     '@context': 'https://schema.org',
     '@type': 'Service',
     name: 'Wärmepumpe: Planung, Installation & Förderantrag',
-    serviceType: 'Wärmepumpen-Installation',
+    serviceType: 'Luft-Wasser-Wärmepumpe – Planung und Installation',
     url: PAGE_URL,
     provider: {
       '@type': 'HomeAndConstructionBusiness',

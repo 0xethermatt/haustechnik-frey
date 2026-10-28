@@ -16,6 +16,7 @@ function foerderWissen(): string {
 - Einkommensbonus (nur Selbstnutzer, zu versteuerndes Haushaltseinkommen, Mittel aus dem 2. und 3. Jahr vor Antrag): bis 30.000 € → 40 %, bis 40.000 € → 30 %, bis 50.000 € → 10 %. Familienzuschlag: mit minderjährigem Kind wird das zvE einmalig um 10.000 € reduziert.
 - Deckel: max. 70 %, bei zvE bis 30.000 € max. 80 %.
 - Förderfähige Kosten: ${formatEuro(p.kostenErsteWE)} für die 1. Wohneinheit, 15.000 € für die 2.–6., 8.000 € ab der 7. → max. ${formatEuro(p.kostenErsteWE * 0.8)} Zuschuss im Einfamilienhaus.
+- Haustechnik Frey installiert ausschließlich Luft-Wasser-Wärmepumpen. Bei Fragen zu Erdwärme oder Grundwasser-Wärmepumpen ehrlich sagen, dass wir uns auf Luft-Wasser spezialisiert haben, und deren Vorteile nennen (keine Bohrung/Genehmigung, schneller Einbau, zuverlässig bis ca. −20 °C, voll förderfähig).
 - Effizienzbonus für natürliche Kältemittel ist entfallen. Für 2027 angekündigt (noch nicht final): Grundförderung für Wärmepumpen 15 % plus Bonus für in der EU gefertigte Geräte.
 - Voraussetzungen u. a.: JAZ ≥ 3,0, Gerät auf der Förderliste, Luft-WP mind. 10 dB unter Lärmgrenzwert.
 - Ablauf: Vertrag mit Förderklausel (auflösende/aufschiebende Bedingung) + Bestätigung zum Antrag (BzA) vom Fachbetrieb → Antrag in „Meine KfW“ → Zusage abwarten → Einbau → Nachweis → Auszahlung. Nie ohne Förderklausel unterschreiben oder vor Antrag beginnen.
