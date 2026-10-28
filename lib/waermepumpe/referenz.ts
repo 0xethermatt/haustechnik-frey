@@ -28,40 +28,47 @@ export interface Referenz {
 }
 
 export const REFERENZ: Referenz = {
-  titel: 'Frisch fertig: Weishaupt-Wärmepumpe im Bestand',
+  titel: 'Echte Anlagen, echte Handarbeit',
   einleitung:
-    'Ein aktuelles Projekt aus unserer Region – Außengerät hinterm Haus, die Technik kompakt im Keller. Sauber verrohrt, gedämmt und in Betrieb genommen.',
-  // Ergänzen, sobald bekannt: { label: 'Ort', wert: '…' }, { label: 'Vorher', wert: 'Ölheizung' }, { label: 'Einbauzeit', wert: '4 Tage' }
+    'Weishaupt-Wärmepumpen, die wir zuletzt fertiggestellt haben – keine Katalogbilder. Außengerät am Haus, Technik kompakt im Keller, jede Leitung gedämmt und beschriftet.',
+  // Pro Projekt ergänzbar: { label: 'Ort', wert: '…' }, { label: 'Vorher', wert: 'Ölheizung' }, { label: 'Einbauzeit', wert: '4 Tage' }
   fakten: [
-    { label: 'Gerät', wert: 'Weishaupt Luft-Wasser' },
-    { label: 'Gebäude', wert: 'Bestandsgebäude' },
-    { label: 'Außen', wert: 'Auf Fundament am Haus' },
-    { label: 'Keller', wert: 'Inneneinheit + Speicher' },
+    { label: 'Hersteller', wert: 'Weishaupt' },
+    { label: 'System', wert: 'Luft-Wasser-Wärmepumpe' },
+    { label: 'Leitungen', wert: 'Gedämmt & beschriftet' },
+    { label: 'Ausführung', wert: 'Eigener Meisterbetrieb' },
   ],
+  // Reihenfolge = Layout: [0] Hochformat links, [1] breit, [2] + [3] klein, [4] Hochformat rechts
   bilder: [
     {
       src: '/images/referenz-weishaupt/01-aussengeraet.jpg',
       alt: 'Weishaupt Luft-Wasser-Wärmepumpe auf Betonfundament an der Hauswand',
       titel: 'Außengerät',
-      text: 'Auf eigenem Fundament, mit Abstand zur Wand und Leitungsführung direkt ins Haus.',
+      text: 'Auf eigenem Fundament, Leitungsführung direkt ins Haus.',
     },
     {
-      src: '/images/referenz-weishaupt/03-technikraum.jpg',
-      alt: 'Technikraum im Keller mit Weishaupt-Inneneinheit, Warmwasserspeicher und gedämmten Leitungen',
+      src: '/images/referenz-weishaupt/03-technikraum-hell.jpg',
+      alt: 'Technikraum mit Weishaupt-Inneneinheit, Warmwasserspeicher, Ausdehnungsgefäß und gedämmten Leitungen',
       titel: 'Technikraum',
-      text: 'Inneneinheit, Warmwasserspeicher und Ausdehnungsgefäß – alle Leitungen gedämmt.',
+      text: 'Inneneinheit, Warmwasserspeicher und Ausdehnungsgefäß – aufgeräumt und wartungsfreundlich.',
+    },
+    {
+      src: '/images/referenz-weishaupt/04-hydraulik-detail.jpg',
+      alt: 'Gedämmte und beschriftete Heizungsleitungen mit Absperrhähnen unter der Weishaupt-Inneneinheit',
+      titel: 'Sauber verrohrt',
+      text: 'Jede Leitung gedämmt und beschriftet.',
     },
     {
       src: '/images/referenz-weishaupt/02-aussengeraet-front.jpg',
       alt: 'Weishaupt Wärmepumpe von vorne im Garten',
       titel: 'Dezent im Garten',
-      text: 'Anthrazit, kompakt – fügt sich unauffällig ein.',
+      text: 'Anthrazit und kompakt.',
     },
     {
-      src: '/images/referenz-weishaupt/04-inneneinheit-speicher.jpg',
-      alt: 'Weishaupt-Inneneinheit an der Wand neben dem Warmwasserspeicher',
-      titel: 'Inneneinheit & Speicher',
-      text: 'Platzsparend an der Wand, Speicher direkt daneben.',
+      src: '/images/referenz-weishaupt/05-inneneinheit.jpg',
+      alt: 'Weishaupt-Inneneinheit an der Kellerwand mit Leitungsführung und Ausdehnungsgefäß',
+      titel: 'Inneneinheit',
+      text: 'Platzsparend an der Wand montiert.',
     },
   ],
   // Optional später: Bauablauf, z. B. { titel: 'Ausgangslage', text: '…', bild: '/images/referenz-weishaupt/…', bildAlt: '…' }

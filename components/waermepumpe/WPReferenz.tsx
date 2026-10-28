@@ -2,12 +2,14 @@ import Image from 'next/image'
 import { Quote } from 'lucide-react'
 import { REFERENZ, referenzVorhanden } from '@/lib/waermepumpe/referenz'
 
-// lg: Hauptbild links über zwei Reihen, rechts ein breites und zwei kleine Bilder
+// sm: zwei kleine, ein breites, zwei kleine (grid-flow-dense füllt die Lücke)
+// lg (4 Spalten): Hochformat links und rechts über zwei Reihen, dazwischen ein breites und zwei kleine Bilder
 const KACHEL = [
-  'sm:col-span-2 lg:col-span-1 lg:row-span-2',
+  'lg:row-span-2',
   'sm:col-span-2',
   '',
   '',
+  'lg:row-span-2 lg:col-start-4 lg:row-start-1',
 ]
 
 export default function WPReferenz() {
@@ -40,7 +42,7 @@ export default function WPReferenz() {
 
         {bilder.length > 0 && (
           <div
-            className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-2 lg:h-[640px] gap-4 overflow-x-auto sm:overflow-visible snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 pb-2 sm:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex sm:grid sm:grid-flow-dense sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2 lg:h-[600px] gap-4 overflow-x-auto sm:overflow-visible snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 pb-2 sm:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             role="list"
             aria-label="Fotos vom Projekt"
           >
@@ -54,7 +56,7 @@ export default function WPReferenz() {
                   src={b.src}
                   alt={b.alt}
                   fill
-                  sizes={i === 0 ? '(max-width: 640px) 85vw, (max-width: 1024px) 100vw, 33vw' : '(max-width: 640px) 85vw, (max-width: 1024px) 50vw, 33vw'}
+                  sizes={i === 1 ? '(max-width: 640px) 85vw, (max-width: 1024px) 100vw, 50vw' : '(max-width: 640px) 85vw, (max-width: 1024px) 50vw, 25vw'}
                   className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                 />
                 <figcaption className="absolute inset-x-0 bottom-0 p-4 sm:p-5 bg-gradient-to-t from-brand-purple-deep/85 via-brand-purple-deep/40 to-transparent text-white">
