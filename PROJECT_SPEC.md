@@ -153,33 +153,55 @@ Invitation e-mails are visible in Mailpit at http://127.0.0.1:54324.
 
 ## 7. Deployment checklist
 
-1. **Supabase project** (region EU, e.g. Frankfurt). Link and push migrations: `npx supabase link --project-ref …`,
+1. **Supabase project** (Free plan, region Frankfurt). Link and push migrations: `npx supabase link --project-ref …`,
    `npx supabase db push`. **Do not run `seed.sql` in production.**
 2. **Auth settings:** disable "Allow new users to sign up"; Site URL `https://haustechnik-frey.de/intern`; redirect URL
    `https://haustechnik-frey.de/intern/auth/confirm`; minimum password length 10; copy the German templates from
-   `supabase/templates/` (invite, recovery); configure custom SMTP (e.g. the existing Resend domain) – the built-in
-   mailer is rate-limited.
+   `supabase/templates/` (invite, recovery); configure custom SMTP with the existing Resend account
+   (`smtp.resend.com`, port 465, user `resend`, password = Resend API key) – required on the free plan.
 3. **Vercel env vars:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (all environments),
    `SUPABASE_SERVICE_ROLE_KEY` (server only, never `NEXT_PUBLIC_`).
 4. **First admin:** invite yourself from the Supabase dashboard, then set roles once via SQL:
    `update profiles set roles='{admin,office,employee}' where email='…';` and link the employee record. All further
    users are invited from `/intern/benutzer`.
-5. Verify: `/intern` redirects to login; website pages unchanged; install the PWA on one Android and one iPhone.
+5. **Backups:** set the two GitHub secrets from §8 and run the backup workflow once.
+6. Verify: `/intern` redirects to login; website pages unchanged; install the PWA on one Android and one iPhone.
 
 **Hosting decision (25.11.2026):** Supabase (region Frankfurt, `eu-central-1`) as the only data store; Vercel
 serverless functions pinned to Frankfurt (`vercel.json` → `regions: ["fra1"]`) so database round-trips stay short.
 A US provider with EU data residency was accepted by the business; the standard DPA (AVV) is still signed in both
 dashboards as a formality.
 
-## 8. Backup & restore strategy (to be set up before production use)
+## 8. Running costs & backup strategy
 
-- **Supabase Pro plan** for daily automated backups (7 days); enable **Point-in-Time Recovery** if the budget allows
-  (recommended once reports replace paper).
-- **Independent weekly logical backup** (`pg_dump` via GitHub Action or a NAS cron job) to storage outside Supabase,
-  encrypted, retention ≥ 12 months; tax-relevant records may need longer retention – confirm with the tax advisor.
-- **Restore drill** before go-live and quarterly: restore the latest dump into a fresh Supabase project, run
-  `npm test` + e2e against it, document duration.
-- Migrations are the schema source of truth (in git); never change production schema via the dashboard.
+**Goal: no additional monthly cost.** Decision 25.11.2026.
+
+| Component | Plan | Cost | Limits / notes |
+|---|---|---|---|
+| Database, auth | Supabase **Free**, region Frankfurt | 0 € | 500 MB DB (estimate: ~50 MB/year at 10 employees), 50k monthly users; **no restorable Supabase backups**; project pauses after 7 days without any activity (unpause with one click, data is kept) |
+| App hosting | Same Vercel project as the website | 0 € extra | Note: Vercel's free Hobby plan is for non-commercial use only – applies to the website already |
+| Invitation / password e-mails | Existing Resend account as custom SMTP | 0 € (free tier) | Supabase's built-in mailer only delivers to project team members, so custom SMTP is required |
+| Backups | GitHub Actions, daily, encrypted | 0 € | 90 days retention as workflow artifacts |
+
+**Backup (`.github/workflows/db-backup.yml`, `scripts/backup-db.sh`):** daily dump of roles, schema and data
+(`public` + `auth`, i.e. including logins) using the Supabase CLI, AES-256 encrypted with a passphrase **before**
+upload. Necessary because the repository is public. Setup:
+1. GitHub → Settings → Secrets → Actions: `SUPABASE_DB_URL` (Supabase → Connect → **Session pooler** string, port 5432;
+   the direct connection is IPv6-only and does not work from GitHub runners) and `BACKUP_PASSPHRASE` (long random
+   passphrase, also stored offline – without it backups are useless).
+2. Scheduled workflows only run from the default branch, i.e. after merging to `master`. Trigger once manually
+   ("Run workflow") and check the artifact.
+3. Once a month, download one artifact and keep it offline (USB drive/NAS) for long-term retention.
+
+**Restore (`scripts/restore-db.sh`), tested 25.11.2026:** backup → wipe → restore on the local stack reproduced all
+row counts exactly (customers, reports, time entries, links, audit log, auth users, roles); logins worked and number
+sequences continued correctly; a wrong passphrase aborts. Procedure for an emergency: new Supabase project →
+`supabase db push` (migrations) → `RESTORE_DB_URL=… BACKUP_PASSPHRASE=… scripts/restore-db.sh <file> --data-only` →
+update Vercel env vars. Repeat the drill quarterly.
+
+**When to upgrade to Supabase Pro (~25 $/month):** when photos/signatures are added (storage beyond 1 GB), when the
+pause risk over holidays is unacceptable, or when Supabase-managed backups / point-in-time recovery are wanted.
+Storage files (future photos) are **not** covered by the current database backup.
 
 ## 9. Unresolved requirements / questions for the business
 
