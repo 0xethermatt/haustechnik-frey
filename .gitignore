@@ -36,3 +36,6 @@ next-env.d.ts
 
 # Custom
 training-data/
+
+# Intern: vorab gebautes Stylesheet (npm run build:ops-css)
+app/(ops)/ops.generated.css

@@ -12,7 +12,12 @@
     "test:watch": "vitest",
     "test:e2e": "node tests/e2e/mvp-flow.cjs",
     "db:start": "supabase start",
-    "db:reset": "supabase db reset"
+    "db:reset": "supabase db reset",
+    "build:ops-css": "tailwindcss -c tailwind.ops.config.ts -i styles/ops.src.css -o \"app/(ops)/ops.generated.css\" --minify",
+    "dev:ops-css": "tailwindcss -c tailwind.ops.config.ts -i styles/ops.src.css -o \"app/(ops)/ops.generated.css\" --watch",
+    "predev": "npm run build:ops-css",
+    "prebuild": "npm run build:ops-css",
+    "postbuild": "node scripts/check-site-css.cjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.82.0",

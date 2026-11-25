@@ -52,6 +52,13 @@ tests/unit|db|e2e       vitest (domain), vitest + PGlite (DB/RLS), Playwright (M
 **ADR-1 – One app, isolated route group.** The internal app shares the repo and Vercel project with the website (one
 deployment, shared tooling) but has its own root layout, CSS and Tailwind config. Middleware only matches `/intern/*`.
 A subdomain (`intern.haustechnik-frey.de`) can later be mapped via a Vercel rewrite without code changes.
+Two Tailwind configurations coexist, so **the stylesheets are built separately**: the website uses `tailwind.config.ts`
+through Next's normal pipeline (and explicitly excludes the ops folders); the platform uses `tailwind.ops.config.ts` and
+is pre-built to `app/(ops)/ops.generated.css` by `npm run build:ops-css` (runs automatically in `predev`/`prebuild`;
+`npm run dev:ops-css` watches while developing). Do **not** use `@config` inside a CSS file imported by Next – it leaks
+into every stylesheet of the build (this broke the website's colours for a few hours on 25.11.2026). `postbuild`
+(`scripts/check-site-css.cjs`) fails the build if the website's brand classes disappear. `vercel.json` pins
+`buildCommand: npm run build` so these steps always run.
 
 **ADR-2 – Permissions live in Postgres.** Every table has RLS. UI visibility is convenience only.
 Visibility helpers (`ist_buero()`, `darf_auftrag_sehen()`, `darf_bericht_sehen()` …) are `SECURITY DEFINER` to avoid policy
