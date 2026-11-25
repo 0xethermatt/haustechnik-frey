@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { z } from 'zod'
 import { createClient } from '@/lib/ops/supabase/server'
+import { loginErrorMessage, type AuthErrorLike } from '@/lib/ops/auth-errors'
 
 export interface AuthFormState {
   error?: string
@@ -23,15 +24,18 @@ const credentials = z.object({
 export async function signIn(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const parsed = credentials.safeParse({ email: formData.get('email'), password: formData.get('password') })
   if (!parsed.success) return { error: 'Bitte E-Mail und Passwort eingeben.' }
-  const supabase = createClient()
-  const { error } = await supabase.auth.signInWithPassword(parsed.data)
+  let error: AuthErrorLike | null = null
+  try {
+    const supabase = createClient()
+    const res = await supabase.auth.signInWithPassword(parsed.data)
+    error = res.error
+  } catch (e) {
+    error = { name: 'ClientSetupError', message: e instanceof Error ? e.message : String(e) }
+  }
   if (error) {
-    return {
-      error:
-        error.status === 429
-          ? 'Zu viele Versuche. Bitte kurz warten.'
-          : 'Anmeldung fehlgeschlagen. E-Mail oder Passwort ist falsch.',
-    }
+    // Ursache ins Server-Protokoll (ohne E-Mail-Adresse/Passwort), damit sie in Vercel → Logs sichtbar ist
+    console.error('[login]', JSON.stringify({ code: error.code, status: error.status, name: error.name, message: error.message }))
+    return { error: loginErrorMessage(error) }
   }
   redirect(safeNext(formData.get('next')))
 }
