@@ -52,6 +52,7 @@ export interface Customer {
   id: string
   customer_number: number
   edison_customer_number: string | null
+  short_name: string | null
   first_name: string | null
   last_name: string | null
   company_name: string | null

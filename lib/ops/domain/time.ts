@@ -32,7 +32,7 @@ export interface DaySummary {
 export type FlagSeverity = 'error' | 'warning' | 'info'
 
 export interface DayFlag {
-  code: 'OVERLAP' | 'MISSING' | 'WORKDAY_MISSING' | 'OVER_ALLOCATED' | 'ABSENCE_WITH_TIME' | 'LONG_DAY' | 'BREAK_HINT' | 'OPEN_DRAFT'
+  code: 'OVERLAP' | 'MISSING' | 'WORKDAY_MISSING' | 'OVER_ALLOCATED' | 'ABSENCE_WITH_TIME' | 'LONG_DAY' | 'OPEN_DRAFT'
   severity: FlagSeverity
   message: string
   entryIds?: string[]
@@ -172,7 +172,7 @@ export interface AnalyzeDayInput {
 
 /**
  * Prüft einen Tag auf Unvollständigkeit und Widersprüche.
- * Hinweise zu Pausen orientieren sich am ArbZG §4, sind aber KEINE rechtliche Bewertung.
+ * Pausen werden im Betrieb nicht abgezogen, daher gibt es keinen Pausenhinweis.
  */
 export function analyzeDay(input: AnalyzeDayInput): DayFlag[] {
   const flags: DayFlag[] = []
@@ -212,15 +212,6 @@ export function analyzeDay(input: AnalyzeDayInput): DayFlag[] {
 
   if (totals.workMinutes > 600) {
     flags.push({ code: 'LONG_DAY', severity: 'warning', message: 'Mehr als 10 Stunden Arbeitszeit erfasst.' })
-  }
-
-  const requiredBreak = totals.workMinutes > 540 ? 45 : totals.workMinutes > 360 ? 30 : 0
-  if (requiredBreak > 0 && totals.breakMinutes < requiredBreak) {
-    flags.push({
-      code: 'BREAK_HINT',
-      severity: 'info',
-      message: `Pausenzeit prüfen (erfasst: ${totals.breakMinutes} min, Richtwert: ${requiredBreak} min).`,
-    })
   }
 
   if (input.openDraftCount && input.openDraftCount > 0) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildTimesheetRows, defaultScheduleFor, placeLabel, sumTimesheet } from '@/lib/ops/domain/workday'
+import { buildTimesheetRows, defaultScheduleFor, placeLabel, shortCompanyName, sumTimesheet } from '@/lib/ops/domain/workday'
 import { sheetName, buildTimesheetWorkbook } from '@/lib/ops/exports/timesheet-xlsx'
 import ExcelJS from 'exceljs'
 
@@ -56,10 +56,18 @@ describe('Stundenzettel wie die bisherige Excel-Tabelle', () => {
     expect(sumTimesheet(rows)).toEqual({ minutes: 840, days: 2 })
   })
 
-  it('Firmenkunden mit Firmennamen, Vorbelegung Mo–Do 7:30–16:00, Fr bis 13:30', () => {
-    expect(placeLabel(job('Krause', 'Ulm', 'Zahnarztpraxis Dr. Krause'), abbreviations)).toBe('Zahnarztpraxis Dr. Krause UL')
-    expect(defaultScheduleFor('2026-11-26')).toMatchObject({ start: '07:30', end: '16:00' })
-    expect(defaultScheduleFor('2026-11-27')).toMatchObject({ start: '07:30', end: '13:30' })
+  it('kürzt Firmennamen: Kurzname, sonst ohne Rechtsform', () => {
+    expect(placeLabel(job('Roth', 'Neu-Ulm', 'Wohnbau Donautal GmbH'), abbreviations)).toBe('Wohnbau Donautal Neu-Ulm')
+    expect(shortCompanyName('Bäckerei Hofmann GmbH & Co. KG')).toBe('Bäckerei Hofmann')
+    expect(shortCompanyName('Elektro Maier e.K.')).toBe('Elektro Maier')
+    expect(shortCompanyName('AG Bau')).toBe('AG Bau')
+    const withShort = { customer: { first_name: null, last_name: 'Roth', company_name: 'Wohnbau Donautal GmbH', short_name: 'Donautal', billing_city: 'Ulm' }, location: null }
+    expect(placeLabel(withShort, abbreviations)).toBe('Donautal UL')
+  })
+
+  it('Vorbelegung Mo–Do 7:30–16:00, Fr bis 13:30, ohne Pausenabzug', () => {
+    expect(defaultScheduleFor('2026-11-26')).toEqual({ start: '07:30', end: '16:00', breakMinutes: 0 })
+    expect(defaultScheduleFor('2026-11-27')).toEqual({ start: '07:30', end: '13:30', breakMinutes: 0 })
   })
 })
 

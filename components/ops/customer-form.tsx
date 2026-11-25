@@ -11,12 +11,14 @@ import { Textarea } from '@/components/ui/textarea'
 import { Field } from '@/components/ui/field'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { checkDuplicates, createCustomer, updateCustomer, type DuplicateHit } from '@/app/(ops)/intern/(app)/kunden/actions'
+import { customerShortName } from '@/lib/ops/domain/workday'
 
 export interface CustomerFormValues {
   first_name: string
   last_name: string
   company_name: string
   edison_customer_number: string
+  short_name: string
   billing_street: string
   billing_postal_code: string
   billing_city: string
@@ -30,6 +32,7 @@ export const emptyCustomerValues: CustomerFormValues = {
   last_name: '',
   company_name: '',
   edison_customer_number: '',
+  short_name: '',
   billing_street: '',
   billing_postal_code: '',
   billing_city: '',
@@ -128,6 +131,16 @@ export function CustomerForm({ customerId, initial, canEditNumbers }: { customer
           <Field label="E-Mail" htmlFor="c-email" optional error={err('email')}>
             <Input id="c-email" type="email" value={v.email} onChange={set('email')} />
           </Field>
+          {canEditNumbers ? (
+            <Field
+              label="Kurzname für den Stundenzettel"
+              htmlFor="c-short"
+              optional
+              hint={`Leer lassen für automatisch: „${customerShortName({ ...v, short_name: null }) || '–'}“`}
+            >
+              <Input id="c-short" value={v.short_name} onChange={set('short_name')} maxLength={40} placeholder="z. B. Donautal" />
+            </Field>
+          ) : null}
           {canEditNumbers ? (
             <Field label="Edison-Kundennummer" htmlFor="c-edison" optional hint="Kundennummer aus Edison Handwerk">
               <Input id="c-edison" value={v.edison_customer_number} onChange={set('edison_customer_number')} />

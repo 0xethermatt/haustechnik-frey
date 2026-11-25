@@ -21,7 +21,7 @@ export interface TimeEntryRow {
     id: string
     job_number: number
     title: string
-    customer: { first_name: string | null; last_name: string | null; company_name: string | null; billing_city: string | null } | null
+    customer: { first_name: string | null; last_name: string | null; company_name: string | null; short_name: string | null; billing_city: string | null } | null
     location: { city: string } | null
   } | null
   link: { work_report_id: string; report: { status: ReportStatus; report_number: number } | null }[]
@@ -45,7 +45,7 @@ export async function loadTimeEntries(
     .from('time_entries')
     .select(
       `id, employee_id, entry_date, entry_type, job_id, started_at, ended_at, break_minutes, duration_minutes, billable, note,
-       job:jobs(id, job_number, title, customer:customers(first_name, last_name, company_name, billing_city), location:service_locations(city)),
+       job:jobs(id, job_number, title, customer:customers(first_name, last_name, company_name, short_name, billing_city), location:service_locations(city)),
        link:work_report_time_entries(work_report_id, report:work_reports(status, report_number))`,
     )
     .gte('entry_date', from)

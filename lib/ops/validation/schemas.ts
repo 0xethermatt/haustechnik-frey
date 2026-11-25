@@ -57,6 +57,7 @@ export const customerSchema = z
     last_name: optionalText(100),
     company_name: optionalText(200),
     edison_customer_number: optionalText(50),
+    short_name: optionalText(40),
     billing_street: optionalText(200),
     billing_postal_code: optionalPostalCode,
     billing_city: optionalText(100),

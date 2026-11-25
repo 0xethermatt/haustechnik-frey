@@ -5,20 +5,20 @@ import type { AbsenceType, TimeEntryType } from './types'
 /**
  * Übliche Arbeitszeiten (Vorbelegung beim Erfassen des Arbeitstags).
  * Laut bisherigem Stundenzettel: Mo–Do 7:30–16:00, Fr 7:30–13:30.
- * Pausen sind noch zu bestätigen (siehe PROJECT_SPEC, offene Fragen).
+ * Pausen werden im Betrieb nicht abgezogen (bestätigt 25.11.2026) – daher 0.
  */
 export const DEFAULT_SCHEDULE: Record<number, { start: string; end: string; breakMinutes: number } | null> = {
-  1: { start: '07:30', end: '16:00', breakMinutes: 30 },
-  2: { start: '07:30', end: '16:00', breakMinutes: 30 },
-  3: { start: '07:30', end: '16:00', breakMinutes: 30 },
-  4: { start: '07:30', end: '16:00', breakMinutes: 30 },
+  1: { start: '07:30', end: '16:00', breakMinutes: 0 },
+  2: { start: '07:30', end: '16:00', breakMinutes: 0 },
+  3: { start: '07:30', end: '16:00', breakMinutes: 0 },
+  4: { start: '07:30', end: '16:00', breakMinutes: 0 },
   5: { start: '07:30', end: '13:30', breakMinutes: 0 },
   6: null,
   7: null,
 }
 
 export function defaultScheduleFor(date: string) {
-  return DEFAULT_SCHEDULE[isoWeekday(date)] ?? { start: '07:30', end: '16:00', breakMinutes: 30 }
+  return DEFAULT_SCHEDULE[isoWeekday(date)] ?? { start: '07:30', end: '16:00', breakMinutes: 0 }
 }
 
 /** „07:30:00“ → „07:30“ */
@@ -48,7 +48,13 @@ export interface SheetEntryInput {
   started_at: string | null
   note: string | null
   job: {
-    customer: { first_name: string | null; last_name: string | null; company_name: string | null; billing_city: string | null } | null
+    customer: {
+      first_name: string | null
+      last_name: string | null
+      company_name: string | null
+      short_name?: string | null
+      billing_city: string | null
+    } | null
     location: { city: string } | null
   } | null
 }
@@ -92,6 +98,22 @@ const ENTRY_REMARK: Partial<Record<TimeEntryType, string>> = {
   intern: 'Intern',
 }
 
+const LEGAL_FORM = /[\s,]+(gmbh\s*&\s*co\.?\s*kg|gmbh|ug\s*\(haftungsbeschränkt\)|ug|ag|kg|ohg|gbr|e\.\s?k\.?|e\.\s?v\.?|mbh)\.?$/i
+
+/** „Wohnbau Donautal GmbH“ → „Wohnbau Donautal“ (Rechtsform entfernen). */
+export function shortCompanyName(name: string): string {
+  let result = name.trim()
+  for (let i = 0; i < 2 && LEGAL_FORM.test(result); i++) result = result.replace(LEGAL_FORM, '').trim()
+  return result || name.trim()
+}
+
+/** Name im Stundenzettel: Kurzname, sonst Firma ohne Rechtsform, sonst Nachname. */
+export function customerShortName(c: { first_name: string | null; last_name: string | null; company_name: string | null; short_name?: string | null }): string | null {
+  if (c.short_name?.trim()) return c.short_name.trim()
+  if (c.company_name?.trim()) return shortCompanyName(c.company_name)
+  return c.last_name || c.first_name
+}
+
 /** „Girbach UL“ – Kundenname plus Ortskürzel (oder ausgeschriebener Ort). */
 export function placeLabel(
   job: NonNullable<SheetEntryInput['job']>,
@@ -99,7 +121,7 @@ export function placeLabel(
 ): string | null {
   const c = job.customer
   if (!c) return null
-  const name = c.company_name || c.last_name || c.first_name
+  const name = customerShortName(c)
   if (!name) return null
   const city = job.location?.city ?? c.billing_city
   if (!city) return name

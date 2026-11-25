@@ -278,14 +278,13 @@ begin
       elsif extract(isodow from d) = 5 then
         v_start := '07:30'; v_end := '13:30'; v_break := 0;
       else
-        v_start := '07:30'; v_end := '16:00'; v_break := 30;
+        v_start := '07:30'; v_end := '16:00'; v_break := 0;
       end if;
 
       -- Längere Tage, wenn mehr Stunden Aufträgen zugeordnet sind
       select coalesce(sum(duration_minutes), 0) into v_alloc
       from public.time_entries where employee_id = e.id and entry_date = d and entry_type <> 'pause';
       if v_alloc > extract(epoch from (v_end - v_start)) / 60 - v_break then
-        v_break := case when v_alloc > 360 then 30 else v_break end;
         v_end := v_start + make_interval(mins => (ceil((v_alloc + v_break) / 15.0) * 15)::integer);
       end if;
 
@@ -303,3 +302,7 @@ insert into public.place_abbreviations (city, abbreviation) values
   ('Blaubeuren', 'Blb'),
   ('Herbrechtingen', 'HDH')
 on conflict (city) do nothing;
+
+-- Kurznamen für den Stundenzettel
+update public.customers set short_name = 'Donautal' where id = 'c1000000-0000-4000-8000-000000000005';
+update public.customers set short_name = 'Dr. Krause' where id = 'c1000000-0000-4000-8000-000000000009';

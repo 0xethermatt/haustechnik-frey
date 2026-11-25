@@ -95,7 +95,7 @@ describe('Prüfungen', () => {
       absences: [{ absence_type: 'krank', start_date: '2026-11-24', end_date: '2026-11-24', half_day: false }],
       openDraftCount: 1,
     })
-    expect(flags.map((f) => f.code).sort()).toEqual(['ABSENCE_WITH_TIME', 'BREAK_HINT', 'LONG_DAY', 'OPEN_DRAFT'])
+    expect(flags.map((f) => f.code).sort()).toEqual(['ABSENCE_WITH_TIME', 'LONG_DAY', 'OPEN_DRAFT'])
   })
 })
 

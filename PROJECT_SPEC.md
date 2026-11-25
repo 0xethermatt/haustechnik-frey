@@ -217,9 +217,9 @@ Storage files (future photos) are **not** covered by the current database backup
 
 ## 9. Unresolved requirements / questions for the business
 
-1. **Stundenzettel details** – (a) standard breaks: pre-filled with 30 min Mo–Do and none on Friday (the old sheet
-   leaves the Pause column empty); (b) meaning of the "*" column (left empty in the export); (c) whether long company
-   names should get a short name for the remarks (e.g. "Wohnbau Donautal GmbH" → "Donautal").
+1. **Stundenzettel details** – decided 25.11.2026: breaks are not deducted (default 0, no break hint); long company
+   names are shortened (optional `customers.short_name`, otherwise legal form removed). Open: meaning of the "*" column
+   (left empty in the export).
 1a. **Payroll & overtime rules** – how are vacation, sickness, vocational school and holidays credited (hours per day?),
    overtime thresholds, rounding? Nothing is calculated until confirmed. Weekly target is stored as master data only.
 2. **Travel time in reports** – should travel be captured per participant inside the report (currently recorded
