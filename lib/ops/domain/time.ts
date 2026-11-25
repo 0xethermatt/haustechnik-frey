@@ -32,7 +32,7 @@ export interface DaySummary {
 export type FlagSeverity = 'error' | 'warning' | 'info'
 
 export interface DayFlag {
-  code: 'OVERLAP' | 'MISSING' | 'ABSENCE_WITH_TIME' | 'LONG_DAY' | 'BREAK_HINT' | 'OPEN_DRAFT'
+  code: 'OVERLAP' | 'MISSING' | 'WORKDAY_MISSING' | 'OVER_ALLOCATED' | 'ABSENCE_WITH_TIME' | 'LONG_DAY' | 'BREAK_HINT' | 'OPEN_DRAFT'
   severity: FlagSeverity
   message: string
   entryIds?: string[]
@@ -109,11 +109,62 @@ export function isRegularWorkday(date: string): boolean {
   return isoWeekday(date) <= 5 && !holidayName(date)
 }
 
+/** Arbeitstag (Anwesenheit) – maßgeblich für Stundenzettel und Lohn. */
+export interface WorkDayTimes {
+  duration_minutes: number
+  break_minutes: number
+}
+
+export interface DayTotals {
+  /** Arbeitszeit lt. Arbeitstag; ohne Arbeitstag die Summe der Zeiteinträge */
+  workMinutes: number
+  billableMinutes: number
+  nonBillableMinutes: number
+  breakMinutes: number
+  /** Aufträgen bzw. Tätigkeiten zugeordnete Minuten */
+  allocatedMinutes: number
+  /** Arbeitszeit ohne Zuordnung (Fahrt, Sonstiges) */
+  unallocatedMinutes: number
+  hasWorkDay: boolean
+}
+
+export function dayTotals(entries: TimeEntryInput[], workDay?: WorkDayTimes | null): DayTotals {
+  const s = summarizeEntries(entries)
+  if (!workDay) {
+    return { ...s, allocatedMinutes: s.workMinutes, unallocatedMinutes: 0, hasWorkDay: false }
+  }
+  return {
+    workMinutes: workDay.duration_minutes,
+    billableMinutes: s.billableMinutes,
+    nonBillableMinutes: Math.max(0, workDay.duration_minutes - s.billableMinutes),
+    breakMinutes: workDay.break_minutes,
+    allocatedMinutes: s.workMinutes,
+    unallocatedMinutes: Math.max(0, workDay.duration_minutes - s.workMinutes),
+    hasWorkDay: true,
+  }
+}
+
+export function sumTotals(list: DayTotals[]): DayTotals {
+  return list.reduce(
+    (acc, t) => ({
+      workMinutes: acc.workMinutes + t.workMinutes,
+      billableMinutes: acc.billableMinutes + t.billableMinutes,
+      nonBillableMinutes: acc.nonBillableMinutes + t.nonBillableMinutes,
+      breakMinutes: acc.breakMinutes + t.breakMinutes,
+      allocatedMinutes: acc.allocatedMinutes + t.allocatedMinutes,
+      unallocatedMinutes: acc.unallocatedMinutes + t.unallocatedMinutes,
+      hasWorkDay: acc.hasWorkDay || t.hasWorkDay,
+    }),
+    { workMinutes: 0, billableMinutes: 0, nonBillableMinutes: 0, breakMinutes: 0, allocatedMinutes: 0, unallocatedMinutes: 0, hasWorkDay: false },
+  )
+}
+
 export interface AnalyzeDayInput {
   date: string
   today: string
   entries: TimeEntryInput[]
   absences: AbsenceInput[]
+  workDay?: WorkDayTimes | null
   openDraftCount?: number
   /** Mitarbeiter war an diesem Tag beschäftigt (Eintritt/Austritt) */
   employed?: boolean
@@ -125,20 +176,33 @@ export interface AnalyzeDayInput {
  */
 export function analyzeDay(input: AnalyzeDayInput): DayFlag[] {
   const flags: DayFlag[] = []
-  const { date, today, entries, absences } = input
-  const summary = summarizeEntries(entries)
+  const { date, today, entries, absences, workDay } = input
+  const totals = dayTotals(entries, workDay)
   const absence = absenceOn(date, absences)
+  const employed = input.employed ?? true
+  const past = date < today
 
   for (const [a, b] of findOverlaps(entries)) {
     flags.push({ code: 'OVERLAP', severity: 'error', message: 'Zeiteinträge überschneiden sich.', entryIds: [a, b] })
   }
 
-  const employed = input.employed ?? true
-  if (employed && date < today && entries.length === 0 && !absence && isRegularWorkday(date)) {
-    flags.push({ code: 'MISSING', severity: 'warning', message: 'Keine Zeiten erfasst.' })
+  if (employed && past && !workDay && totals.allocatedMinutes === 0 && !absence && isRegularWorkday(date)) {
+    flags.push({ code: 'MISSING', severity: 'warning', message: 'Keine Arbeitszeit erfasst.' })
   }
 
-  if (absence && !absence.half_day && summary.workMinutes > 0) {
+  if (past && !workDay && totals.allocatedMinutes > 0 && !(absence && !absence.half_day)) {
+    flags.push({ code: 'WORKDAY_MISSING', severity: 'warning', message: 'Beginn und Ende des Arbeitstags fehlen.' })
+  }
+
+  if (workDay && totals.allocatedMinutes > workDay.duration_minutes) {
+    flags.push({
+      code: 'OVER_ALLOCATED',
+      severity: 'warning',
+      message: `Mehr Stunden Aufträgen zugeordnet (${formatMinutes(totals.allocatedMinutes)}) als Arbeitszeit (${formatMinutes(workDay.duration_minutes)}).`,
+    })
+  }
+
+  if (absence && !absence.half_day && (workDay || totals.allocatedMinutes > 0)) {
     flags.push({
       code: 'ABSENCE_WITH_TIME',
       severity: 'warning',
@@ -146,16 +210,16 @@ export function analyzeDay(input: AnalyzeDayInput): DayFlag[] {
     })
   }
 
-  if (summary.workMinutes > 600) {
+  if (totals.workMinutes > 600) {
     flags.push({ code: 'LONG_DAY', severity: 'warning', message: 'Mehr als 10 Stunden Arbeitszeit erfasst.' })
   }
 
-  const requiredBreak = summary.workMinutes > 540 ? 45 : summary.workMinutes > 360 ? 30 : 0
-  if (requiredBreak > 0 && summary.breakMinutes < requiredBreak) {
+  const requiredBreak = totals.workMinutes > 540 ? 45 : totals.workMinutes > 360 ? 30 : 0
+  if (requiredBreak > 0 && totals.breakMinutes < requiredBreak) {
     flags.push({
       code: 'BREAK_HINT',
       severity: 'info',
-      message: `Pausenzeit prüfen (erfasst: ${summary.breakMinutes} min, Richtwert: ${requiredBreak} min).`,
+      message: `Pausenzeit prüfen (erfasst: ${totals.breakMinutes} min, Richtwert: ${requiredBreak} min).`,
     })
   }
 

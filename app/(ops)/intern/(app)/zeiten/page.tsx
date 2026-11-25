@@ -5,13 +5,15 @@ import { ChevronLeft, ChevronRight, FileText, Pencil } from 'lucide-react'
 import { requireSession } from '@/lib/ops/auth'
 import { createClient } from '@/lib/ops/supabase/server'
 import { loadDirectory, loadJobOptions } from '@/lib/ops/data/common'
-import { buildDays, loadAbsences, loadTimeEntries } from '@/lib/ops/data/time'
+import { buildDays, loadAbsences, loadTimeEntries, loadWorkDays } from '@/lib/ops/data/time'
 import { addDays, berlinToday, formatDateLong, isIsoDate, isoWeekNumber, startOfWeek, utcToBerlinTime } from '@/lib/ops/domain/dates'
 import { formatMinutes } from '@/lib/ops/domain/time'
 import { ABSENCE_TYPE_LABELS, TIME_ENTRY_TYPE_LABELS } from '@/lib/ops/domain/labels'
 import { PageBody, PageHeader } from '@/components/ops/page-header'
 import { FlagList, SummaryTiles, WeekStrip } from '@/components/ops/time-views'
 import { TimeEntrySheet } from '@/components/ops/time-entry-sheet'
+import { WorkDayCard } from '@/components/ops/work-day-card'
+import { defaultScheduleFor } from '@/lib/ops/domain/workday'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { NativeSelect } from '@/components/ui/select'
@@ -34,13 +36,14 @@ export default async function TimePage({ searchParams }: { searchParams: { datum
 
   const weekStart = startOfWeek(date)
   const weekEnd = addDays(weekStart, 6)
-  const [entries, absences, jobs, employment] = await Promise.all([
+  const [entries, absences, workDays, jobs, employment] = await Promise.all([
     loadTimeEntries(supabase, { from: weekStart, to: weekEnd, employeeIds: [employeeId] }),
     loadAbsences(supabase, { from: weekStart, to: weekEnd, employeeIds: [employeeId] }),
+    loadWorkDays(supabase, { from: weekStart, to: weekEnd, employeeIds: [employeeId] }),
     loadJobOptions(supabase),
     supabase.from('employees').select('start_date, end_date').eq('id', employeeId).maybeSingle(),
   ])
-  const days = buildDays({ from: weekStart, to: weekEnd, today, entries, absences, employment: employment.data ?? undefined })
+  const days = buildDays({ from: weekStart, to: weekEnd, today, entries, absences, workDays, employment: employment.data ?? undefined })
   const day = days.find((d) => d.date === date)!
   const isOwn = employeeId === ctx.employee?.id
   const canAdd = isOwn || ctx.isOffice
@@ -106,7 +109,18 @@ export default async function TimePage({ searchParams }: { searchParams: { datum
         </div>
         <WeekStrip days={days} selected={date} hrefFor={href} />
 
-        <SummaryTiles summary={day.summary} />
+        {canAdd && !(day.absence && !day.absence.half_day) ? (
+          <WorkDayCard
+            key={`${employeeId}-${date}-${day.workDay?.id ?? 'neu'}`}
+            employeeId={employeeId}
+            date={date}
+            workDay={day.workDay}
+            defaults={defaultScheduleFor(date)}
+            title={date === today ? 'Arbeitszeit heute' : `Arbeitszeit ${formatDateLong(date)}`}
+          />
+        ) : null}
+
+        <SummaryTiles totals={day.totals} />
 
         {day.holiday ? <Badge variant="secondary">Feiertag: {day.holiday}</Badge> : null}
         {day.absence ? (

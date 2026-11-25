@@ -5,7 +5,7 @@ import { requireSession } from '@/lib/ops/auth'
 import { createClient } from '@/lib/ops/supabase/server'
 import { loadDirectory } from '@/lib/ops/data/common'
 import { loadReports, reportMinutes, type ReportListItem } from '@/lib/ops/data/reports'
-import { loadAbsences, loadTimeEntries } from '@/lib/ops/data/time'
+import { loadAbsences, loadTimeEntries, loadWorkDays } from '@/lib/ops/data/time'
 import {
   addDays,
   berlinToday,
@@ -18,7 +18,7 @@ import {
   weekdayLabel,
 } from '@/lib/ops/domain/dates'
 import { holidayName } from '@/lib/ops/domain/holidays'
-import { formatMinutes, summarizeEntries } from '@/lib/ops/domain/time'
+import { dayTotals, formatMinutes } from '@/lib/ops/domain/time'
 import { ABSENCE_TYPE_LABELS, REPORT_STATUS_LABELS } from '@/lib/ops/domain/labels'
 import type { ReportStatus } from '@/lib/ops/domain/types'
 import { PageBody, PageHeader } from '@/components/ops/page-header'
@@ -48,11 +48,14 @@ export default async function CalendarPage({ searchParams }: { searchParams: { a
   const employeeId = searchParams.mitarbeiter && directory.list.some((e) => e.id === searchParams.mitarbeiter) ? searchParams.mitarbeiter : undefined
   const status = Object.keys(REPORT_STATUS_LABELS).includes(searchParams.status ?? '') ? (searchParams.status as ReportStatus) : undefined
 
-  const [reports, absences, dayEntries] = await Promise.all([
+  const [reports, absences, dayEntries, dayWorkDays] = await Promise.all([
     loadReports(supabase, { from, to, employeeId, status, limit: 500 }),
     loadAbsences(supabase, { from, to, employeeIds: employeeId ? [employeeId] : undefined }),
     view === 'tag' && ctx.isOffice
       ? loadTimeEntries(supabase, { from, to, employeeIds: employeeId ? [employeeId] : undefined })
+      : Promise.resolve([]),
+    view === 'tag' && ctx.isOffice
+      ? loadWorkDays(supabase, { from, to, employeeIds: employeeId ? [employeeId] : undefined })
       : Promise.resolve([]),
   ])
 
@@ -195,7 +198,8 @@ export default async function CalendarPage({ searchParams }: { searchParams: { a
                   {directory.active
                     .filter((e) => !employeeId || e.id === employeeId)
                     .map((e) => {
-                      const s = summarizeEntries(dayEntries.filter((x) => x.employee_id === e.id))
+                      const wd = dayWorkDays.find((w) => w.employee_id === e.id)
+                      const s = dayTotals(dayEntries.filter((x) => x.employee_id === e.id), wd)
                       const absence = absencesOn(date).find((a) => a.employee_id === e.id)
                       return (
                         <li key={e.id} className="flex items-center justify-between gap-2">
@@ -205,6 +209,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: { a
                           <span className="tabular text-muted-foreground">
                             {s.workMinutes ? (
                               <>
+                                {wd ? `${wd.start_time.slice(0, 5)}–${wd.end_time.slice(0, 5)} · ` : ''}
                                 <span className="font-medium text-foreground">{formatMinutes(s.workMinutes)}</span> · {formatMinutes(s.billableMinutes, false)} verr.
                               </>
                             ) : absence ? (

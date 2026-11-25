@@ -4,7 +4,10 @@ import { requireSession, type SessionContext } from '@/lib/ops/auth'
 import { createClient } from '@/lib/ops/supabase/server'
 import { loadDirectory, loadJobOptions } from '@/lib/ops/data/common'
 import { loadReports } from '@/lib/ops/data/reports'
-import { buildDays, loadAbsences, loadTimeEntries } from '@/lib/ops/data/time'
+import { buildDays, loadAbsences, loadTimeEntries, loadWorkDays } from '@/lib/ops/data/time'
+import { WorkDayCard } from '@/components/ops/work-day-card'
+import { defaultScheduleFor } from '@/lib/ops/domain/workday'
+import { isRegularWorkday } from '@/lib/ops/domain/time'
 import { addDays, berlinToday, formatDateLong, formatDateShort, startOfWeek } from '@/lib/ops/domain/dates'
 import { PageBody, PageHeader, EmptyState } from '@/components/ops/page-header'
 import { ReportList } from '@/components/ops/report-list'
@@ -33,14 +36,18 @@ async function EmployeeToday({ ctx }: { ctx: SessionContext }) {
   const supabase = createClient()
   const today = berlinToday()
   const employeeId = ctx.employee?.id
-  const [directory, jobs, myReports, entries, absences] = await Promise.all([
+  const weekAgo = addDays(today, -7)
+  const [directory, jobs, myReports, entries, absences, workDays] = await Promise.all([
     loadDirectory(supabase),
     loadJobOptions(supabase),
     loadReports(supabase, { employeeId, from: addDays(today, -30), limit: 50 }),
-    employeeId ? loadTimeEntries(supabase, { from: today, to: today, employeeIds: [employeeId] }) : Promise.resolve([]),
-    employeeId ? loadAbsences(supabase, { from: today, to: today, employeeIds: [employeeId] }) : Promise.resolve([]),
+    employeeId ? loadTimeEntries(supabase, { from: weekAgo, to: today, employeeIds: [employeeId] }) : Promise.resolve([]),
+    employeeId ? loadAbsences(supabase, { from: weekAgo, to: today, employeeIds: [employeeId] }) : Promise.resolve([]),
+    employeeId ? loadWorkDays(supabase, { from: weekAgo, to: today, employeeIds: [employeeId] }) : Promise.resolve([]),
   ])
-  const [day] = buildDays({ from: today, to: today, today, entries, absences })
+  const week = buildDays({ from: weekAgo, to: today, today, entries, absences, workDays })
+  const day = week[week.length - 1]
+  const missingDays = week.filter((d) => d.flags.some((f) => f.code === 'MISSING' || f.code === 'WORKDAY_MISSING'))
   const open = myReports.filter((r) => r.status === 'entwurf' || r.status === 'korrektur_erforderlich')
   const activeJobs = jobs.filter((j) => ['geplant', 'in_bearbeitung'].includes(j.status)).slice(0, 8)
   const firstName = ctx.employee?.first_name ?? ctx.profile.display_name.split(' ')[0]
@@ -55,6 +62,31 @@ async function EmployeeToday({ ctx }: { ctx: SessionContext }) {
           </Link>
         </Button>
 
+        {employeeId && !day.absence && isRegularWorkday(today) ? (
+          <WorkDayCard
+            key={day.workDay?.id ?? 'neu'}
+            employeeId={employeeId}
+            date={today}
+            workDay={day.workDay}
+            defaults={defaultScheduleFor(today)}
+            title="Arbeitszeit heute"
+          />
+        ) : null}
+
+        {missingDays.length ? (
+          <div className="rounded-xl border border-warning/40 bg-warning/5 p-3 text-sm">
+            <span className="font-medium text-warning">Arbeitszeit fehlt: </span>
+            {missingDays.map((d, i) => (
+              <span key={d.date}>
+                {i ? ', ' : ''}
+                <Link href={`/intern/zeiten?datum=${d.date}`} className="underline underline-offset-2">
+                  {formatDateShort(d.date)}
+                </Link>
+              </span>
+            ))}
+          </div>
+        ) : null}
+
         <section className="space-y-2">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-muted-foreground">Heute erfasst</h2>
@@ -62,8 +94,8 @@ async function EmployeeToday({ ctx }: { ctx: SessionContext }) {
               Meine Zeiten
             </Link>
           </div>
-          <SummaryTiles summary={day.summary} />
-          <FlagList flags={day.flags.filter((f) => f.code !== 'MISSING')} />
+          <SummaryTiles totals={day.totals} />
+          <FlagList flags={day.flags.filter((f) => f.code !== 'MISSING' && f.code !== 'WORKDAY_MISSING')} />
         </section>
 
         {open.length ? (
@@ -143,9 +175,10 @@ async function OfficeDashboard({ ctx }: { ctx: SessionContext }) {
     supabase.from('employees').select('id, first_name, last_name, start_date, end_date, employment_role').eq('is_active', true),
   ])
   const employees = (employeesRes.data ?? []) as Employee[]
-  const [entries, absences] = await Promise.all([
+  const [entries, absences, workDays] = await Promise.all([
     loadTimeEntries(supabase, { from: missingFrom, to: yesterday, employeeIds: employees.map((e) => e.id) }),
     loadAbsences(supabase, { from: missingFrom, to: yesterday, employeeIds: employees.map((e) => e.id) }),
+    loadWorkDays(supabase, { from: missingFrom, to: yesterday, employeeIds: employees.map((e) => e.id) }),
   ])
   const missing = employees
     .map((e) => ({
@@ -156,8 +189,9 @@ async function OfficeDashboard({ ctx }: { ctx: SessionContext }) {
         today,
         entries: entries.filter((x) => x.employee_id === e.id),
         absences: absences.filter((a) => a.employee_id === e.id),
+        workDays: workDays.filter((w) => w.employee_id === e.id),
         employment: e,
-      }).filter((d) => d.flags.some((f) => f.code === 'MISSING' || f.code === 'OVERLAP')),
+      }).filter((d) => d.flags.some((f) => ['MISSING', 'WORKDAY_MISSING', 'OVERLAP'].includes(f.code))),
     }))
     .filter((m) => m.days.length)
 

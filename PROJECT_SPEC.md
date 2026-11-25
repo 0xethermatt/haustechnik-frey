@@ -101,6 +101,18 @@ locations have `archived_at`; employees have `is_active`/`end_date`. Only unsubm
 done server-side (`berlinLocalToUtc`), DST-safe and tested. A DB check enforces `duration = end − start − break` when a
 span is given. Baden-Württemberg public holidays are computed (no table needed).
 
+**ADR-7b – Work day (attendance) vs. job allocation (added 25.11.2026).** Requirement from the office: the monthly
+timesheet ("Stundenzettel", one Excel sheet per month, one block per employee, columns Kalendertag / Beginn / Pause /
+Ende / Dauer / * / aufgezeichnet am / Bemerkungen) must be produced without chasing employees for their hours.
+`work_days` stores one start/end/break per employee and day (unique), pre-filled with the usual schedule
+(Mo–Do 7:30–16:00, Fr 7:30–13:30) so employees confirm with one tap. This is the **payroll time**. Report time entries
+remain the **allocation to jobs** (billing); unallocated work-day time counts as travel/other. Checks: no work day on a
+past workday → reminder; report hours exceed the work day → warning. "aufgezeichnet am" is the creation date of the
+work day. Remarks are generated from the day's reports ("Kundenname Ortskürzel", e.g. "Girbach UL"; abbreviations
+maintained by the office, unknown towns written out), manual entries (Lager, Material, notes like "TÜV") and absences
+("Schule", "Urlaub", "Krank" – red). `/intern/zeiten/stundenzettel` shows the month and downloads an `.xlsx` in the
+same layout (real Excel time values, one employee per printed A4 page).
+
 **ADR-8 – Daily consistency checks are hints, not rules.** Flags: overlapping spans (error), missing times on past
 regular workdays (warning), absence with work time, > 10 h/day, break hint following ArbZG §4 thresholds (info),
 unsubmitted reports. **No** overtime, vacation balance or payroll calculation.
@@ -205,7 +217,10 @@ Storage files (future photos) are **not** covered by the current database backup
 
 ## 9. Unresolved requirements / questions for the business
 
-1. **Payroll & overtime rules** – how are vacation, sickness, vocational school and holidays credited (hours per day?),
+1. **Stundenzettel details** – (a) standard breaks: pre-filled with 30 min Mo–Do and none on Friday (the old sheet
+   leaves the Pause column empty); (b) meaning of the "*" column (left empty in the export); (c) whether long company
+   names should get a short name for the remarks (e.g. "Wohnbau Donautal GmbH" → "Donautal").
+1a. **Payroll & overtime rules** – how are vacation, sickness, vocational school and holidays credited (hours per day?),
    overtime thresholds, rounding? Nothing is calculated until confirmed. Weekly target is stored as master data only.
 2. **Travel time in reports** – should travel be captured per participant inside the report (currently recorded
    separately in "Meine Zeiten", optionally billable with a job)? Data model is ready to extend.

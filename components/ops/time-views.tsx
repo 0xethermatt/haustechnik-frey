@@ -1,26 +1,33 @@
 import Link from 'next/link'
 import { AlertCircle, AlertTriangle, Info } from 'lucide-react'
-import { formatMinutes, worstSeverity, type DayFlag, type DaySummary } from '@/lib/ops/domain/time'
+import { formatMinutes, worstSeverity, type DayFlag, type DayTotals } from '@/lib/ops/domain/time'
 import { formatDate, weekdayLabel } from '@/lib/ops/domain/dates'
 import { ABSENCE_TYPE_LABELS } from '@/lib/ops/domain/labels'
 import type { EmployeeDay } from '@/lib/ops/data/time'
 import { cn } from '@/lib/ops/utils'
 
-export function SummaryTiles({ summary, className }: { summary: DaySummary; className?: string }) {
+export function SummaryTiles({ totals, className }: { totals: DayTotals; className?: string }) {
   const tiles = [
-    { label: 'Arbeitszeit', value: summary.workMinutes, strong: true },
-    { label: 'Verrechenbar', value: summary.billableMinutes },
-    { label: 'Nicht verrechenbar', value: summary.nonBillableMinutes },
-    { label: 'Pausen', value: summary.breakMinutes },
+    { label: 'Arbeitszeit', value: totals.workMinutes, strong: true },
+    { label: 'Verrechenbar', value: totals.billableMinutes },
+    { label: 'Nicht verrechenbar', value: totals.nonBillableMinutes },
+    { label: 'Pausen', value: totals.breakMinutes },
   ]
   return (
-    <div className={cn('grid grid-cols-2 gap-2 md:grid-cols-4', className)}>
-      {tiles.map((t) => (
-        <div key={t.label} className="rounded-xl border bg-card p-3">
-          <div className="text-xs text-muted-foreground">{t.label}</div>
-          <div className={cn('tabular mt-0.5 text-lg font-semibold', t.strong && 'text-primary')}>{formatMinutes(t.value)}</div>
-        </div>
-      ))}
+    <div className={cn('space-y-1.5', className)}>
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+        {tiles.map((t) => (
+          <div key={t.label} className="rounded-xl border bg-card p-3">
+            <div className="text-xs text-muted-foreground">{t.label}</div>
+            <div className={cn('tabular mt-0.5 text-lg font-semibold', t.strong && 'text-primary')}>{formatMinutes(t.value)}</div>
+          </div>
+        ))}
+      </div>
+      {totals.hasWorkDay && totals.unallocatedMinutes > 0 ? (
+        <p className="text-xs text-muted-foreground">
+          Davon ohne Auftrag (Fahrt, Lager, Sonstiges): {formatMinutes(totals.unallocatedMinutes)}
+        </p>
+      ) : null}
     </div>
   )
 }
@@ -79,7 +86,7 @@ export function WeekStrip({ days, selected, hrefFor }: { days: EmployeeDay[]; se
           <span className="text-muted-foreground">{weekdayLabel(d.date)}</span>
           <span className={cn('font-medium', d.date === selected && 'text-primary')}>{formatDate(d.date).slice(0, 2)}</span>
           <span className="tabular text-[11px] text-muted-foreground">
-            {d.summary.workMinutes ? formatMinutes(d.summary.workMinutes, false) : d.absence ? ABSENCE_TYPE_LABELS[d.absence.absence_type].slice(0, 5) : '–'}
+            {d.totals.workMinutes ? formatMinutes(d.totals.workMinutes, false) : d.absence ? ABSENCE_TYPE_LABELS[d.absence.absence_type].slice(0, 5) : '–'}
           </span>
           <span className="h-2">
             <FlagDot flags={d.flags} />

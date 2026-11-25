@@ -101,6 +101,15 @@ async function shot(page, name) {
   assert(ids1 === ids2, 'Bearbeiten + Einreichen: dieselben Zeiteinträge (keine Duplikate)')
   assert(minutes === '105,135', 'Arbeitszeiten korrekt: 1:45 h und 2:15 h')
 
+  // Arbeitstag mit einem Tipp (vorausgefüllt mit den üblichen Zeiten)
+  await m.goto(`${BASE}/intern`)
+  const saveDay = m.getByRole('button', { name: /^\d{2}:\d{2}–\d{2}:\d{2} speichern$/ })
+  if (await saveDay.count()) {
+    await saveDay.click()
+    await m.getByText('Arbeitszeit gespeichert').waitFor()
+    const wd = sql(`select start_time || '-' || end_time from work_days w join employees e on e.id = w.employee_id where e.employee_number = '103' and work_date = (now() at time zone 'Europe/Berlin')::date`)
+    assert(/^07:30:00-(16|13):(00|30):00$/.test(wd), `Arbeitstag mit einem Tipp gespeichert (${wd})`)
+  }
   await m.goto(`${BASE}/intern/zeiten`)
   await shot(m, '05-meine-zeiten')
 
@@ -151,6 +160,17 @@ async function shot(page, name) {
   await d.getByText(/KW \d+/).first().waitFor()
   assert(true, 'Office 5. Monatsübersicht Mitarbeiterzeiten')
 
+  // Stundenzettel wie die bisherige Excel-Tabelle + Download
+  await d.goto(`${BASE}/intern/zeiten/stundenzettel`)
+  await d.getByRole('cell', { name: /Weber/ }).first().waitFor()
+  assert(true, 'Stundenzettel zeigt Orte aus den Berichten (z. B. „Weber …“)')
+  await shot(d, '11-stundenzettel')
+  const [download] = await Promise.all([d.waitForEvent('download'), d.getByRole('link', { name: 'Excel herunterladen' }).click()])
+  const file = await download.path()
+  const size = require('node:fs').statSync(file).size
+  assert(/^Stundenzettel_.+\.xlsx$/.test(download.suggestedFilename()) && size > 5000, `Excel-Download (${download.suggestedFilename()}, ${size} Bytes)`)
+  if (shots) await download.saveAs(`${shots}/${download.suggestedFilename()}`)
+
   await d.goto(`${BASE}/intern/auftraege?status=abrechnungsbereit`)
   await d.getByText('Heizungswartung Gasbrennwert').waitFor()
   assert(true, 'Office 6. Abrechnungsbereite Aufträge erkennbar')
@@ -162,6 +182,8 @@ async function shot(page, name) {
   await m.goto(`${BASE}/intern/zeiten/uebersicht`)
   await m.waitForLoadState('networkidle')
   assert(m.url() === `${BASE}/intern`, 'Mitarbeiter wird von Zeitübersicht umgeleitet')
+  const res = await m.request.get(`${BASE}/intern/zeiten/stundenzettel/export?monat=2026-10`)
+  assert(res.status() === 403, 'Mitarbeiter kann den Excel-Export nicht abrufen')
 
   // Dunkelmodus
   const dark = await browser.newContext({ ...devices['iPhone 13'], colorScheme: 'dark', locale: 'de-DE', timezoneId: 'Europe/Berlin' })

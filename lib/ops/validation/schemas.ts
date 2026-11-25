@@ -256,3 +256,27 @@ export function fieldErrors(error: z.ZodError): Record<string, string> {
   }
   return out
 }
+
+export const workDaySchema = z
+  .object({
+    employee_id: z.uuid(),
+    work_date: isoDate,
+    start_time: timeOfDay,
+    end_time: timeOfDay,
+    break_minutes: z.number().int().min(0).max(600),
+    note: optionalText(500),
+  })
+  .refine((w) => w.end_time > w.start_time, { message: 'Ende muss nach dem Beginn liegen.', path: ['end_time'] })
+  .refine(
+    (w) => {
+      const [sh, sm] = w.start_time.split(':').map(Number)
+      const [eh, em] = w.end_time.split(':').map(Number)
+      return eh * 60 + em - (sh * 60 + sm) > w.break_minutes
+    },
+    { message: 'Die Pause ist länger als die Arbeitszeit.', path: ['break_minutes'] },
+  )
+
+export const placeAbbreviationSchema = z.object({
+  city: z.string().trim().min(1, 'Ort fehlt.').max(100),
+  abbreviation: z.string().trim().min(1, 'Kürzel fehlt.').max(20),
+})

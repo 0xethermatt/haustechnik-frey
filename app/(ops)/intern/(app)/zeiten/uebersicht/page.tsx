@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, FileSpreadsheet } from 'lucide-react'
 import { requireOffice } from '@/lib/ops/auth'
 import { createClient } from '@/lib/ops/supabase/server'
-import { buildDays, loadAbsences, loadTimeEntries, sumDays, type EmployeeDay } from '@/lib/ops/data/time'
+import { buildDays, loadAbsences, loadTimeEntries, loadWorkDays, sumDays, type EmployeeDay } from '@/lib/ops/data/time'
 import {
   addDays,
   berlinToday,
@@ -45,9 +45,10 @@ export default async function TimeOverviewPage({ searchParams }: { searchParams:
     .order('last_name')
   const employees = (employeesData ?? []) as Employee[]
   const ids = employees.map((e) => e.id)
-  const [entries, absences] = await Promise.all([
+  const [entries, absences, workDays] = await Promise.all([
     loadTimeEntries(supabase, { from, to, employeeIds: ids }),
     loadAbsences(supabase, { from, to, employeeIds: ids }),
+    loadWorkDays(supabase, { from, to, employeeIds: ids }),
   ])
 
   const rows = employees.map((e) => {
@@ -57,6 +58,7 @@ export default async function TimeOverviewPage({ searchParams }: { searchParams:
       today,
       entries: entries.filter((x) => x.employee_id === e.id),
       absences: absences.filter((a) => a.employee_id === e.id),
+      workDays: workDays.filter((w) => w.employee_id === e.id),
       employment: e,
     })
     return { employee: e, days, total: sumDays(days), issues: days.flatMap((d) => d.flags).filter((f) => f.severity !== 'info').length }
@@ -75,6 +77,12 @@ export default async function TimeOverviewPage({ searchParams }: { searchParams:
         title="Zeitübersicht"
         description={view === 'woche' ? `KW ${isoWeekNumber(from)} · ${formatDate(from)} – ${formatDate(to)}` : formatMonth(from)}
         actions={
+          <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline">
+            <Link href={`/intern/zeiten/stundenzettel?monat=${from.slice(0, 7)}`}>
+              <FileSpreadsheet /> Stundenzettel & Excel
+            </Link>
+          </Button>
           <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
             {(['woche', 'monat'] as const).map((v) => (
               <Link
@@ -85,6 +93,7 @@ export default async function TimeOverviewPage({ searchParams }: { searchParams:
                 {v === 'woche' ? 'Woche' : 'Monat'}
               </Link>
             ))}
+          </div>
           </div>
         }
       />
@@ -174,8 +183,8 @@ function DayCell({ day, href, today }: { day: EmployeeDay; href: string; today: 
     <td className={cn('px-1 py-2 text-center', (day.holiday || day.absence) && 'bg-muted/50')}>
       <Link href={future ? '#' : href} className={cn('block rounded-lg px-1 py-1', !future && 'hover:bg-accent')} aria-disabled={future}>
         <div className="tabular">
-          {day.summary.workMinutes ? (
-            formatMinutes(day.summary.workMinutes, false)
+          {day.totals.workMinutes ? (
+            formatMinutes(day.totals.workMinutes, false)
           ) : day.absence ? (
             <span className="text-xs text-muted-foreground">{ABSENCE_TYPE_LABELS[day.absence.absence_type]}</span>
           ) : day.holiday ? (

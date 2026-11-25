@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { requireSession } from '@/lib/ops/auth'
 import { createClient } from '@/lib/ops/supabase/server'
 import { fail, fromDbError, invalid, ok, type ActionResult } from '@/lib/ops/actions'
-import { absenceSchema, timeEntrySchema } from '@/lib/ops/validation/schemas'
+import { absenceSchema, placeAbbreviationSchema, timeEntrySchema, workDaySchema } from '@/lib/ops/validation/schemas'
 import { berlinLocalToUtc, berlinToday } from '@/lib/ops/domain/dates'
 import { durationFromSpan } from '@/lib/ops/domain/time'
 
@@ -86,6 +86,57 @@ export async function deleteAbsence(id: string): Promise<ActionResult<null>> {
   if (!ctx.isOffice) return fail('Keine Berechtigung.', { code: 'FORBIDDEN' })
   const supabase = createClient()
   const { error } = await supabase.from('employee_absences').delete().eq('id', id)
+  if (error) return fromDbError(error)
+  revalidateTime()
+  return ok(null)
+}
+
+/** Arbeitstag (Beginn/Ende/Pause) anlegen oder ändern – genau einer pro Mitarbeiter und Tag. */
+export async function saveWorkDay(input: unknown): Promise<ActionResult<{ id: string }>> {
+  const ctx = await requireSession()
+  const parsed = workDaySchema.safeParse(input)
+  if (!parsed.success) return invalid(parsed.error)
+  const w = parsed.data
+  if (!ctx.isOffice && w.employee_id !== ctx.employee?.id) return fail('Nur die eigene Arbeitszeit erfassen.', { code: 'FORBIDDEN' })
+  if (w.work_date > berlinToday()) return fail('Arbeitszeit kann nicht im Voraus erfasst werden.', { code: 'INVALID' })
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('work_days')
+    .upsert({ ...w, created_by: ctx.userId }, { onConflict: 'employee_id,work_date' })
+    .select('id')
+    .single()
+  if (error) return fromDbError(error)
+  revalidateTime()
+  return ok({ id: data.id })
+}
+
+export async function deleteWorkDay(id: string): Promise<ActionResult<null>> {
+  await requireSession()
+  const supabase = createClient()
+  const { data, error } = await supabase.from('work_days').delete().eq('id', id).select('id')
+  if (error) return fromDbError(error)
+  if (!data?.length) return fail('Eintrag nicht gefunden oder keine Berechtigung.', { code: 'FORBIDDEN' })
+  revalidateTime()
+  return ok(null)
+}
+
+export async function savePlaceAbbreviation(input: unknown): Promise<ActionResult<null>> {
+  const ctx = await requireSession()
+  if (!ctx.isOffice) return fail('Ortskürzel pflegt das Büro.', { code: 'FORBIDDEN' })
+  const parsed = placeAbbreviationSchema.safeParse(input)
+  if (!parsed.success) return invalid(parsed.error)
+  const supabase = createClient()
+  const { error } = await supabase.from('place_abbreviations').upsert(parsed.data, { onConflict: 'city' })
+  if (error) return fromDbError(error)
+  revalidateTime()
+  return ok(null)
+}
+
+export async function deletePlaceAbbreviation(city: string): Promise<ActionResult<null>> {
+  const ctx = await requireSession()
+  if (!ctx.isOffice) return fail('Keine Berechtigung.', { code: 'FORBIDDEN' })
+  const supabase = createClient()
+  const { error } = await supabase.from('place_abbreviations').delete().eq('city', city)
   if (error) return fromDbError(error)
   revalidateTime()
   return ok(null)

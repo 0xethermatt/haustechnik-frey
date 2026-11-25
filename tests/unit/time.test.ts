@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   analyzeDay,
+  dayTotals,
   durationFromSpan,
   findOverlaps,
   formatMinutes,
@@ -95,5 +96,31 @@ describe('Prüfungen', () => {
       openDraftCount: 1,
     })
     expect(flags.map((f) => f.code).sort()).toEqual(['ABSENCE_WITH_TIME', 'BREAK_HINT', 'LONG_DAY', 'OPEN_DRAFT'])
+  })
+})
+
+describe('Arbeitstag (Beginn/Ende/Pause) als Lohngrundlage', () => {
+  const workDay = { duration_minutes: 480, break_minutes: 30 }
+
+  it('Arbeitszeit kommt aus dem Arbeitstag, Rest ist nicht verrechenbar', () => {
+    const t = dayTotals([entry({ id: 'a', duration_minutes: 300, billable: true }), entry({ id: 'b', entry_type: 'lager', duration_minutes: 60 })], workDay)
+    expect(t).toMatchObject({
+      workMinutes: 480,
+      billableMinutes: 300,
+      nonBillableMinutes: 180,
+      breakMinutes: 30,
+      allocatedMinutes: 360,
+      unallocatedMinutes: 120,
+      hasWorkDay: true,
+    })
+  })
+
+  it('erkennt fehlende Arbeitstage und Überbuchung', () => {
+    const base = { date: '2026-11-24', today: '2026-11-25', absences: [] }
+    expect(analyzeDay({ ...base, entries: [entry({ id: 'a', duration_minutes: 120 })] }).map((f) => f.code)).toEqual(['WORKDAY_MISSING'])
+    expect(analyzeDay({ ...base, entries: [], workDay })).toEqual([])
+    expect(analyzeDay({ ...base, entries: [entry({ id: 'a', duration_minutes: 540 })], workDay }).map((f) => f.code)).toEqual(['OVER_ALLOCATED'])
+    // heute noch keine Erinnerung
+    expect(analyzeDay({ ...base, today: '2026-11-24', entries: [entry({ id: 'a', duration_minutes: 120 })] })).toEqual([])
   })
 })

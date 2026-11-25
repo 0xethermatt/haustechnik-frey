@@ -3,7 +3,7 @@ import type { ServerSupabase } from '../supabase/server'
 import type { AbsenceType, ReportStatus, TimeEntryType } from '../domain/types'
 import { eachDay } from '../domain/dates'
 import { holidayName } from '../domain/holidays'
-import { absenceOn, analyzeDay, summarizeEntries, type DayFlag, type DaySummary } from '../domain/time'
+import { absenceOn, analyzeDay, dayTotals, sumTotals, type DayFlag, type DayTotals } from '../domain/time'
 
 export interface TimeEntryRow {
   id: string
@@ -17,7 +17,13 @@ export interface TimeEntryRow {
   duration_minutes: number
   billable: boolean
   note: string | null
-  job: { id: string; job_number: number; title: string; customer: { first_name: string | null; last_name: string | null; company_name: string | null } | null } | null
+  job: {
+    id: string
+    job_number: number
+    title: string
+    customer: { first_name: string | null; last_name: string | null; company_name: string | null; billing_city: string | null } | null
+    location: { city: string } | null
+  } | null
   link: { work_report_id: string; report: { status: ReportStatus; report_number: number } | null }[]
 }
 
@@ -39,7 +45,7 @@ export async function loadTimeEntries(
     .from('time_entries')
     .select(
       `id, employee_id, entry_date, entry_type, job_id, started_at, ended_at, break_minutes, duration_minutes, billable, note,
-       job:jobs(id, job_number, title, customer:customers(first_name, last_name, company_name)),
+       job:jobs(id, job_number, title, customer:customers(first_name, last_name, company_name, billing_city), location:service_locations(city)),
        link:work_report_time_entries(work_report_id, report:work_reports(status, report_number))`,
     )
     .gte('entry_date', from)
@@ -63,9 +69,41 @@ export async function loadAbsences(
   return (data ?? []) as AbsenceRow[]
 }
 
+export interface WorkDayRow {
+  id: string
+  employee_id: string
+  work_date: string
+  start_time: string
+  end_time: string
+  break_minutes: number
+  duration_minutes: number
+  note: string | null
+  created_at: string
+}
+
+export async function loadWorkDays(
+  supabase: ServerSupabase,
+  { from, to, employeeIds }: { from: string; to: string; employeeIds?: string[] },
+): Promise<WorkDayRow[]> {
+  let q = supabase
+    .from('work_days')
+    .select('id, employee_id, work_date, start_time, end_time, break_minutes, duration_minutes, note, created_at')
+    .gte('work_date', from)
+    .lte('work_date', to)
+  if (employeeIds) q = q.in('employee_id', employeeIds)
+  const { data } = await q.order('work_date')
+  return (data ?? []) as WorkDayRow[]
+}
+
+export async function loadAbbreviations(supabase: ServerSupabase): Promise<Map<string, string>> {
+  const { data } = await supabase.from('place_abbreviations').select('city, abbreviation')
+  return new Map((data ?? []).map((r) => [r.city.trim().toLowerCase(), r.abbreviation]))
+}
+
 export interface EmployeeDay {
   date: string
-  summary: DaySummary
+  totals: DayTotals
+  workDay: WorkDayRow | undefined
   flags: DayFlag[]
   absence: AbsenceRow | undefined
   holiday: string | undefined
@@ -78,6 +116,7 @@ export function buildDays(opts: {
   today: string
   entries: TimeEntryRow[]
   absences: AbsenceRow[]
+  workDays?: WorkDayRow[]
   employment?: { start_date: string; end_date: string | null }
 }): EmployeeDay[] {
   return eachDay(opts.from, opts.to).map((date) => {
@@ -90,17 +129,19 @@ export function buildDays(opts: {
         .filter((e) => e.link[0]?.report && ['entwurf', 'korrektur_erforderlich'].includes(e.link[0].report.status))
         .map((e) => e.link[0].work_report_id),
     ).size
+    const workDay = opts.workDays?.find((w) => w.work_date === date)
     return {
       date,
       entries,
-      summary: summarizeEntries(entries),
-      flags: analyzeDay({ date, today: opts.today, entries, absences: opts.absences, openDraftCount, employed }),
+      workDay,
+      totals: dayTotals(entries, workDay),
+      flags: analyzeDay({ date, today: opts.today, entries, absences: opts.absences, workDay, openDraftCount, employed }),
       absence: absenceOn(date, opts.absences) as AbsenceRow | undefined,
       holiday: holidayName(date),
     }
   })
 }
 
-export function sumDays(days: EmployeeDay[]): DaySummary {
-  return summarizeEntries(days.flatMap((d) => d.entries))
+export function sumDays(days: EmployeeDay[]): DayTotals {
+  return sumTotals(days.map((d) => d.totals))
 }

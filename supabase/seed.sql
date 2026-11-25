@@ -252,3 +252,54 @@ insert into public.employee_absences (employee_id, absence_type, start_date, end
 -- Abrechnungsstatus nach Erfassung der Berichte setzen
 update public.jobs set status = 'abrechnungsbereit'
 where id in ('b1000000-0000-4000-8000-000000000002', 'b1000000-0000-4000-8000-000000000009');
+
+-- Arbeitstage (Beginn/Ende/Pause) der letzten ~8 Wochen, ohne heute.
+-- Bewusst offen gelassen: Lukas Brenner am letzten Werktag (zeigt die Erinnerung „Arbeitszeit fehlt“).
+do $$
+declare
+  e record;
+  d date;
+  v_start time;
+  v_end time;
+  v_break integer;
+  v_alloc integer;
+begin
+  for e in select id, employment_role, employee_number from public.employees where is_active loop
+    for d in select generate_series(public.berlin_today() - 56, public.berlin_today() - 1, interval '1 day')::date loop
+      continue when extract(isodow from d) > 5;
+      continue when d < (select start_date from public.employees where id = e.id);
+      continue when exists (
+        select 1 from public.employee_absences a where a.employee_id = e.id and d between a.start_date and a.end_date
+      );
+      continue when e.employee_number = '104' and d = pg_temp.wd(1);
+
+      if e.employment_role = 'buero' then
+        v_start := '08:00'; v_end := '12:00'; v_break := 0;
+      elsif extract(isodow from d) = 5 then
+        v_start := '07:30'; v_end := '13:30'; v_break := 0;
+      else
+        v_start := '07:30'; v_end := '16:00'; v_break := 30;
+      end if;
+
+      -- Längere Tage, wenn mehr Stunden Aufträgen zugeordnet sind
+      select coalesce(sum(duration_minutes), 0) into v_alloc
+      from public.time_entries where employee_id = e.id and entry_date = d and entry_type <> 'pause';
+      if v_alloc > extract(epoch from (v_end - v_start)) / 60 - v_break then
+        v_break := case when v_alloc > 360 then 30 else v_break end;
+        v_end := v_start + make_interval(mins => (ceil((v_alloc + v_break) / 15.0) * 15)::integer);
+      end if;
+
+      insert into public.work_days (employee_id, work_date, start_time, end_time, break_minutes, note, created_at)
+      values (e.id, d, v_start, v_end, v_break,
+              case when e.employee_number = '103' and d = pg_temp.wd(7) then 'TÜV' end,
+              (d + time '17:30') at time zone 'Europe/Berlin');
+    end loop;
+  end loop;
+end;
+$$;
+
+insert into public.place_abbreviations (city, abbreviation) values
+  ('Neu-Ulm', 'NU'),
+  ('Blaubeuren', 'Blb'),
+  ('Herbrechtingen', 'HDH')
+on conflict (city) do nothing;

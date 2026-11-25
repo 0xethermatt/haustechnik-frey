@@ -67,8 +67,8 @@ export const TIME_ENTRY_TYPE_LABELS: Record<TimeEntryType, string> = {
   pause: 'Pause',
 }
 
-/** Typen, die direkt (ohne Arbeitsbericht) erfasst werden dürfen. */
-export const MANUAL_TIME_ENTRY_TYPES: TimeEntryType[] = ['fahrzeit', 'materialbeschaffung', 'lager', 'intern', 'pause']
+/** Typen, die direkt (ohne Arbeitsbericht) erfasst werden. Pausen gehören zum Arbeitstag. */
+export const MANUAL_TIME_ENTRY_TYPES: TimeEntryType[] = ['fahrzeit', 'materialbeschaffung', 'lager', 'intern']
 
 export const ABSENCE_TYPE_LABELS: Record<AbsenceType, string> = {
   urlaub: 'Urlaub',
