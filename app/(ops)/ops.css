@@ -1,0 +1,98 @@
+@config "../../tailwind.ops.config.ts";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 270 15% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 270 15% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 270 15% 10%;
+    --primary: 280 51% 36%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 275 20% 96%;
+    --secondary-foreground: 275 30% 18%;
+    --muted: 270 10% 96%;
+    --muted-foreground: 270 6% 42%;
+    --accent: 278 40% 95%;
+    --accent-foreground: 280 51% 30%;
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 60% 32%;
+    --success-foreground: 0 0% 100%;
+    --warning: 35 92% 42%;
+    --warning-foreground: 0 0% 100%;
+    --border: 270 10% 90%;
+    --input: 270 10% 86%;
+    --ring: 280 51% 46%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 270 12% 7%;
+    --foreground: 270 10% 95%;
+    --card: 270 12% 10%;
+    --card-foreground: 270 10% 95%;
+    --popover: 270 12% 10%;
+    --popover-foreground: 270 10% 95%;
+    --primary: 280 60% 72%;
+    --primary-foreground: 280 40% 12%;
+    --secondary: 270 10% 16%;
+    --secondary-foreground: 270 10% 92%;
+    --muted: 270 10% 15%;
+    --muted-foreground: 270 6% 64%;
+    --accent: 280 25% 18%;
+    --accent-foreground: 280 60% 85%;
+    --destructive: 0 65% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 50% 50%;
+    --success-foreground: 152 60% 8%;
+    --warning: 38 92% 58%;
+    --warning-foreground: 38 80% 10%;
+    --border: 270 10% 20%;
+    --input: 270 10% 24%;
+    --ring: 280 60% 72%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  /* iOS zoomt bei Schrift < 16px in Eingabefeldern – daher mindestens 16px */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  @media (min-width: 768px) {
+    input,
+    select,
+    textarea {
+      font-size: 14px;
+    }
+  }
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
