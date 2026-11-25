@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import './ops.css'
+import './ops.generated.css'
 import { ThemeProvider } from '@/components/ops/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { ServiceWorkerRegister } from '@/components/ops/service-worker-register'

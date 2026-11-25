@@ -5,6 +5,10 @@ const config: Config = {
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
+    // Die interne Plattform hat ihr eigenes Stylesheet (tailwind.ops.config.ts) – hier nicht mitbauen
+    '!./app/(ops)/**',
+    '!./components/ui/**',
+    '!./components/ops/**',
   ],
   theme: {
     extend: {

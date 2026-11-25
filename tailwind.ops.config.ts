@@ -8,6 +8,7 @@ const config: Config = {
     './app/(ops)/**/*.{ts,tsx}',
     './components/ui/**/*.{ts,tsx}',
     './components/ops/**/*.{ts,tsx}',
+    './components/Logo.tsx',
     './lib/ops/**/*.{ts,tsx}',
   ],
   theme: {
