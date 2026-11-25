@@ -14,8 +14,8 @@ export default async function EditJobPage({ params }: { params: { id: string } }
   await requireOffice()
   const supabase = createClient()
   const [{ data: job }, { data: assignments }, options, directory] = await Promise.all([
-    supabase.from('jobs').select('*').eq('id', params.id).maybeSingle(),
-    supabase.from('job_assignments').select('employee_id').eq('job_id', params.id),
+    supabase.from('auftraege').select('*').eq('id', params.id).maybeSingle(),
+    supabase.from('auftragszuweisungen').select('employee_id').eq('job_id', params.id),
     loadJobFormOptions(supabase),
     loadDirectory(supabase),
   ])

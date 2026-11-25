@@ -18,7 +18,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: { 
   const archived = searchParams.archiv === '1'
 
   let query = supabase
-    .from('customers')
+    .from('kunden')
     .select('id, customer_number, edison_customer_number, first_name, last_name, company_name, billing_postal_code, billing_city, phone, archived_at')
   query = archived ? query.not('archived_at', 'is', null) : query.is('archived_at', null)
   if (q) {

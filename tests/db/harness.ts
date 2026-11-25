@@ -76,20 +76,20 @@ export async function seedBase(db: Db) {
       ('${ids.admin}', 'admin@frey.test'), ('${ids.office}', 'buero@frey.test'),
       ('${ids.geselleUser}', 'jonas@frey.test'), ('${ids.otherUser}', 'lukas@frey.test'),
       ('${ids.noRoleUser}', 'neu@frey.test');
-    update public.profiles set roles = '{admin}' where id = '${ids.admin}';
-    update public.profiles set roles = '{office}' where id = '${ids.office}';
-    update public.profiles set roles = '{employee}' where id in ('${ids.geselleUser}', '${ids.otherUser}');
-    insert into public.employees (id, profile_id, employee_number, first_name, last_name, employment_role, start_date) values
+    update public.benutzerprofile set roles = '{admin}' where id = '${ids.admin}';
+    update public.benutzerprofile set roles = '{office}' where id = '${ids.office}';
+    update public.benutzerprofile set roles = '{employee}' where id in ('${ids.geselleUser}', '${ids.otherUser}');
+    insert into public.mitarbeiter (id, profile_id, employee_number, first_name, last_name, employment_role, start_date) values
       ('${ids.geselle}', '${ids.geselleUser}', '103', 'Jonas', 'Keller', 'geselle', '2020-09-01'),
       ('${ids.azubi}', null, '201', 'Lena', 'Schmid', 'auszubildender', '2024-09-01'),
       ('${ids.other}', '${ids.otherUser}', '104', 'Lukas', 'Brenner', 'geselle', '2019-03-01');
-    insert into public.customers (id, first_name, last_name, billing_street, billing_postal_code, billing_city, phone, email) values
+    insert into public.kunden (id, first_name, last_name, billing_street, billing_postal_code, billing_city, phone, email) values
       ('${ids.customerA}', 'Hans', 'Müller', 'Lindenweg 4', '89129', 'Langenau', '07345 12345', 'hans.mueller@example.de'),
       ('${ids.customerB}', 'Petra', 'Wagner', 'Hauptstraße 12', '89073', 'Ulm', '0731 998877', null);
-    insert into public.jobs (id, customer_id, title, category, start_date) values
+    insert into public.auftraege (id, customer_id, title, category, start_date) values
       ('${ids.jobA}', '${ids.customerA}', 'Waschtisch erneuern', 'sanitaer', '2026-11-01'),
       ('${ids.jobB}', '${ids.customerB}', 'Heizungswartung', 'wartung', '2026-11-01');
-    insert into public.job_assignments (job_id, employee_id) values
+    insert into public.auftragszuweisungen (job_id, employee_id) values
       ('${ids.jobA}', '${ids.geselle}'), ('${ids.jobB}', '${ids.other}');
   `)
 }

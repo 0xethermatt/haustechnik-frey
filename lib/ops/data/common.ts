@@ -4,7 +4,7 @@ import type { DirectoryEmployee } from '../domain/types'
 import { fullName } from '../utils'
 
 export async function loadDirectory(supabase: ServerSupabase) {
-  const { data } = await supabase.rpc('employee_directory')
+  const { data } = await supabase.rpc('mitarbeiter_verzeichnis')
   const list = (data ?? []) as DirectoryEmployee[]
   const byId = new Map(list.map((e) => [e.id, e]))
   const byProfile = new Map(list.filter((e) => e.profile_id).map((e) => [e.profile_id!, e]))
@@ -22,9 +22,9 @@ export type Directory = Awaited<ReturnType<typeof loadDirectory>>
 /** Auswahlliste der Aufträge (RLS begrenzt Mitarbeiter automatisch auf ihre Aufträge). */
 export async function loadJobOptions(supabase: ServerSupabase) {
   const { data } = await supabase
-    .from('jobs')
+    .from('auftraege')
     .select(
-      'id, job_number, title, status, category, start_date, customer:customers(id, customer_number, first_name, last_name, company_name), location:service_locations(street, postal_code, city)',
+      'id, job_number, title, status, category, start_date, customer:kunden(id, customer_number, first_name, last_name, company_name), location:einsatzorte(street, postal_code, city)',
     )
     .is('archived_at', null)
     .neq('status', 'abgerechnet')

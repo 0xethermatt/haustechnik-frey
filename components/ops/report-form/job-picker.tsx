@@ -429,7 +429,7 @@ function NewCustomerForm({
                   name: d.display_name,
                   place: [d.postal_code, d.city].filter(Boolean).join(' '),
                   limited: true,
-                  locations: d.service_locations,
+                  locations: d.einsatzorte,
                 })
               }
               className="flex w-full items-center justify-between gap-2 rounded-lg bg-background p-2.5 text-left text-sm active:bg-accent"

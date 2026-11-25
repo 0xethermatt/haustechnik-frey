@@ -17,7 +17,7 @@ export async function loadTimesheets(supabase: ServerSupabase, month: string, em
   const from = `${month}-01`
   const to = endOfMonth(from)
   let q = supabase
-    .from('employees')
+    .from('mitarbeiter')
     .select('id, first_name, last_name, employee_number, employment_role, start_date, end_date')
     .lte('start_date', to)
     .or(`end_date.is.null,end_date.gte.${from}`)

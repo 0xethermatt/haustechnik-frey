@@ -33,7 +33,7 @@ export async function inviteUser(input: unknown): Promise<ActionResult<{ id: str
   }
 
   const supabase = createClient()
-  const { error: accessError } = await supabase.rpc('admin_set_user_access', {
+  const { error: accessError } = await supabase.rpc('zugang_setzen', {
     p_user_id: data.user.id,
     p_roles: parsed.data.roles,
     p_is_active: true,
@@ -51,7 +51,7 @@ export async function setUserAccess(input: unknown): Promise<ActionResult<null>>
   const parsed = userAccessSchema.safeParse(input)
   if (!parsed.success) return invalid(parsed.error)
   const supabase = createClient()
-  const { error } = await supabase.rpc('admin_set_user_access', {
+  const { error } = await supabase.rpc('zugang_setzen', {
     p_user_id: parsed.data.user_id,
     p_roles: parsed.data.roles,
     p_is_active: parsed.data.is_active,

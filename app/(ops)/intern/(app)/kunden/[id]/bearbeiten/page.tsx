@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: 'Kunde bearbeiten' }
 export default async function EditCustomerPage({ params }: { params: { id: string } }) {
   await requireOffice()
   const supabase = createClient()
-  const { data: c } = await supabase.from('customers').select('*').eq('id', params.id).maybeSingle()
+  const { data: c } = await supabase.from('kunden').select('*').eq('id', params.id).maybeSingle()
   if (!c) notFound()
   return (
     <>

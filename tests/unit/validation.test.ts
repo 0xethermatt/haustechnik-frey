@@ -64,9 +64,9 @@ describe('Änderungsverlauf', () => {
   it('fasst Korrekturen lesbar zusammen', () => {
     const events = summarizeReportAudit(
       [
-        { id: 1, table_name: 'work_reports', record_id: 'r', action: 'INSERT', actor_id: null, reason: null, old_data: null, new_data: { status: 'entwurf' }, changed_at: '' },
-        { id: 2, table_name: 'work_reports', record_id: 'r', action: 'UPDATE', actor_id: null, reason: null, old_data: { status: 'eingereicht' }, new_data: { status: 'freigegeben' }, changed_at: '' },
-        { id: 3, table_name: 'time_entries', record_id: 't', action: 'UPDATE', actor_id: null, reason: 'Rücksprache', old_data: { employee_id: 'e', duration_minutes: 150 }, new_data: { employee_id: 'e', duration_minutes: 135 }, changed_at: '' },
+        { id: 1, table_name: 'arbeitsberichte', record_id: 'r', action: 'INSERT', actor_id: null, reason: null, old_data: null, new_data: { status: 'entwurf' }, changed_at: '' },
+        { id: 2, table_name: 'arbeitsberichte', record_id: 'r', action: 'UPDATE', actor_id: null, reason: null, old_data: { status: 'eingereicht' }, new_data: { status: 'freigegeben' }, changed_at: '' },
+        { id: 3, table_name: 'zeiteintraege', record_id: 't', action: 'UPDATE', actor_id: null, reason: 'Rücksprache', old_data: { employee_id: 'e', duration_minutes: 150 }, new_data: { employee_id: 'e', duration_minutes: 135 }, changed_at: '' },
       ],
       () => 'Jonas Keller',
     )

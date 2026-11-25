@@ -31,7 +31,7 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
 
   let history: ReturnType<typeof summarizeReportAudit> = []
   if (ctx.isOffice) {
-    const { data: links } = await supabase.from('work_report_time_entries').select('time_entry_id').eq('work_report_id', report.id)
+    const { data: links } = await supabase.from('arbeitsbericht_zeiteintraege').select('time_entry_id').eq('work_report_id', report.id)
     const entryIds = (links ?? []).map((l) => l.time_entry_id)
     const filters = [
       `record_id.eq.${report.id}`,
@@ -40,9 +40,9 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
       ...(entryIds.length ? [`record_id.in.(${entryIds.join(',')})`] : []),
     ]
     const { data: audit } = await supabase
-      .from('audit_logs')
+      .from('aenderungsprotokoll')
       .select('id, table_name, record_id, action, actor_id, reason, old_data, new_data, changed_at')
-      .in('table_name', ['work_reports', 'time_entries', 'work_report_materials', 'work_report_activities'])
+      .in('table_name', ['arbeitsberichte', 'zeiteintraege', 'arbeitsbericht_material', 'arbeitsbericht_taetigkeiten'])
       .or(filters.join(','))
       .order('changed_at', { ascending: false })
       .limit(100)

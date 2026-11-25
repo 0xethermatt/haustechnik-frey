@@ -93,13 +93,13 @@ export function toApprovedWorkRecord(r: Row): ApprovedWorkRecord {
 /** Freigegebene Berichte eines Zeitraums (RLS: nur Büro/Admin sehen alle). */
 export async function loadApprovedWorkRecords(supabase: ServerSupabase, range: { from: string; to: string }) {
   const { data, error } = await supabase
-    .from('work_reports')
+    .from('arbeitsberichte')
     .select(
       `id, report_number, report_date, reviewed_at,
-       job:jobs!inner(id, job_number, title, category, customer:customers!inner(id, customer_number, edison_customer_number, first_name, last_name, company_name)),
-       activities:work_report_activities(position, description),
-       materials:work_report_materials(position, description, quantity, unit, manufacturer, article_number, supplier_article_number, catalog_article_id),
-       time_links:work_report_time_entries(employee_id, time_entry_id, time_entry:time_entries!inner(duration_minutes, billable))`,
+       job:auftraege!inner(id, job_number, title, category, customer:kunden!inner(id, customer_number, edison_customer_number, first_name, last_name, company_name)),
+       activities:arbeitsbericht_taetigkeiten(position, description),
+       materials:arbeitsbericht_material(position, description, quantity, unit, manufacturer, article_number, supplier_article_number, catalog_article_id),
+       time_links:arbeitsbericht_zeiteintraege(employee_id, time_entry_id, time_entry:zeiteintraege!inner(duration_minutes, billable))`,
     )
     .eq('status', 'freigegeben')
     .gte('report_date', range.from)

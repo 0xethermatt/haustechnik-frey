@@ -37,11 +37,11 @@ export default async function JobsPage({ searchParams }: { searchParams: { statu
   const q = (searchParams.q ?? '').trim().slice(0, 100)
 
   let query = supabase
-    .from('jobs')
+    .from('auftraege')
     .select(
       `id, job_number, title, status, category, start_date,
-       customer:customers(first_name, last_name, company_name), location:service_locations(city),
-       assignments:job_assignments${employeeId ? '!inner' : ''}(employee_id)`,
+       customer:kunden(first_name, last_name, company_name), location:einsatzorte(city),
+       assignments:auftragszuweisungen${employeeId ? '!inner' : ''}(employee_id)`,
     )
     .is('archived_at', null)
   if (status) query = query.eq('status', status)

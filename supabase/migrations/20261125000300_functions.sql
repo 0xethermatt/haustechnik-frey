@@ -1,7 +1,7 @@
 -- Fachfunktionen (RPC). Alle Schreibvorgänge an Arbeitsberichten laufen hierüber,
 -- damit Bericht, Positionen und Zeiteinträge immer in EINER Transaktion konsistent bleiben.
 
-create or replace function public.berlin_today()
+create or replace function public.berlin_heute()
 returns date
 language sql
 stable
@@ -10,7 +10,7 @@ as $$
   select (now() at time zone 'Europe/Berlin')::date;
 $$;
 
-create or replace function public.raise_app_error(p_code text, p_message text)
+create or replace function public.app_fehler(p_code text, p_message text)
 returns void
 language plpgsql
 set search_path = ''
@@ -21,11 +21,11 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
--- save_work_report: Anlegen/Ändern (optional Einreichen) in einem Schritt.
+-- arbeitsbericht_speichern: Anlegen/Ändern (optional Einreichen) in einem Schritt.
 -- Idempotent über mutation_id, konfliktsicher über expected_version.
 -- Zeiteinträge werden pro Teilnehmer aktualisiert statt neu angelegt.
 -- ---------------------------------------------------------------------------
-create or replace function public.save_work_report(p jsonb)
+create or replace function public.arbeitsbericht_speichern(p jsonb)
 returns jsonb
 language plpgsql
 security definer
@@ -33,8 +33,8 @@ set search_path = ''
 as $$
 declare
   v_uid uuid := auth.uid();
-  v_is_office boolean := public.is_office();
-  v_employee uuid := public.current_employee_id();
+  v_is_office boolean := public.ist_buero();
+  v_employee uuid := public.aktuelle_mitarbeiter_id();
   v_id uuid := (p ->> 'id')::uuid;
   v_mutation uuid := (p ->> 'mutation_id')::uuid;
   v_expected integer := (p ->> 'expected_version')::integer;
@@ -45,8 +45,8 @@ declare
   v_activities jsonb := coalesce(p -> 'activities', '[]'::jsonb);
   v_materials jsonb := coalesce(p -> 'materials', '[]'::jsonb);
   v_participants jsonb := coalesce(p -> 'participants', '[]'::jsonb);
-  v_report public.work_reports%rowtype;
-  v_job public.jobs%rowtype;
+  v_report public.arbeitsberichte%rowtype;
+  v_job public.auftraege%rowtype;
   v_exists boolean;
   v_item jsonb;
   v_pos integer;
@@ -56,26 +56,26 @@ declare
   v_break integer;
   v_duration integer;
   v_participant_ids uuid[];
-  v_new_status public.report_status;
+  v_new_status public.berichtsstatus;
 begin
-  if v_uid is null or not public.is_member() then
-    perform public.raise_app_error('FORBIDDEN', 'Nicht angemeldet oder keine Berechtigung.');
+  if v_uid is null or not public.ist_mitglied() then
+    perform public.app_fehler('FORBIDDEN', 'Nicht angemeldet oder keine Berechtigung.');
   end if;
   if not v_is_office and v_employee is null then
-    perform public.raise_app_error('FORBIDDEN', 'Kein aktiver Mitarbeiter mit diesem Konto verknüpft.');
+    perform public.app_fehler('FORBIDDEN', 'Kein aktiver Mitarbeiter mit diesem Konto verknüpft.');
   end if;
   if v_id is null or v_mutation is null or v_job_id is null or v_date is null then
-    perform public.raise_app_error('INVALID', 'Bericht-ID, Mutations-ID, Auftrag und Datum sind erforderlich.');
+    perform public.app_fehler('INVALID', 'Bericht-ID, Mutations-ID, Auftrag und Datum sind erforderlich.');
   end if;
   if jsonb_typeof(v_activities) <> 'array' or jsonb_typeof(v_materials) <> 'array'
      or jsonb_typeof(v_participants) <> 'array' then
-    perform public.raise_app_error('INVALID', 'Ungültiges Datenformat.');
+    perform public.app_fehler('INVALID', 'Ungültiges Datenformat.');
   end if;
-  if v_date > public.berlin_today() then
-    perform public.raise_app_error('INVALID', 'Das Berichtsdatum darf nicht in der Zukunft liegen.');
+  if v_date > public.berlin_heute() then
+    perform public.app_fehler('INVALID', 'Das Berichtsdatum darf nicht in der Zukunft liegen.');
   end if;
 
-  select * into v_report from public.work_reports where id = v_id for update;
+  select * into v_report from public.arbeitsberichte where id = v_id for update;
   v_exists := found;
 
   if v_exists then
@@ -85,48 +85,48 @@ begin
         'status', v_report.status, 'report_number', v_report.report_number, 'replayed', true);
     end if;
     if v_expected is null or v_expected <> v_report.version then
-      perform public.raise_app_error('VERSION_CONFLICT',
+      perform public.app_fehler('VERSION_CONFLICT',
         'Der Bericht wurde zwischenzeitlich geändert. Bitte neu laden.');
     end if;
     if v_is_office then
       if v_report.status = 'freigegeben' and (v_reason is null or length(v_reason) < 5) then
-        perform public.raise_app_error('REASON_REQUIRED',
+        perform public.app_fehler('REASON_REQUIRED',
           'Änderungen an freigegebenen Berichten benötigen eine Begründung.');
       end if;
     else
       if v_report.created_by <> v_uid then
-        perform public.raise_app_error('FORBIDDEN', 'Nur der Ersteller kann diesen Bericht bearbeiten.');
+        perform public.app_fehler('FORBIDDEN', 'Nur der Ersteller kann diesen Bericht bearbeiten.');
       end if;
       if v_report.status not in ('entwurf', 'korrektur_erforderlich') then
-        perform public.raise_app_error('LOCKED', 'Eingereichte Berichte können nicht mehr geändert werden.');
+        perform public.app_fehler('LOCKED', 'Eingereichte Berichte können nicht mehr geändert werden.');
       end if;
     end if;
   end if;
 
-  select * into v_job from public.jobs where id = v_job_id;
+  select * into v_job from public.auftraege where id = v_job_id;
   if not found then
-    perform public.raise_app_error('INVALID', 'Auftrag nicht gefunden.');
+    perform public.app_fehler('INVALID', 'Auftrag nicht gefunden.');
   end if;
-  if not public.can_view_job(v_job_id) then
-    perform public.raise_app_error('FORBIDDEN', 'Kein Zugriff auf diesen Auftrag.');
+  if not public.darf_auftrag_sehen(v_job_id) then
+    perform public.app_fehler('FORBIDDEN', 'Kein Zugriff auf diesen Auftrag.');
   end if;
   if v_job.archived_at is not null or v_job.status = 'abgerechnet' then
     if not (v_exists and v_report.job_id = v_job_id and v_is_office) then
-      perform public.raise_app_error('INVALID', 'Für diesen Auftrag können keine Berichte mehr erfasst werden.');
+      perform public.app_fehler('INVALID', 'Für diesen Auftrag können keine Berichte mehr erfasst werden.');
     end if;
   end if;
   if not v_is_office and v_job.status = 'abrechnungsbereit' then
-    perform public.raise_app_error('INVALID', 'Auftrag ist bereits abrechnungsbereit. Bitte Büro kontaktieren.');
+    perform public.app_fehler('INVALID', 'Auftrag ist bereits abrechnungsbereit. Bitte Büro kontaktieren.');
   end if;
 
   perform set_config('app.change_reason', coalesce(v_reason, ''), true);
 
   if v_submit then
     if jsonb_array_length(v_activities) = 0 then
-      perform public.raise_app_error('INVALID', 'Mindestens eine ausgeführte Arbeit ist erforderlich.');
+      perform public.app_fehler('INVALID', 'Mindestens eine ausgeführte Arbeit ist erforderlich.');
     end if;
     if jsonb_array_length(v_participants) = 0 then
-      perform public.raise_app_error('INVALID', 'Mindestens ein Mitarbeiter mit Arbeitszeit ist erforderlich.');
+      perform public.app_fehler('INVALID', 'Mindestens ein Mitarbeiter mit Arbeitszeit ist erforderlich.');
     end if;
   end if;
 
@@ -140,7 +140,7 @@ begin
   end if;
 
   if v_exists then
-    update public.work_reports set
+    update public.arbeitsberichte set
       job_id = v_job_id,
       report_date = v_date,
       internal_notes = nullif(trim(coalesce(p ->> 'internal_notes', '')), ''),
@@ -152,7 +152,7 @@ begin
     where id = v_id
     returning * into v_report;
   else
-    insert into public.work_reports (id, job_id, report_date, status, internal_notes, created_by,
+    insert into public.arbeitsberichte (id, job_id, report_date, status, internal_notes, created_by,
       submitted_at, submitted_by, last_mutation_id)
     values (v_id, v_job_id, v_date, v_new_status, nullif(trim(coalesce(p ->> 'internal_notes', '')), ''), v_uid,
       case when v_new_status = 'eingereicht' then now() end,
@@ -162,7 +162,7 @@ begin
   end if;
 
   -- Tätigkeiten (Upsert nach ID, entfernte Positionen löschen)
-  delete from public.work_report_activities a
+  delete from public.arbeitsbericht_taetigkeiten a
   where a.work_report_id = v_id
     and a.id not in (
       select (x ->> 'id')::uuid from jsonb_array_elements(v_activities) x where x ->> 'id' is not null
@@ -170,24 +170,24 @@ begin
   v_pos := 0;
   for v_item in select * from jsonb_array_elements(v_activities) loop
     if length(trim(coalesce(v_item ->> 'description', ''))) = 0 then
-      perform public.raise_app_error('INVALID', 'Leere Tätigkeitsbeschreibung.');
+      perform public.app_fehler('INVALID', 'Leere Tätigkeitsbeschreibung.');
     end if;
-    insert into public.work_report_activities (id, work_report_id, position, description)
+    insert into public.arbeitsbericht_taetigkeiten (id, work_report_id, position, description)
     values (coalesce((v_item ->> 'id')::uuid, gen_random_uuid()), v_id, v_pos, trim(v_item ->> 'description'))
     on conflict (id) do update set position = excluded.position, description = excluded.description
-      where public.work_report_activities.work_report_id = v_id;
+      where public.arbeitsbericht_taetigkeiten.work_report_id = v_id;
     v_pos := v_pos + 1;
   end loop;
 
   -- Material
-  delete from public.work_report_materials m
+  delete from public.arbeitsbericht_material m
   where m.work_report_id = v_id
     and m.id not in (
       select (x ->> 'id')::uuid from jsonb_array_elements(v_materials) x where x ->> 'id' is not null
     );
   v_pos := 0;
   for v_item in select * from jsonb_array_elements(v_materials) loop
-    insert into public.work_report_materials (id, work_report_id, position, catalog_article_id, description,
+    insert into public.arbeitsbericht_material (id, work_report_id, position, catalog_article_id, description,
       quantity, unit, manufacturer, article_number, supplier_article_number, supplier_reference)
     values (
       coalesce((v_item ->> 'id')::uuid, gen_random_uuid()), v_id, v_pos,
@@ -205,7 +205,7 @@ begin
       description = excluded.description, quantity = excluded.quantity, unit = excluded.unit,
       manufacturer = excluded.manufacturer, article_number = excluded.article_number,
       supplier_article_number = excluded.supplier_article_number, supplier_reference = excluded.supplier_reference
-      where public.work_report_materials.work_report_id = v_id;
+      where public.arbeitsbericht_material.work_report_id = v_id;
     v_pos := v_pos + 1;
   end loop;
 
@@ -214,25 +214,25 @@ begin
   from jsonb_array_elements(v_participants) x;
 
   if cardinality(v_participant_ids) <> (select count(distinct u) from unnest(v_participant_ids) u) then
-    perform public.raise_app_error('INVALID', 'Ein Mitarbeiter ist mehrfach eingetragen.');
+    perform public.app_fehler('INVALID', 'Ein Mitarbeiter ist mehrfach eingetragen.');
   end if;
 
   -- Entfernte Teilnehmer: Verknüpfung und Zeiteintrag löschen
   with removed as (
-    delete from public.work_report_time_entries l
+    delete from public.arbeitsbericht_zeiteintraege l
     where l.work_report_id = v_id and not (l.employee_id = any (v_participant_ids))
     returning l.time_entry_id
   )
-  delete from public.time_entries t using removed r where t.id = r.time_entry_id;
+  delete from public.zeiteintraege t using removed r where t.id = r.time_entry_id;
 
   for v_item in select * from jsonb_array_elements(v_participants) loop
     if not exists (
-      select 1 from public.employees e where e.id = (v_item ->> 'employee_id')::uuid and e.is_active
+      select 1 from public.mitarbeiter e where e.id = (v_item ->> 'employee_id')::uuid and e.is_active
     ) and not exists (
-      select 1 from public.work_report_time_entries l
+      select 1 from public.arbeitsbericht_zeiteintraege l
       where l.work_report_id = v_id and l.employee_id = (v_item ->> 'employee_id')::uuid
     ) then
-      perform public.raise_app_error('INVALID', 'Unbekannter oder inaktiver Mitarbeiter.');
+      perform public.app_fehler('INVALID', 'Unbekannter oder inaktiver Mitarbeiter.');
     end if;
 
     v_started := (v_item ->> 'started_at')::timestamptz;
@@ -246,32 +246,32 @@ begin
       v_duration := (v_item ->> 'duration_minutes')::integer;
     end if;
     if v_duration is null or v_duration <= 0 or v_duration > 1440 then
-      perform public.raise_app_error('INVALID', 'Ungültige Arbeitszeit.');
+      perform public.app_fehler('INVALID', 'Ungültige Arbeitszeit.');
     end if;
 
     select l.time_entry_id into v_entry_id
-    from public.work_report_time_entries l
+    from public.arbeitsbericht_zeiteintraege l
     where l.work_report_id = v_id and l.employee_id = (v_item ->> 'employee_id')::uuid;
 
     if v_entry_id is not null then
-      update public.time_entries set
+      update public.zeiteintraege set
         entry_date = v_date, entry_type = 'kundenarbeit', job_id = v_job_id,
         started_at = v_started, ended_at = v_ended, break_minutes = v_break,
         duration_minutes = v_duration, billable = true
       where id = v_entry_id;
     else
-      insert into public.time_entries (employee_id, entry_date, entry_type, job_id, started_at, ended_at,
+      insert into public.zeiteintraege (employee_id, entry_date, entry_type, job_id, started_at, ended_at,
         break_minutes, duration_minutes, billable, created_by)
       values ((v_item ->> 'employee_id')::uuid, v_date, 'kundenarbeit', v_job_id, v_started, v_ended,
         v_break, v_duration, true, v_uid)
       returning id into v_entry_id;
-      insert into public.work_report_time_entries (work_report_id, time_entry_id, employee_id)
+      insert into public.arbeitsbericht_zeiteintraege (work_report_id, time_entry_id, employee_id)
       values (v_id, v_entry_id, (v_item ->> 'employee_id')::uuid);
     end if;
   end loop;
 
   if v_job.status = 'geplant' then
-    update public.jobs set status = 'in_bearbeitung' where id = v_job_id;
+    update public.auftraege set status = 'in_bearbeitung' where id = v_job_id;
   end if;
 
   return jsonb_build_object('id', v_report.id, 'version', v_report.version,
@@ -282,7 +282,7 @@ $$;
 -- ---------------------------------------------------------------------------
 -- Prüfung durch das Büro
 -- ---------------------------------------------------------------------------
-create or replace function public.review_work_report(
+create or replace function public.arbeitsbericht_pruefen(
   p_report_id uuid,
   p_expected_version integer,
   p_decision text,
@@ -294,42 +294,42 @@ security definer
 set search_path = ''
 as $$
 declare
-  v_report public.work_reports%rowtype;
+  v_report public.arbeitsberichte%rowtype;
   v_comment text := nullif(trim(coalesce(p_comment, '')), '');
 begin
-  if not public.is_office() then
-    perform public.raise_app_error('FORBIDDEN', 'Nur Büro oder Admin dürfen Berichte prüfen.');
+  if not public.ist_buero() then
+    perform public.app_fehler('FORBIDDEN', 'Nur Büro oder Admin dürfen Berichte prüfen.');
   end if;
 
-  select * into v_report from public.work_reports where id = p_report_id for update;
+  select * into v_report from public.arbeitsberichte where id = p_report_id for update;
   if not found then
-    perform public.raise_app_error('NOT_FOUND', 'Bericht nicht gefunden.');
+    perform public.app_fehler('NOT_FOUND', 'Bericht nicht gefunden.');
   end if;
   if v_report.version <> p_expected_version then
-    perform public.raise_app_error('VERSION_CONFLICT', 'Der Bericht wurde zwischenzeitlich geändert. Bitte neu laden.');
+    perform public.app_fehler('VERSION_CONFLICT', 'Der Bericht wurde zwischenzeitlich geändert. Bitte neu laden.');
   end if;
 
   if p_decision = 'approve' then
     if v_report.status <> 'eingereicht' then
-      perform public.raise_app_error('INVALID_STATE', 'Nur eingereichte Berichte können freigegeben werden.');
+      perform public.app_fehler('INVALID_STATE', 'Nur eingereichte Berichte können freigegeben werden.');
     end if;
     perform set_config('app.change_reason', coalesce(v_comment, ''), true);
-    update public.work_reports set status = 'freigegeben', reviewed_at = now(), reviewed_by = auth.uid(),
+    update public.arbeitsberichte set status = 'freigegeben', reviewed_at = now(), reviewed_by = auth.uid(),
       review_comment = v_comment, version = version + 1
     where id = p_report_id returning * into v_report;
   elsif p_decision = 'request_correction' then
     if v_report.status not in ('eingereicht', 'freigegeben') then
-      perform public.raise_app_error('INVALID_STATE', 'Korrektur kann nur für eingereichte oder freigegebene Berichte angefordert werden.');
+      perform public.app_fehler('INVALID_STATE', 'Korrektur kann nur für eingereichte oder freigegebene Berichte angefordert werden.');
     end if;
     if v_comment is null then
-      perform public.raise_app_error('REASON_REQUIRED', 'Bitte angeben, was korrigiert werden soll.');
+      perform public.app_fehler('REASON_REQUIRED', 'Bitte angeben, was korrigiert werden soll.');
     end if;
     perform set_config('app.change_reason', v_comment, true);
-    update public.work_reports set status = 'korrektur_erforderlich', reviewed_at = now(), reviewed_by = auth.uid(),
+    update public.arbeitsberichte set status = 'korrektur_erforderlich', reviewed_at = now(), reviewed_by = auth.uid(),
       review_comment = v_comment, version = version + 1
     where id = p_report_id returning * into v_report;
   else
-    perform public.raise_app_error('INVALID', 'Unbekannte Entscheidung.');
+    perform public.app_fehler('INVALID', 'Unbekannte Entscheidung.');
   end if;
 
   return jsonb_build_object('id', v_report.id, 'version', v_report.version, 'status', v_report.status);
@@ -339,42 +339,42 @@ $$;
 -- ---------------------------------------------------------------------------
 -- Entwurf verwerfen (inkl. zugehöriger Zeiteinträge)
 -- ---------------------------------------------------------------------------
-create or replace function public.delete_work_report_draft(p_report_id uuid, p_expected_version integer)
+create or replace function public.arbeitsbericht_entwurf_loeschen(p_report_id uuid, p_expected_version integer)
 returns void
 language plpgsql
 security definer
 set search_path = ''
 as $$
 declare
-  v_report public.work_reports%rowtype;
+  v_report public.arbeitsberichte%rowtype;
 begin
-  select * into v_report from public.work_reports where id = p_report_id for update;
+  select * into v_report from public.arbeitsberichte where id = p_report_id for update;
   if not found then
-    perform public.raise_app_error('NOT_FOUND', 'Bericht nicht gefunden.');
+    perform public.app_fehler('NOT_FOUND', 'Bericht nicht gefunden.');
   end if;
-  if not (public.is_office() or (v_report.created_by = auth.uid() and public.is_member())) then
-    perform public.raise_app_error('FORBIDDEN', 'Keine Berechtigung.');
+  if not (public.ist_buero() or (v_report.created_by = auth.uid() and public.ist_mitglied())) then
+    perform public.app_fehler('FORBIDDEN', 'Keine Berechtigung.');
   end if;
   if v_report.status <> 'entwurf' then
-    perform public.raise_app_error('LOCKED', 'Nur Entwürfe können verworfen werden.');
+    perform public.app_fehler('LOCKED', 'Nur Entwürfe können verworfen werden.');
   end if;
   if v_report.version <> p_expected_version then
-    perform public.raise_app_error('VERSION_CONFLICT', 'Der Bericht wurde zwischenzeitlich geändert.');
+    perform public.app_fehler('VERSION_CONFLICT', 'Der Bericht wurde zwischenzeitlich geändert.');
   end if;
 
   with removed as (
-    delete from public.work_report_time_entries l where l.work_report_id = p_report_id
+    delete from public.arbeitsbericht_zeiteintraege l where l.work_report_id = p_report_id
     returning l.time_entry_id
   )
-  delete from public.time_entries t using removed r where t.id = r.time_entry_id;
-  delete from public.work_reports where id = p_report_id;
+  delete from public.zeiteintraege t using removed r where t.id = r.time_entry_id;
+  delete from public.arbeitsberichte where id = p_report_id;
 end;
 $$;
 
 -- ---------------------------------------------------------------------------
 -- Dublettenprüfung Kunden (liefert bewusst nur minimale Daten)
 -- ---------------------------------------------------------------------------
-create or replace function public.find_customer_duplicates(
+create or replace function public.kunden_dubletten_finden(
   p_first_name text default null,
   p_last_name text default null,
   p_company_name text default null,
@@ -390,7 +390,7 @@ returns table (
   city text,
   match_reason text,
   score real,
-  service_locations jsonb
+  einsatzorte jsonb
 )
 language sql
 stable
@@ -415,7 +415,7 @@ as $$
         when i.last_name <> '' and extensions.similarity(
                lower(trim(coalesce(c.first_name, '') || ' ' || coalesce(c.last_name, ''))), i.person) >= 0.55
              and (i.postal_code is null or c.billing_postal_code = i.postal_code
-                  or exists (select 1 from public.service_locations s where s.customer_id = c.id and s.postal_code = i.postal_code))
+                  or exists (select 1 from public.einsatzorte s where s.customer_id = c.id and s.postal_code = i.postal_code))
           then 'Name und PLZ'
         when i.last_name <> '' and lower(coalesce(c.last_name, '')) = i.last_name and i.postal_code is not null
              and c.billing_postal_code = i.postal_code then 'Nachname und PLZ'
@@ -424,7 +424,7 @@ as $$
         extensions.similarity(lower(trim(coalesce(c.first_name, '') || ' ' || coalesce(c.last_name, ''))), i.person),
         extensions.similarity(lower(coalesce(c.company_name, '')), i.company)
       ) as sim
-    from public.customers c, input i
+    from public.kunden c, input i
     where c.archived_at is null
   )
   select s.id, s.customer_number,
@@ -433,10 +433,10 @@ as $$
     coalesce((
       select jsonb_agg(jsonb_build_object('id', l.id, 'label', l.label, 'street', l.street,
         'postal_code', l.postal_code, 'city', l.city) order by l.created_at)
-      from public.service_locations l where l.customer_id = s.id and l.archived_at is null
+      from public.einsatzorte l where l.customer_id = s.id and l.archived_at is null
     ), '[]'::jsonb)
   from scored s
-  where s.reason is not null and public.is_member()
+  where s.reason is not null and public.ist_mitglied()
   order by (s.reason in ('Telefonnummer', 'E-Mail')) desc, s.sim desc
   limit 5;
 $$;
@@ -444,9 +444,9 @@ $$;
 -- ---------------------------------------------------------------------------
 -- Benutzerverwaltung (nur Admin). Einladung erfolgt serverseitig über die Auth-API.
 -- ---------------------------------------------------------------------------
-create or replace function public.admin_set_user_access(
+create or replace function public.zugang_setzen(
   p_user_id uuid,
-  p_roles public.app_role[],
+  p_roles public.app_rolle[],
   p_is_active boolean,
   p_display_name text default null,
   p_employee_id uuid default null
@@ -457,29 +457,29 @@ security definer
 set search_path = ''
 as $$
 begin
-  if not public.is_admin() then
-    perform public.raise_app_error('FORBIDDEN', 'Nur Administratoren dürfen Zugänge verwalten.');
+  if not public.ist_admin() then
+    perform public.app_fehler('FORBIDDEN', 'Nur Administratoren dürfen Zugänge verwalten.');
   end if;
-  if not exists (select 1 from public.profiles where id = p_user_id) then
-    perform public.raise_app_error('NOT_FOUND', 'Benutzer nicht gefunden.');
+  if not exists (select 1 from public.benutzerprofile where id = p_user_id) then
+    perform public.app_fehler('NOT_FOUND', 'Benutzer nicht gefunden.');
   end if;
 
-  update public.profiles set
+  update public.benutzerprofile set
     roles = (select coalesce(array_agg(distinct r), '{}') from unnest(p_roles) r),
     is_active = p_is_active,
     display_name = coalesce(nullif(trim(p_display_name), ''), display_name)
   where id = p_user_id;
 
   if not exists (
-    select 1 from public.profiles where is_active and 'admin' = any (roles)
+    select 1 from public.benutzerprofile where is_active and 'admin' = any (roles)
   ) then
-    perform public.raise_app_error('INVALID', 'Es muss mindestens ein aktiver Administrator bestehen bleiben.');
+    perform public.app_fehler('INVALID', 'Es muss mindestens ein aktiver Administrator bestehen bleiben.');
   end if;
 
-  update public.employees set profile_id = null
+  update public.mitarbeiter set profile_id = null
   where profile_id = p_user_id and (p_employee_id is null or id <> p_employee_id);
   if p_employee_id is not null then
-    update public.employees set profile_id = p_user_id where id = p_employee_id;
+    update public.mitarbeiter set profile_id = p_user_id where id = p_employee_id;
   end if;
 end;
 $$;
@@ -487,17 +487,17 @@ $$;
 revoke execute on all functions in schema public from public, anon;
 
 grant execute on function
-  public.berlin_today(),
-  public.save_work_report(jsonb),
-  public.review_work_report(uuid, integer, text, text),
-  public.delete_work_report_draft(uuid, integer),
-  public.find_customer_duplicates(text, text, text, text, text, text),
-  public.admin_set_user_access(uuid, public.app_role[], boolean, text, uuid)
+  public.berlin_heute(),
+  public.arbeitsbericht_speichern(jsonb),
+  public.arbeitsbericht_pruefen(uuid, integer, text, text),
+  public.arbeitsbericht_entwurf_loeschen(uuid, integer),
+  public.kunden_dubletten_finden(text, text, text, text, text, text),
+  public.zugang_setzen(uuid, public.app_rolle[], boolean, text, uuid)
   to authenticated;
 
 -- Sichtbarkeits-Helfer aus der RLS-Migration wieder für angemeldete Benutzer freigeben.
 grant execute on function
-  public.has_role(public.app_role), public.is_admin(), public.is_office(), public.is_member(),
-  public.current_employee_id(), public.can_view_job(uuid), public.can_view_customer(uuid),
-  public.can_view_report(uuid), public.customer_is_active(uuid), public.employee_directory()
+  public.hat_rolle(public.app_rolle), public.ist_admin(), public.ist_buero(), public.ist_mitglied(),
+  public.aktuelle_mitarbeiter_id(), public.darf_auftrag_sehen(uuid), public.darf_kunde_sehen(uuid),
+  public.darf_bericht_sehen(uuid), public.kunde_ist_aktiv(uuid), public.mitarbeiter_verzeichnis()
   to authenticated;

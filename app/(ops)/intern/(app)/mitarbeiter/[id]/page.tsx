@@ -20,9 +20,9 @@ export default async function EmployeePage({ params }: { params: { id: string } 
   const supabase = createClient()
   const today = berlinToday()
   const [{ data }, { data: absences }] = await Promise.all([
-    supabase.from('employees').select('*').eq('id', params.id).maybeSingle(),
+    supabase.from('mitarbeiter').select('*').eq('id', params.id).maybeSingle(),
     supabase
-      .from('employee_absences')
+      .from('fehlzeiten')
       .select('id, absence_type, start_date, end_date, half_day, note')
       .eq('employee_id', params.id)
       .gte('end_date', addDays(today, -90))
@@ -30,7 +30,7 @@ export default async function EmployeePage({ params }: { params: { id: string } 
   ])
   if (!data) notFound()
   const { data: profile } = data.profile_id
-    ? await supabase.from('profiles').select('email').eq('id', data.profile_id).maybeSingle()
+    ? await supabase.from('benutzerprofile').select('email').eq('id', data.profile_id).maybeSingle()
     : { data: null }
   const e = data as Employee
 

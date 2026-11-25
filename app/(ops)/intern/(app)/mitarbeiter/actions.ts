@@ -13,12 +13,12 @@ export async function saveEmployee(id: string | null, input: unknown): Promise<A
   if (!parsed.success) return invalid(parsed.error)
   const supabase = createClient()
   if (id) {
-    const { error } = await supabase.from('employees').update(parsed.data).eq('id', id)
+    const { error } = await supabase.from('mitarbeiter').update(parsed.data).eq('id', id)
     if (error) return fromDbError(error)
     revalidatePath('/intern', 'layout')
     return ok({ id })
   }
-  const { data, error } = await supabase.from('employees').insert(parsed.data).select('id').single()
+  const { data, error } = await supabase.from('mitarbeiter').insert(parsed.data).select('id').single()
   if (error) return fromDbError(error)
   revalidatePath('/intern', 'layout')
   return ok({ id: data.id })

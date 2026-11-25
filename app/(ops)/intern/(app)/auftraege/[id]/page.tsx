@@ -24,9 +24,9 @@ export default async function JobPage({ params }: { params: { id: string } }) {
   const ctx = await requireSession()
   const supabase = createClient()
   const { data: job } = await supabase
-    .from('jobs')
+    .from('auftraege')
     .select(
-      '*, customer:customers(id, first_name, last_name, company_name, phone), location:service_locations(street, postal_code, city, label, access_notes), assignments:job_assignments(employee_id)',
+      '*, customer:kunden(id, first_name, last_name, company_name, phone), location:einsatzorte(street, postal_code, city, label, access_notes), assignments:auftragszuweisungen(employee_id)',
     )
     .eq('id', params.id)
     .maybeSingle()
@@ -36,12 +36,12 @@ export default async function JobPage({ params }: { params: { id: string } }) {
     loadDirectory(supabase),
     loadReports(supabase, { jobId: job.id, limit: 500 }),
     supabase
-      .from('time_entries')
+      .from('zeiteintraege')
       .select('id, employee_id, entry_date, entry_type, started_at, ended_at, break_minutes, duration_minutes, billable')
       .eq('job_id', job.id),
     supabase
-      .from('work_report_materials')
-      .select('description, quantity, unit, article_number, report:work_reports!inner(job_id, status)')
+      .from('arbeitsbericht_material')
+      .select('description, quantity, unit, article_number, report:arbeitsberichte!inner(job_id, status)')
       .eq('report.job_id', job.id),
   ])
 

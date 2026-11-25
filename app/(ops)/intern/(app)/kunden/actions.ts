@@ -26,7 +26,7 @@ export interface DuplicateHit {
   postal_code: string | null
   city: string | null
   match_reason: string
-  service_locations: CustomerHit['locations']
+  einsatzorte: CustomerHit['locations']
 }
 
 function escapeLike(q: string) {
@@ -45,13 +45,13 @@ export async function searchCustomers(query: string): Promise<ActionResult<Custo
 
   const [visible, duplicates] = await Promise.all([
     supabase
-      .from('customers')
-      .select('id, customer_number, first_name, last_name, company_name, billing_postal_code, billing_city, service_locations(id, label, street, postal_code, city, archived_at)')
+      .from('kunden')
+      .select('id, customer_number, first_name, last_name, company_name, billing_postal_code, billing_city, service_locations:einsatzorte(id, label, street, postal_code, city, archived_at)')
       .is('archived_at', null)
       .ilike('search_text', `%${escapeLike(term)}%`)
       .order('last_name')
       .limit(8),
-    supabase.rpc('find_customer_duplicates', {
+    supabase.rpc('kunden_dubletten_finden', {
       p_last_name: q,
       p_company_name: q,
       p_phone: digits.length >= 6 ? digits : null,
@@ -77,7 +77,7 @@ export async function searchCustomers(query: string): Promise<ActionResult<Custo
       place: [d.postal_code, d.city].filter(Boolean).join(' '),
       limited: true,
       match_reason: d.match_reason,
-      locations: d.service_locations,
+      locations: d.einsatzorte,
     })
   }
   return ok(hits.slice(0, 10))
@@ -99,7 +99,7 @@ export async function checkDuplicates(input: unknown): Promise<ActionResult<Dupl
   const v = parsed.data
   if (!v.last_name && !v.company_name && !v.phone && !v.email) return ok([])
   const supabase = createClient()
-  const { data, error } = await supabase.rpc('find_customer_duplicates', {
+  const { data, error } = await supabase.rpc('kunden_dubletten_finden', {
     p_first_name: v.first_name || null,
     p_last_name: v.last_name || null,
     p_company_name: v.company_name || null,
@@ -135,7 +135,7 @@ export async function createCustomer(input: unknown): Promise<ActionResult<{ id:
 
   const supabase = createClient()
   const { data, error } = await supabase
-    .from('customers')
+    .from('kunden')
     .insert({ ...customer, created_by: ctx.userId })
     .select('id')
     .single()
@@ -144,7 +144,7 @@ export async function createCustomer(input: unknown): Promise<ActionResult<{ id:
   let locationId: string | null = null
   if (location) {
     const loc = await supabase
-      .from('service_locations')
+      .from('einsatzorte')
       .insert({ ...location, customer_id: data.id })
       .select('id')
       .single()
@@ -161,7 +161,7 @@ export async function updateCustomer(id: string, input: unknown): Promise<Action
   const parsed = customerSchema.safeParse(input)
   if (!parsed.success) return invalid(parsed.error)
   const supabase = createClient()
-  const { error, count } = await supabase.from('customers').update(parsed.data, { count: 'exact' }).eq('id', id)
+  const { error, count } = await supabase.from('kunden').update(parsed.data, { count: 'exact' }).eq('id', id)
   if (error) return fromDbError(error)
   if (!count) return fail('Kunde nicht gefunden oder keine Berechtigung.', { code: 'FORBIDDEN' })
   revalidatePath(`/intern/kunden/${id}`)
@@ -173,7 +173,7 @@ export async function setCustomerArchived(id: string, archived: boolean): Promis
   if (!ctx.isOffice) return fail('Keine Berechtigung.', { code: 'FORBIDDEN' })
   const supabase = createClient()
   const { error } = await supabase
-    .from('customers')
+    .from('kunden')
     .update({ archived_at: archived ? new Date().toISOString() : null })
     .eq('id', id)
   if (error) return fromDbError(error)
@@ -188,7 +188,7 @@ export async function addServiceLocation(customerId: string, input: unknown): Pr
   if (!parsed.success) return invalid(parsed.error)
   const supabase = createClient()
   const { data, error } = await supabase
-    .from('service_locations')
+    .from('einsatzorte')
     .insert({ ...parsed.data, customer_id: customerId })
     .select('id')
     .single()

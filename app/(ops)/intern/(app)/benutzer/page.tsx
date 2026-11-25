@@ -14,8 +14,8 @@ export default async function UsersPage() {
   await requireAdmin()
   const supabase = createClient()
   const [{ data: profiles }, { data: employees }] = await Promise.all([
-    supabase.from('profiles').select('id, email, display_name, roles, is_active, created_at').order('display_name'),
-    supabase.from('employees').select('id, first_name, last_name, profile_id, is_active').order('last_name'),
+    supabase.from('benutzerprofile').select('id, email, display_name, roles, is_active, created_at').order('display_name'),
+    supabase.from('mitarbeiter').select('id, first_name, last_name, profile_id, is_active').order('last_name'),
   ])
   const options = (employees ?? [])
     .filter((e) => e.is_active)

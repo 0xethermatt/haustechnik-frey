@@ -84,9 +84,9 @@ async function shot(page, name) {
   await m.waitForURL(/berichte\/[0-9a-f-]{36}\/bearbeiten/)
   await m.getByText(/Gespeichert|Entwurf/).first().waitFor()
   const reportId = m.url().match(/berichte\/([0-9a-f-]{36})/)[1]
-  const count1 = sql(`select count(*) from work_report_time_entries where work_report_id = '${reportId}'`)
+  const count1 = sql(`select count(*) from arbeitsbericht_zeiteintraege where work_report_id = '${reportId}'`)
   assert(count1 === '2', 'Entwurf gespeichert: 2 Zeiteinträge')
-  const ids1 = sql(`select string_agg(time_entry_id::text, ',' order by time_entry_id) from work_report_time_entries where work_report_id = '${reportId}'`)
+  const ids1 = sql(`select string_agg(time_entry_id::text, ',' order by time_entry_id) from arbeitsbericht_zeiteintraege where work_report_id = '${reportId}'`)
 
   await m.getByRole('button', { name: '15 Minuten mehr' }).first().click()
   await m.getByRole('button', { name: 'Speichern', exact: true }).click()
@@ -96,8 +96,8 @@ async function shot(page, name) {
   assert(await m.getByText('Eingereicht').first().isVisible(), '8. Bericht eingereicht')
   await shot(m, '04-bericht-eingereicht')
 
-  const ids2 = sql(`select string_agg(time_entry_id::text, ',' order by time_entry_id) from work_report_time_entries where work_report_id = '${reportId}'`)
-  const minutes = sql(`select string_agg(t.duration_minutes::text, ',' order by t.duration_minutes) from time_entries t join work_report_time_entries l on l.time_entry_id = t.id where l.work_report_id = '${reportId}'`)
+  const ids2 = sql(`select string_agg(time_entry_id::text, ',' order by time_entry_id) from arbeitsbericht_zeiteintraege where work_report_id = '${reportId}'`)
+  const minutes = sql(`select string_agg(t.duration_minutes::text, ',' order by t.duration_minutes) from zeiteintraege t join arbeitsbericht_zeiteintraege l on l.time_entry_id = t.id where l.work_report_id = '${reportId}'`)
   assert(ids1 === ids2, 'Bearbeiten + Einreichen: dieselben Zeiteinträge (keine Duplikate)')
   assert(minutes === '105,135', 'Arbeitszeiten korrekt: 1:45 h und 2:15 h')
 
@@ -107,7 +107,7 @@ async function shot(page, name) {
   if (await saveDay.count()) {
     await saveDay.click()
     await m.getByText('Arbeitszeit gespeichert').waitFor()
-    const wd = sql(`select start_time || '-' || end_time from work_days w join employees e on e.id = w.employee_id where e.employee_number = '103' and work_date = (now() at time zone 'Europe/Berlin')::date`)
+    const wd = sql(`select start_time || '-' || end_time from arbeitstage w join mitarbeiter e on e.id = w.employee_id where e.employee_number = '103' and work_date = (now() at time zone 'Europe/Berlin')::date`)
     assert(/^07:30:00-(16|13):(00|30):00$/.test(wd), `Arbeitstag mit einem Tipp gespeichert (${wd})`)
   }
   await m.goto(`${BASE}/intern/zeiten`)
@@ -133,7 +133,7 @@ async function shot(page, name) {
   assert(await d.getByText('Lena Schmid').first().isVisible(), 'Office 3. Arbeitszeiten sichtbar')
   await d.getByRole('button', { name: 'Freigeben' }).click()
   await d.getByText('Freigegeben').first().waitFor()
-  assert(sql(`select status from work_reports where id = '${reportId}'`) === 'freigegeben', 'Office 4. Bericht freigegeben')
+  assert(sql(`select status from arbeitsberichte where id = '${reportId}'`) === 'freigegeben', 'Office 4. Bericht freigegeben')
 
   // Korrektur eines freigegebenen Berichts – nachvollziehbar, ohne Duplikate
   await d.goto(`${BASE}/intern/berichte/${reportId}/bearbeiten`)
@@ -141,10 +141,10 @@ async function shot(page, name) {
   await d.getByPlaceholder('Warum wird der freigegebene Bericht geändert?').fill('Azubi früher in Berufsschule')
   await d.getByRole('button', { name: 'Änderungen speichern' }).click()
   await d.getByText(/Gespeichert/).first().waitFor()
-  const ids3 = sql(`select string_agg(time_entry_id::text, ',' order by time_entry_id) from work_report_time_entries where work_report_id = '${reportId}'`)
+  const ids3 = sql(`select string_agg(time_entry_id::text, ',' order by time_entry_id) from arbeitsbericht_zeiteintraege where work_report_id = '${reportId}'`)
   assert(ids3 === ids1, 'Korrektur nach Freigabe: weiterhin dieselben Zeiteinträge')
   assert(
-    sql(`select count(*) from audit_logs where reason = 'Azubi früher in Berufsschule' and table_name = 'time_entries'`) === '1',
+    sql(`select count(*) from aenderungsprotokoll where reason = 'Azubi früher in Berufsschule' and table_name = 'zeiteintraege'`) === '1',
     'Korrektur mit Begründung im Audit-Log',
   )
   await d.goto(`${BASE}/intern/berichte/${reportId}`)

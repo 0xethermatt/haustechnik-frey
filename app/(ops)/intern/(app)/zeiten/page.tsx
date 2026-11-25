@@ -41,7 +41,7 @@ export default async function TimePage({ searchParams }: { searchParams: { datum
     loadAbsences(supabase, { from: weekStart, to: weekEnd, employeeIds: [employeeId] }),
     loadWorkDays(supabase, { from: weekStart, to: weekEnd, employeeIds: [employeeId] }),
     loadJobOptions(supabase),
-    supabase.from('employees').select('start_date, end_date').eq('id', employeeId).maybeSingle(),
+    supabase.from('mitarbeiter').select('start_date, end_date').eq('id', employeeId).maybeSingle(),
   ])
   const days = buildDays({ from: weekStart, to: weekEnd, today, entries, absences, workDays, employment: employment.data ?? undefined })
   const day = days.find((d) => d.date === date)!

@@ -42,8 +42,8 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
   const [reports, directory, customer, job] = await Promise.all([
     loadReports(supabase, { status, from, to, employeeId, customerId, jobId }),
     loadDirectory(supabase),
-    customerId ? supabase.from('customers').select('first_name, last_name, company_name').eq('id', customerId).maybeSingle() : null,
-    jobId ? supabase.from('jobs').select('title').eq('id', jobId).maybeSingle() : null,
+    customerId ? supabase.from('kunden').select('first_name, last_name, company_name').eq('id', customerId).maybeSingle() : null,
+    jobId ? supabase.from('auftraege').select('title').eq('id', jobId).maybeSingle() : null,
   ])
 
   const params = (patch: Partial<Search>) => {

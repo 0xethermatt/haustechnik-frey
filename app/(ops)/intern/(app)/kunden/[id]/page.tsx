@@ -21,11 +21,11 @@ export default async function CustomerPage({ params }: { params: { id: string } 
   const ctx = await requireSession()
   const supabase = createClient()
   const [{ data: c }, { data: locations }, { data: jobs }] = await Promise.all([
-    supabase.from('customers').select('*').eq('id', params.id).maybeSingle(),
-    supabase.from('service_locations').select('*').eq('customer_id', params.id).is('archived_at', null).order('created_at'),
+    supabase.from('kunden').select('*').eq('id', params.id).maybeSingle(),
+    supabase.from('einsatzorte').select('*').eq('customer_id', params.id).is('archived_at', null).order('created_at'),
     supabase
-      .from('jobs')
-      .select('id, job_number, title, status, category, start_date, completion_date, location:service_locations(city)')
+      .from('auftraege')
+      .select('id, job_number, title, status, category, start_date, completion_date, location:einsatzorte(city)')
       .eq('customer_id', params.id)
       .order('start_date', { ascending: false }),
   ])

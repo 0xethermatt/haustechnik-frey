@@ -166,13 +166,13 @@ async function OfficeDashboard({ ctx }: { ctx: SessionContext }) {
     loadReports(supabase, { status: 'korrektur_erforderlich', limit: 50 }),
     loadReports(supabase, { from: addDays(today, -14), limit: 8 }),
     supabase
-      .from('jobs')
-      .select('id, job_number, title, status, completion_date, customer:customers(first_name, last_name, company_name)')
+      .from('auftraege')
+      .select('id, job_number, title, status, completion_date, customer:kunden(first_name, last_name, company_name)')
       .is('archived_at', null)
       .in('status', ['abgeschlossen', 'abrechnungsbereit'])
       .order('completion_date', { ascending: true, nullsFirst: false })
       .limit(50),
-    supabase.from('employees').select('id, first_name, last_name, start_date, end_date, employment_role').eq('is_active', true),
+    supabase.from('mitarbeiter').select('id, first_name, last_name, start_date, end_date, employment_role').eq('is_active', true),
   ])
   const employees = (employeesRes.data ?? []) as Employee[]
   const [entries, absences, workDays] = await Promise.all([

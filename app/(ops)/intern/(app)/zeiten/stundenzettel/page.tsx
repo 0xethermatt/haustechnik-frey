@@ -33,8 +33,8 @@ export default async function TimesheetPage({ searchParams }: { searchParams: { 
   const [sheets, allSheets, { data: abbreviations }, { data: cities }] = await Promise.all([
     loadTimesheets(supabase, month, employeeId),
     employeeId ? loadTimesheets(supabase, month) : Promise.resolve(null),
-    supabase.from('place_abbreviations').select('city, abbreviation').order('city'),
-    supabase.from('service_locations').select('city').is('archived_at', null).limit(2000),
+    supabase.from('ortskuerzel').select('city, abbreviation').order('city'),
+    supabase.from('einsatzorte').select('city').is('archived_at', null).limit(2000),
   ])
   const employees = (allSheets ?? sheets).map((s) => s.employee)
   const citySuggestions = [...new Set((cities ?? []).map((c) => c.city))].sort((a, b) => a.localeCompare(b, 'de'))

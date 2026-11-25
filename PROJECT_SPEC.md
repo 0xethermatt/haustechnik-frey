@@ -54,7 +54,7 @@ deployment, shared tooling) but has its own root layout, CSS and Tailwind config
 A subdomain (`intern.haustechnik-frey.de`) can later be mapped via a Vercel rewrite without code changes.
 
 **ADR-2 – Permissions live in Postgres.** Every table has RLS. UI visibility is convenience only.
-Visibility helpers (`is_office()`, `can_view_job()`, `can_view_report()` …) are `SECURITY DEFINER` to avoid policy
+Visibility helpers (`ist_buero()`, `darf_auftrag_sehen()`, `darf_bericht_sehen()` …) are `SECURITY DEFINER` to avoid policy
 recursion. `anon` has no table or function privileges at all.
 
 | | Admin | Office | Employee | Logged in, no role |
@@ -63,19 +63,19 @@ recursion. `anon` has no table or function privileges at all.
 | Jobs | all | all, edit, assign, status | assigned or own-created; create (auto-assigned) | – |
 | Work reports | all, review, correct | all, review, correct (reason required after approval) | own + where participant + assigned jobs; edit own drafts / correction requests | – |
 | Time entries | all | all (manual) | own; colleagues only via shared reports | – |
-| Employees | all | all | own record; colleague **names** via `employee_directory()` (no contract data) | – |
+| Employees | all | all | own record; colleague **names** via `mitarbeiter_verzeichnis()` (no contract data) | – |
 | Absences | all | manage | own (read) | – |
 | Audit log | read | read | – | – |
 | Roles / invites | yes | – | – | – |
 
-Multiple roles per user (`profiles.roles app_role[]`), e.g. owner = admin + office + employee. Employment role
-(Meister/Geselle/…) is a separate attribute of `employees`. New auth users get an empty role set (no access) until an
+Multiple roles per user (`benutzerprofile.roles app_rolle[]`), e.g. owner = admin + office + employee. Employment role
+(Meister/Geselle/…) is a separate attribute of `mitarbeiter`. New auth users get an empty role set (no access) until an
 admin assigns roles; the last active admin cannot be removed.
 
-**ADR-3 – Single source of truth for working hours.** Durations exist only in `time_entries` (integer minutes).
-Reports link to them via `work_report_time_entries` with `UNIQUE(time_entry_id)` and `PRIMARY KEY(work_report_id,
+**ADR-3 – Single source of truth for working hours.** Durations exist only in `zeiteintraege` (integer minutes).
+Reports link to them via `arbeitsbericht_zeiteintraege` with `UNIQUE(time_entry_id)` and `PRIMARY KEY(work_report_id,
 employee_id)` – the database itself makes duplicates impossible. All report writes go through one transactional RPC,
-`save_work_report(jsonb)`, which upserts the report, its activities/materials, and **updates** existing time entries per
+`arbeitsbericht_speichern(jsonb)`, which upserts the report, its activities/materials, and **updates** existing time entries per
 participant (removes entries of removed participants). Customer work (`kundenarbeit`) can only be created through
 reports; report-linked entries cannot be edited directly (RLS), only via the report → always traceable.
 
@@ -90,12 +90,17 @@ reports; report-linked entries cannot be edited directly (RLS), only via the rep
 - The service worker caches **no personal data** (only hashed build assets + an offline page).
 
 **ADR-5 – Corrections are traceable.** A generic trigger writes old/new row snapshots, actor and an optional reason
-(`app.change_reason`, set inside the RPCs) to `audit_logs` for all business tables. Approved reports can only be changed
+(`app.change_reason`, set inside the RPCs) to `aenderungsprotokoll` for all business tables. Approved reports can only be changed
 by office/admin with a mandatory reason; the report page shows a human-readable history ("Arbeitszeit Lena Schmid:
 1:45 h → 1:30 h, Begründung …").
 
 **ADR-6 – Archive instead of delete.** No delete policies on customers, jobs, reports, employees. Customers/jobs/
 locations have `archived_at`; employees have `is_active`/`end_date`. Only unsubmitted drafts can be discarded.
+
+**ADR-6b – German database names (25.11.2026).** Tables, the view, functions, sequences and enum types carry German
+names (`kunden`, `fehlzeiten`, `arbeitsberichte`, …) because the business works in German and reads the data in the
+Supabase dashboard. **Column names stay English** (`first_name`, `status`, …): they are mixed with generic UI words in
+hundreds of places in the code, so a rename would be risky; it can be done later with a dedicated, fully tested step.
 
 **ADR-7 – Time & dates.** Business dates are `date` in Europe/Berlin; instants are `timestamptz` (UTC). Conversion is
 done server-side (`berlinLocalToUtc`), DST-safe and tested. A DB check enforces `duration = end − start − break` when a
@@ -104,7 +109,7 @@ span is given. Baden-Württemberg public holidays are computed (no table needed)
 **ADR-7b – Work day (attendance) vs. job allocation (added 25.11.2026).** Requirement from the office: the monthly
 timesheet ("Stundenzettel", one Excel sheet per month, one block per employee, columns Kalendertag / Beginn / Pause /
 Ende / Dauer / * / aufgezeichnet am / Bemerkungen) must be produced without chasing employees for their hours.
-`work_days` stores one start/end/break per employee and day (unique), pre-filled with the usual schedule
+`arbeitstage` stores one start/end/break per employee and day (unique), pre-filled with the usual schedule
 (Mo–Do 7:30–16:00, Fr 7:30–13:30) so employees confirm with one tap. This is the **payroll time**. Report time entries
 remain the **allocation to jobs** (billing); unallocated work-day time counts as travel/other. Checks: no work day on a
 past workday → reminder; report hours exceed the work day → warning. "aufgezeichnet am" is the creation date of the
@@ -118,7 +123,7 @@ regular workdays (warning), absence with work time, > 10 h/day, break hint follo
 unsubmitted reports. **No** overtime, vacation balance or payroll calculation.
 
 **ADR-9 – Materials are snapshots.** Material positions always store description/quantity/unit/manufacturer/article
-numbers, even when later linked to a catalog article (`catalog_article_id` → `catalog_articles`, prepared for KLOWA,
+numbers, even when later linked to a catalog article (`catalog_article_id` → `katalogartikel`, prepared for KLOWA,
 `UNIQUE(source, external_id)`). Catalog changes never alter historical reports.
 
 **ADR-10 – Exports are separate, read-only consumers.** `lib/ops/exports/approved-records.ts` provides a
@@ -130,13 +135,28 @@ not loaded under `/intern`; `/intern` is `noindex` and disallowed in `robots.txt
 
 ## 4. Data model (summary)
 
-`profiles` (1:1 auth.users, roles[]) · `employees` (number, employment role, start/end, weekly target minutes,
-vacation days, optional `profile_id`) · `customers` (number `K-…`, optional Edison number, billing address, generated
-`search_text` + trigram index, `phone_digits`) · `service_locations` (n per customer) · `jobs` (number `A-…`, composite FK
-ensures the location belongs to the job's customer, category, status) · `job_assignments` · `work_reports` (number `B-…`,
-status, version, mutation id, review fields) · `work_report_activities` · `work_report_materials` · `time_entries` ·
-`work_report_time_entries` · `employee_absences` (day-based, half day) · `catalog_articles` (empty, prepared) ·
-`audit_logs` · view `employee_daily_minutes` (security-invoker) for future payroll export.
+| Tabelle | Inhalt |
+|---|---|
+| `benutzerprofile` | 1:1 zu `auth.users`, `roles[]` (Zugriffsrollen), aktiv/inaktiv |
+| `mitarbeiter` | Personalnummer, Beschäftigungsart, Eintritt/Austritt, Wochen-Soll (Minuten), Urlaubsanspruch, optional `profile_id` |
+| `kunden` | Nummer `K-…`, optionale Edison-Nummer, Rechnungsadresse, Kurzname, generierter `search_text` + Trigram-Index |
+| `einsatzorte` | n je Kunde |
+| `auftraege` | Nummer `A-…`, zusammengesetzter FK stellt sicher, dass der Einsatzort zum Kunden gehört; Kategorie, Status |
+| `auftragszuweisungen` | Mitarbeiter ↔ Auftrag |
+| `arbeitsberichte` | Nummer `B-…`, Status, Version, Mutations-ID, Prüffelder |
+| `arbeitsbericht_taetigkeiten`, `arbeitsbericht_material` | Positionen des Berichts |
+| `zeiteintraege` | einzige Quelle für Stunden je Auftrag/Tätigkeit |
+| `arbeitsbericht_zeiteintraege` | Verknüpfung Bericht ↔ Zeiteintrag (eindeutig) |
+| `arbeitstage` | Beginn/Ende/Pause je Mitarbeiter und Tag (Lohn-/Stundenzettel-Grundlage) |
+| `fehlzeiten` | Urlaub, Krank, Berufsschule …, tageweise, halbe Tage |
+| `ortskuerzel` | Ortskürzel für die Bemerkungen im Stundenzettel |
+| `katalogartikel` | leer, vorbereitet für KLOWA |
+| `aenderungsprotokoll` | Audit-Log (nur lesbar für Büro/Admin) |
+| Ansicht `mitarbeiter_tagesminuten` | security-invoker, für späteren Lohn-Export |
+
+Funktionen (RPC): `arbeitsbericht_speichern`, `arbeitsbericht_pruefen`, `arbeitsbericht_entwurf_loeschen`,
+`kunden_dubletten_finden`, `mitarbeiter_verzeichnis`, `zugang_setzen`; Berechtigungs-Helfer `ist_admin`, `ist_buero`,
+`ist_mitglied`, `hat_rolle`, `aktuelle_mitarbeiter_id`, `darf_auftrag_sehen`, `darf_kunde_sehen`, `darf_bericht_sehen`.
 
 Statuses – Job: Geplant → In Bearbeitung (auto on first report) → Abgeschlossen → Abrechnungsbereit → Abgerechnet.
 Report: Entwurf → Eingereicht → Freigegeben, or → Korrektur erforderlich → (edit) → Eingereicht.
@@ -174,7 +194,7 @@ Invitation e-mails are visible in Mailpit at http://127.0.0.1:54324.
 3. **Vercel env vars:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (all environments),
    `SUPABASE_SERVICE_ROLE_KEY` (server only, never `NEXT_PUBLIC_`).
 4. **First admin:** invite yourself from the Supabase dashboard, then set roles once via SQL:
-   `update profiles set roles='{admin,office,employee}' where email='…';` and link the employee record. All further
+   `update benutzerprofile set roles='{admin,office,employee}' where email='…';` and link the employee record. All further
    users are invited from `/intern/benutzer`.
 5. **Backups:** set the two GitHub secrets from §8 and run the backup workflow once.
 6. Verify: `/intern` redirects to login; website pages unchanged; install the PWA on one Android and one iPhone.
@@ -218,7 +238,7 @@ Storage files (future photos) are **not** covered by the current database backup
 ## 9. Unresolved requirements / questions for the business
 
 1. **Stundenzettel details** – decided 25.11.2026: breaks are not deducted (default 0, no break hint); long company
-   names are shortened (optional `customers.short_name`, otherwise legal form removed). Open: meaning of the "*" column
+   names are shortened (optional `kunden.short_name`, otherwise legal form removed). Open: meaning of the "*" column
    (left empty in the export).
 1a. **Payroll & overtime rules** – how are vacation, sickness, vocational school and holidays credited (hours per day?),
    overtime thresholds, rounding? Nothing is calculated until confirmed. Weekly target is stored as master data only.
@@ -242,5 +262,5 @@ Storage files (future photos) are **not** covered by the current database backup
 
 Photos & signatures (Supabase Storage, per-report bucket with RLS) · AI voice-to-report (only after a DPA/EU-hosted
 model decision; report payload is already structured JSON) · catalog search in the material editor · payroll Excel
-export from `employee_daily_minutes` · Edison UGL export from `ApprovedWorkRecord` · vacation requests by employees ·
+export from `mitarbeiter_tagesminuten` · Edison UGL export from `ApprovedWorkRecord` · vacation requests by employees ·
 background sync of offline drafts (current approach: local safeguard + explicit retry).

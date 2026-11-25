@@ -42,11 +42,11 @@ export async function loadTimeEntries(
   { from, to, employeeIds }: { from: string; to: string; employeeIds?: string[] },
 ): Promise<TimeEntryRow[]> {
   let q = supabase
-    .from('time_entries')
+    .from('zeiteintraege')
     .select(
       `id, employee_id, entry_date, entry_type, job_id, started_at, ended_at, break_minutes, duration_minutes, billable, note,
-       job:jobs(id, job_number, title, customer:customers(first_name, last_name, company_name, short_name, billing_city), location:service_locations(city)),
-       link:work_report_time_entries(work_report_id, report:work_reports(status, report_number))`,
+       job:auftraege(id, job_number, title, customer:kunden(first_name, last_name, company_name, short_name, billing_city), location:einsatzorte(city)),
+       link:arbeitsbericht_zeiteintraege(work_report_id, report:arbeitsberichte(status, report_number))`,
     )
     .gte('entry_date', from)
     .lte('entry_date', to)
@@ -60,7 +60,7 @@ export async function loadAbsences(
   { from, to, employeeIds }: { from: string; to: string; employeeIds?: string[] },
 ): Promise<AbsenceRow[]> {
   let q = supabase
-    .from('employee_absences')
+    .from('fehlzeiten')
     .select('id, employee_id, absence_type, start_date, end_date, half_day, note')
     .lte('start_date', to)
     .gte('end_date', from)
@@ -86,7 +86,7 @@ export async function loadWorkDays(
   { from, to, employeeIds }: { from: string; to: string; employeeIds?: string[] },
 ): Promise<WorkDayRow[]> {
   let q = supabase
-    .from('work_days')
+    .from('arbeitstage')
     .select('id, employee_id, work_date, start_time, end_time, break_minutes, duration_minutes, note, created_at')
     .gte('work_date', from)
     .lte('work_date', to)
@@ -96,7 +96,7 @@ export async function loadWorkDays(
 }
 
 export async function loadAbbreviations(supabase: ServerSupabase): Promise<Map<string, string>> {
-  const { data } = await supabase.from('place_abbreviations').select('city, abbreviation')
+  const { data } = await supabase.from('ortskuerzel').select('city, abbreviation')
   return new Map((data ?? []).map((r) => [r.city.trim().toLowerCase(), r.abbreviation]))
 }
 

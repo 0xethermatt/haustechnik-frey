@@ -24,8 +24,8 @@ export const getSessionContext = cache(async (): Promise<SessionContext | null> 
   if (!user) return null
 
   const [{ data: profile }, { data: employee }] = await Promise.all([
-    supabase.from('profiles').select('id, email, display_name, roles, is_active, created_at').eq('id', user.id).maybeSingle(),
-    supabase.from('employees').select('id, first_name, last_name, employment_role').eq('profile_id', user.id).eq('is_active', true).maybeSingle(),
+    supabase.from('benutzerprofile').select('id, email, display_name, roles, is_active, created_at').eq('id', user.id).maybeSingle(),
+    supabase.from('mitarbeiter').select('id, first_name, last_name, employment_role').eq('profile_id', user.id).eq('is_active', true).maybeSingle(),
   ])
   if (!profile) return null
 

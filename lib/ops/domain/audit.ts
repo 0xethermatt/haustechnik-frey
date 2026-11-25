@@ -33,7 +33,7 @@ export function summarizeReportAudit(rows: AuditRow[], employeeName: (id: string
     const n = r.new_data ?? {}
     let text: string | null = null
 
-    if (r.table_name === 'work_reports') {
+    if (r.table_name === 'arbeitsberichte') {
       if (r.action === 'INSERT') text = 'Bericht angelegt'
       else if (r.action === 'UPDATE' && o.status !== n.status) {
         const s = n.status as ReportStatus
@@ -52,7 +52,7 @@ export function summarizeReportAudit(rows: AuditRow[], employeeName: (id: string
         if (o.internal_notes !== n.internal_notes) parts.push('Notiz')
         text = `${parts.join(', ')} geändert`
       }
-    } else if (r.table_name === 'time_entries') {
+    } else if (r.table_name === 'zeiteintraege') {
       const emp = employeeName(String(n.employee_id ?? o.employee_id ?? ''))
       if (r.action === 'UPDATE' && o.duration_minutes !== n.duration_minutes) {
         text = `Arbeitszeit ${emp}: ${formatMinutes(Number(o.duration_minutes))} → ${formatMinutes(Number(n.duration_minutes))}`
@@ -61,7 +61,7 @@ export function summarizeReportAudit(rows: AuditRow[], employeeName: (id: string
       } else if (r.action === 'INSERT' && r.reason) {
         text = `${emp} hinzugefügt (${formatMinutes(Number(n.duration_minutes))})`
       }
-    } else if (r.table_name === 'work_report_materials' && r.reason) {
+    } else if (r.table_name === 'arbeitsbericht_material' && r.reason) {
       const desc = String(n.description ?? o.description ?? '')
       text =
         r.action === 'INSERT'
@@ -69,7 +69,7 @@ export function summarizeReportAudit(rows: AuditRow[], employeeName: (id: string
           : r.action === 'DELETE'
             ? `Material entfernt: ${desc}`
             : `Material geändert: ${desc}`
-    } else if (r.table_name === 'work_report_activities' && r.reason) {
+    } else if (r.table_name === 'arbeitsbericht_taetigkeiten' && r.reason) {
       const desc = String(n.description ?? o.description ?? '')
       text = r.action === 'INSERT' ? `Arbeit ergänzt: ${desc}` : r.action === 'DELETE' ? `Arbeit entfernt: ${desc}` : `Arbeit geändert: ${desc}`
     }

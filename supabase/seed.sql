@@ -9,11 +9,11 @@ declare
 begin
   for u in
     select * from (values
-      ('a1000000-0000-4000-8000-000000000001'::uuid, 'andreas.frey@frey-demo.test', 'Andreas Frey', '{admin,office,employee}'::public.app_role[]),
-      ('a1000000-0000-4000-8000-000000000002'::uuid, 'sabine.frey@frey-demo.test', 'Sabine Frey', '{office}'::public.app_role[]),
-      ('a1000000-0000-4000-8000-000000000003'::uuid, 'jonas.keller@frey-demo.test', 'Jonas Keller', '{employee}'::public.app_role[]),
-      ('a1000000-0000-4000-8000-000000000004'::uuid, 'lukas.brenner@frey-demo.test', 'Lukas Brenner', '{employee}'::public.app_role[]),
-      ('a1000000-0000-4000-8000-000000000005'::uuid, 'tobias.maier@frey-demo.test', 'Tobias Maier', '{employee}'::public.app_role[])
+      ('a1000000-0000-4000-8000-000000000001'::uuid, 'andreas.frey@frey-demo.test', 'Andreas Frey', '{admin,office,employee}'::public.app_rolle[]),
+      ('a1000000-0000-4000-8000-000000000002'::uuid, 'sabine.frey@frey-demo.test', 'Sabine Frey', '{office}'::public.app_rolle[]),
+      ('a1000000-0000-4000-8000-000000000003'::uuid, 'jonas.keller@frey-demo.test', 'Jonas Keller', '{employee}'::public.app_rolle[]),
+      ('a1000000-0000-4000-8000-000000000004'::uuid, 'lukas.brenner@frey-demo.test', 'Lukas Brenner', '{employee}'::public.app_rolle[]),
+      ('a1000000-0000-4000-8000-000000000005'::uuid, 'tobias.maier@frey-demo.test', 'Tobias Maier', '{employee}'::public.app_rolle[])
     ) as t(id, email, name, roles)
   loop
     insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
@@ -24,12 +24,12 @@ begin
       '', '', '', '');
     insert into auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
     values (gen_random_uuid(), u.id, u.id::text, jsonb_build_object('sub', u.id::text, 'email', u.email), 'email', now(), now(), now());
-    update public.profiles set roles = u.roles, display_name = u.name where id = u.id;
+    update public.benutzerprofile set roles = u.roles, display_name = u.name where id = u.id;
   end loop;
 end;
 $$;
 
-insert into public.employees (id, profile_id, employee_number, first_name, last_name, employment_role, start_date, weekly_target_minutes, annual_vacation_days) values
+insert into public.mitarbeiter (id, profile_id, employee_number, first_name, last_name, employment_role, start_date, weekly_target_minutes, annual_vacation_days) values
   ('e1000000-0000-4000-8000-000000000001', 'a1000000-0000-4000-8000-000000000001', '100', 'Andreas', 'Frey', 'meister', '1994-04-01', 2400, 30),
   ('e1000000-0000-4000-8000-000000000002', 'a1000000-0000-4000-8000-000000000005', '101', 'Tobias', 'Maier', 'meister', '2012-08-01', 2400, 30),
   ('e1000000-0000-4000-8000-000000000003', 'a1000000-0000-4000-8000-000000000003', '103', 'Jonas', 'Keller', 'geselle', '2018-09-01', 2400, 28),
@@ -38,7 +38,7 @@ insert into public.employees (id, profile_id, employee_number, first_name, last_
   ('e1000000-0000-4000-8000-000000000006', null, '301', 'Mehmet', 'Yılmaz', 'helfer', '2023-05-02', 1800, 26),
   ('e1000000-0000-4000-8000-000000000007', null, '401', 'Sabine', 'Frey', 'buero', '1998-01-01', 1200, 30);
 
-insert into public.customers (id, edison_customer_number, first_name, last_name, company_name, billing_street, billing_postal_code, billing_city, phone, email, notes) values
+insert into public.kunden (id, edison_customer_number, first_name, last_name, company_name, billing_street, billing_postal_code, billing_city, phone, email, notes) values
   ('c1000000-0000-4000-8000-000000000001', 'E-4711', 'Hans', 'Müller', null, 'Lindenweg 4', '89129', 'Langenau', '07345 912345', 'hans.mueller@example.com', 'Schlüssel bei Nachbarin (Nr. 6).'),
   ('c1000000-0000-4000-8000-000000000002', 'E-4712', 'Petra', 'Wagner', null, 'Hauptstraße 12', '89073', 'Ulm', '0731 998877', 'p.wagner@example.com', null),
   ('c1000000-0000-4000-8000-000000000003', 'E-5120', null, null, 'Bäckerei Hofmann GmbH', 'Marktplatz 3', '89129', 'Langenau', '07345 4455', 'info@baeckerei-hofmann.example.com', 'Arbeiten nur nach 11 Uhr (Backbetrieb).'),
@@ -50,27 +50,27 @@ insert into public.customers (id, edison_customer_number, first_name, last_name,
   ('c1000000-0000-4000-8000-000000000009', 'E-5333', null, 'Krause', 'Zahnarztpraxis Dr. Krause', 'Olgastraße 88', '89073', 'Ulm', '0731 123450', 'praxis@dr-krause.example.com', null),
   ('c1000000-0000-4000-8000-000000000010', null, 'Ingrid', 'Schulz', null, 'Kirchgasse 2', '89129', 'Langenau', '07345 3210', null, null);
 
-update public.customers set archived_at = now() - interval '200 days' where id = 'c1000000-0000-4000-8000-000000000010';
+update public.kunden set archived_at = now() - interval '200 days' where id = 'c1000000-0000-4000-8000-000000000010';
 
-insert into public.service_locations (id, customer_id, label, street, postal_code, city, access_notes)
+insert into public.einsatzorte (id, customer_id, label, street, postal_code, city, access_notes)
 select gen_random_uuid(), c.id, null, c.billing_street, c.billing_postal_code, c.billing_city, null
-from public.customers c where c.id <> 'c1000000-0000-4000-8000-000000000005';
+from public.kunden c where c.id <> 'c1000000-0000-4000-8000-000000000005';
 
-insert into public.service_locations (id, customer_id, label, street, postal_code, city, access_notes) values
+insert into public.einsatzorte (id, customer_id, label, street, postal_code, city, access_notes) values
   ('d1000000-0000-4000-8000-000000000001', 'c1000000-0000-4000-8000-000000000005', 'Objekt Kantstraße', 'Kantstraße 14', '89231', 'Neu-Ulm', 'Heizraum im UG, Schlüssel beim Hausmeister Hr. Lang.'),
   ('d1000000-0000-4000-8000-000000000002', 'c1000000-0000-4000-8000-000000000005', 'Objekt Lessingweg', 'Lessingweg 3', '89233', 'Neu-Ulm', null);
 
 -- Aufträge (Datumsangaben relativ zum Einspieldatum)
 do $$
 declare
-  t date := public.berlin_today();
+  t date := public.berlin_heute();
 begin
-  insert into public.jobs (id, customer_id, service_location_id, title, description, category, status, start_date, completion_date)
+  insert into public.auftraege (id, customer_id, service_location_id, title, description, category, status, start_date, completion_date)
   select j.id, j.customer_id,
-    coalesce(j.loc, (select s.id from public.service_locations s where s.customer_id = j.customer_id order by s.created_at limit 1)),
+    coalesce(j.loc, (select s.id from public.einsatzorte s where s.customer_id = j.customer_id order by s.created_at limit 1)),
     j.title, j.descr, j.cat, j.status, t + j.start_offset, case when j.done_offset is null then null else t + j.done_offset end
   from (values
-    ('b1000000-0000-4000-8000-000000000001'::uuid, 'c1000000-0000-4000-8000-000000000001'::uuid, null::uuid, 'Waschtisch austauschen', 'Alten Waschtisch im OG-Bad ersetzen, neue Armatur.', 'sanitaer'::public.job_category, 'abgeschlossen'::public.job_status, -12, -8),
+    ('b1000000-0000-4000-8000-000000000001'::uuid, 'c1000000-0000-4000-8000-000000000001'::uuid, null::uuid, 'Waschtisch austauschen', 'Alten Waschtisch im OG-Bad ersetzen, neue Armatur.', 'sanitaer'::public.auftragskategorie, 'abgeschlossen'::public.auftragsstatus, -12, -8),
     ('b1000000-0000-4000-8000-000000000002', 'c1000000-0000-4000-8000-000000000002', null, 'Heizungswartung Gasbrennwert', 'Jährliche Wartung Viessmann Vitodens 200.', 'wartung', 'abgeschlossen', -9, -9),
     ('b1000000-0000-4000-8000-000000000003', 'c1000000-0000-4000-8000-000000000003', null, 'Ablauf Backstube reparieren', 'Bodenablauf verstopft, Geruchsverschluss prüfen.', 'reparatur', 'in_bearbeitung', -3, null),
     ('b1000000-0000-4000-8000-000000000004', 'c1000000-0000-4000-8000-000000000004', null, 'Wärmepumpeninstallation', 'Luft-Wasser-Wärmepumpe 10 kW inkl. Pufferspeicher, Demontage Ölkessel.', 'waermepumpe', 'in_bearbeitung', -14, null),
@@ -84,7 +84,7 @@ begin
 end;
 $$;
 
-insert into public.job_assignments (job_id, employee_id) values
+insert into public.auftragszuweisungen (job_id, employee_id) values
   ('b1000000-0000-4000-8000-000000000001', 'e1000000-0000-4000-8000-000000000003'),
   ('b1000000-0000-4000-8000-000000000001', 'e1000000-0000-4000-8000-000000000005'),
   ('b1000000-0000-4000-8000-000000000002', 'e1000000-0000-4000-8000-000000000004'),
@@ -103,7 +103,7 @@ insert into public.job_assignments (job_id, employee_id) values
 -- n-ter zurückliegender Werktag (Mo–Fr), damit Testdaten nicht auf Wochenenden fallen
 create or replace function pg_temp.wd(p_n integer) returns date language plpgsql as $$
 declare
-  d date := public.berlin_today();
+  d date := public.berlin_heute();
   i integer := 0;
 begin
   while i < p_n loop
@@ -126,7 +126,7 @@ declare
   v_date date := pg_temp.wd(p_days_ago);
 begin
   perform set_config('request.jwt.claim.sub', p_user::text, true);
-  v_res := public.save_work_report(jsonb_build_object(
+  v_res := public.arbeitsbericht_speichern(jsonb_build_object(
     'id', v_id, 'mutation_id', gen_random_uuid(), 'expected_version', null, 'job_id', p_job,
     'report_date', v_date, 'submit', p_submit,
     'activities', (select coalesce(jsonb_agg(jsonb_build_object('id', gen_random_uuid(), 'description', a)), '[]') from unnest(p_activities) a),
@@ -135,7 +135,7 @@ begin
   ));
   if p_review is not null then
     perform set_config('request.jwt.claim.sub', 'a1000000-0000-4000-8000-000000000002', true);
-    perform public.review_work_report(v_id, (v_res ->> 'version')::integer, p_review, p_comment);
+    perform public.arbeitsbericht_pruefen(v_id, (v_res ->> 'version')::integer, p_review, p_comment);
   end if;
   perform set_config('request.jwt.claim.sub', '', true);
   return v_id;
@@ -224,7 +224,7 @@ end;
 $$;
 
 -- Weitere Zeiten (Fahrt, Lager, Pausen) – direkt erfasst
-insert into public.time_entries (employee_id, entry_date, entry_type, job_id, duration_minutes, billable, note, created_by)
+insert into public.zeiteintraege (employee_id, entry_date, entry_type, job_id, duration_minutes, billable, note, created_by)
 values
   ('e1000000-0000-4000-8000-000000000003', pg_temp.wd(8), 'fahrzeit', 'b1000000-0000-4000-8000-000000000001', 25, true, 'Anfahrt Langenau', 'a1000000-0000-4000-8000-000000000003'),
   ('e1000000-0000-4000-8000-000000000003', pg_temp.wd(8), 'lager', null, 60, false, 'Material kommissioniert', 'a1000000-0000-4000-8000-000000000003'),
@@ -235,7 +235,7 @@ values
   ('e1000000-0000-4000-8000-000000000004', pg_temp.wd(3), 'pause', null, 30, false, null, 'a1000000-0000-4000-8000-000000000004'),
   ('e1000000-0000-4000-8000-000000000003', pg_temp.wd(1), 'intern', null, 60, false, 'Fahrzeugpflege', 'a1000000-0000-4000-8000-000000000003');
 
-insert into public.time_entries (employee_id, entry_date, entry_type, started_at, ended_at, break_minutes, duration_minutes, note, created_by)
+insert into public.zeiteintraege (employee_id, entry_date, entry_type, started_at, ended_at, break_minutes, duration_minutes, note, created_by)
 values
   ('e1000000-0000-4000-8000-000000000003', pg_temp.wd(1), 'lager',
    (pg_temp.wd(1) + time '13:00') at time zone 'Europe/Berlin',
@@ -244,13 +244,13 @@ values
    (pg_temp.wd(1) + time '14:00') at time zone 'Europe/Berlin',
    (pg_temp.wd(1) + time '15:00') at time zone 'Europe/Berlin', 0, 60, 'Werkzeugprüfung', 'a1000000-0000-4000-8000-000000000003');
 
-insert into public.employee_absences (employee_id, absence_type, start_date, end_date, half_day, note) values
+insert into public.fehlzeiten (employee_id, absence_type, start_date, end_date, half_day, note) values
   ('e1000000-0000-4000-8000-000000000005', 'berufsschule', pg_temp.wd(2), pg_temp.wd(2), false, 'Blockunterricht'),
   ('e1000000-0000-4000-8000-000000000006', 'krank', pg_temp.wd(2), pg_temp.wd(1), false, null),
-  ('e1000000-0000-4000-8000-000000000004', 'urlaub', public.berlin_today() + 7, public.berlin_today() + 11, false, 'Genehmigt');
+  ('e1000000-0000-4000-8000-000000000004', 'urlaub', public.berlin_heute() + 7, public.berlin_heute() + 11, false, 'Genehmigt');
 
 -- Abrechnungsstatus nach Erfassung der Berichte setzen
-update public.jobs set status = 'abrechnungsbereit'
+update public.auftraege set status = 'abrechnungsbereit'
 where id in ('b1000000-0000-4000-8000-000000000002', 'b1000000-0000-4000-8000-000000000009');
 
 -- Arbeitstage (Beginn/Ende/Pause) der letzten ~8 Wochen, ohne heute.
@@ -264,12 +264,12 @@ declare
   v_break integer;
   v_alloc integer;
 begin
-  for e in select id, employment_role, employee_number from public.employees where is_active loop
-    for d in select generate_series(public.berlin_today() - 56, public.berlin_today() - 1, interval '1 day')::date loop
+  for e in select id, employment_role, employee_number from public.mitarbeiter where is_active loop
+    for d in select generate_series(public.berlin_heute() - 56, public.berlin_heute() - 1, interval '1 day')::date loop
       continue when extract(isodow from d) > 5;
-      continue when d < (select start_date from public.employees where id = e.id);
+      continue when d < (select start_date from public.mitarbeiter where id = e.id);
       continue when exists (
-        select 1 from public.employee_absences a where a.employee_id = e.id and d between a.start_date and a.end_date
+        select 1 from public.fehlzeiten a where a.employee_id = e.id and d between a.start_date and a.end_date
       );
       continue when e.employee_number = '104' and d = pg_temp.wd(1);
 
@@ -283,12 +283,12 @@ begin
 
       -- Längere Tage, wenn mehr Stunden Aufträgen zugeordnet sind
       select coalesce(sum(duration_minutes), 0) into v_alloc
-      from public.time_entries where employee_id = e.id and entry_date = d and entry_type <> 'pause';
+      from public.zeiteintraege where employee_id = e.id and entry_date = d and entry_type <> 'pause';
       if v_alloc > extract(epoch from (v_end - v_start)) / 60 - v_break then
         v_end := v_start + make_interval(mins => (ceil((v_alloc + v_break) / 15.0) * 15)::integer);
       end if;
 
-      insert into public.work_days (employee_id, work_date, start_time, end_time, break_minutes, note, created_at)
+      insert into public.arbeitstage (employee_id, work_date, start_time, end_time, break_minutes, note, created_at)
       values (e.id, d, v_start, v_end, v_break,
               case when e.employee_number = '103' and d = pg_temp.wd(7) then 'TÜV' end,
               (d + time '17:30') at time zone 'Europe/Berlin');
@@ -297,12 +297,12 @@ begin
 end;
 $$;
 
-insert into public.place_abbreviations (city, abbreviation) values
+insert into public.ortskuerzel (city, abbreviation) values
   ('Neu-Ulm', 'NU'),
   ('Blaubeuren', 'Blb'),
   ('Herbrechtingen', 'HDH')
 on conflict (city) do nothing;
 
 -- Kurznamen für den Stundenzettel
-update public.customers set short_name = 'Donautal' where id = 'c1000000-0000-4000-8000-000000000005';
-update public.customers set short_name = 'Dr. Krause' where id = 'c1000000-0000-4000-8000-000000000009';
+update public.kunden set short_name = 'Donautal' where id = 'c1000000-0000-4000-8000-000000000005';
+update public.kunden set short_name = 'Dr. Krause' where id = 'c1000000-0000-4000-8000-000000000009';

@@ -35,7 +35,7 @@ export async function saveReport(input: unknown): Promise<ActionResult<SaveResul
   }
 
   const supabase = createClient()
-  const { data, error } = await supabase.rpc('save_work_report', { p: payload })
+  const { data, error } = await supabase.rpc('arbeitsbericht_speichern', { p: payload })
   if (error) return fromDbError(error)
   revalidateReports(parsed.data.id)
   return ok(data as SaveResult)
@@ -48,7 +48,7 @@ export async function getReportSyncState(
   await requireSession()
   const supabase = createClient()
   const { data, error } = await supabase
-    .from('work_reports')
+    .from('arbeitsberichte')
     .select('version, last_mutation_id, status')
     .eq('id', id)
     .maybeSingle()
@@ -62,7 +62,7 @@ export async function reviewReport(input: unknown): Promise<ActionResult<{ statu
   const parsed = reviewSchema.safeParse(input)
   if (!parsed.success) return invalid(parsed.error)
   const supabase = createClient()
-  const { data, error } = await supabase.rpc('review_work_report', {
+  const { data, error } = await supabase.rpc('arbeitsbericht_pruefen', {
     p_report_id: parsed.data.report_id,
     p_expected_version: parsed.data.expected_version,
     p_decision: parsed.data.decision,
@@ -76,7 +76,7 @@ export async function reviewReport(input: unknown): Promise<ActionResult<{ statu
 export async function deleteDraft(id: string, version: number): Promise<ActionResult<null>> {
   await requireSession()
   const supabase = createClient()
-  const { error } = await supabase.rpc('delete_work_report_draft', { p_report_id: id, p_expected_version: version })
+  const { error } = await supabase.rpc('arbeitsbericht_entwurf_loeschen', { p_report_id: id, p_expected_version: version })
   if (error) return fromDbError(error)
   revalidateReports()
   return ok(null)

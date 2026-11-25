@@ -33,7 +33,7 @@ function payload(overrides: Record<string, unknown> & { id: string }) {
 
 async function save(p: Record<string, unknown>) {
   const res = await db.query<{ r: { id: string; version: number; status: string; replayed: boolean } }>(
-    'select public.save_work_report($1::jsonb) as r',
+    'select public.arbeitsbericht_speichern($1::jsonb) as r',
     [JSON.stringify(p)],
   )
   return res.rows[0].r
@@ -43,8 +43,8 @@ async function entriesFor(reportId: string) {
   await db.asAdmin()
   const res = await db.query<{ id: string; employee_id: string; duration_minutes: number; entry_date: string; job_id: string }>(
     `select t.id, t.employee_id, t.duration_minutes, t.entry_date::text, t.job_id
-       from public.time_entries t
-       join public.work_report_time_entries l on l.time_entry_id = t.id
+       from public.zeiteintraege t
+       join public.arbeitsbericht_zeiteintraege l on l.time_entry_id = t.id
       where l.work_report_id = $1 order by t.employee_id`,
     [reportId],
   )
@@ -53,7 +53,7 @@ async function entriesFor(reportId: string) {
 
 async function totalEntryCount() {
   await db.asAdmin()
-  const res = await db.query<{ n: number }>('select count(*)::int as n from public.time_entries')
+  const res = await db.query<{ n: number }>('select count(*)::int as n from public.zeiteintraege')
   return res.rows[0].n
 }
 
@@ -163,7 +163,7 @@ describe('Arbeitsbericht ↔ Zeiteinträge (eine Quelle der Wahrheit)', () => {
     const entries = await entriesFor(reportId)
     expect(entries).toHaveLength(1)
     await db.asAdmin()
-    const orphan = await db.query('select 1 from public.time_entries where employee_id = $1 and entry_type = $2', [
+    const orphan = await db.query('select 1 from public.zeiteintraege where employee_id = $1 and entry_type = $2', [
       ids.azubi,
       'kundenarbeit',
     ])
@@ -191,7 +191,7 @@ describe('Arbeitsbericht ↔ Zeiteinträge (eine Quelle der Wahrheit)', () => {
 
     await db.as(ids.office)
     const approved = await db.query<{ r: { version: number; status: string } }>(
-      `select public.review_work_report($1, $2, 'approve', null) as r`,
+      `select public.arbeitsbericht_pruefen($1, $2, 'approve', null) as r`,
       [reportId, r.version],
     )
     expect(approved.rows[0].r.status).toBe('freigegeben')
@@ -234,8 +234,8 @@ describe('Arbeitsbericht ↔ Zeiteinträge (eine Quelle der Wahrheit)', () => {
     await db.asAdmin()
     const audit = await db.query<{ reason: string; old_minutes: number; new_minutes: number }>(
       `select reason, (old_data->>'duration_minutes')::int as old_minutes, (new_data->>'duration_minutes')::int as new_minutes
-         from public.audit_logs
-        where table_name = 'time_entries' and action = 'UPDATE' and reason is not null
+         from public.aenderungsprotokoll
+        where table_name = 'zeiteintraege' and action = 'UPDATE' and reason is not null
         order by id desc limit 1`,
     )
     expect(audit.rows[0]).toEqual({ reason: 'Arbeitszeit laut Rücksprache korrigiert', old_minutes: 150, new_minutes: 135 })
@@ -243,7 +243,7 @@ describe('Arbeitsbericht ↔ Zeiteinträge (eine Quelle der Wahrheit)', () => {
 
   it('Ersteller kann eingereichte/freigegebene Berichte nicht mehr ändern', async () => {
     await db.asAdmin()
-    const current = await db.query<{ version: number }>('select version from public.work_reports where id = $1', [reportId])
+    const current = await db.query<{ version: number }>('select version from public.arbeitsberichte where id = $1', [reportId])
     await db.as(ids.geselleUser)
     await expect(
       save(
@@ -263,19 +263,19 @@ describe('Arbeitsbericht ↔ Zeiteinträge (eine Quelle der Wahrheit)', () => {
     expect(await entriesFor(draftId)).toHaveLength(1)
     const before = await totalEntryCount()
     await db.as(ids.geselleUser)
-    await db.query('select public.delete_work_report_draft($1, $2)', [draftId, r.version])
+    await db.query('select public.arbeitsbericht_entwurf_loeschen($1, $2)', [draftId, r.version])
     expect(await totalEntryCount()).toBe(before - 1)
   })
 
   it('Datenbank verhindert doppelte Verknüpfung pro Bericht und Mitarbeiter', async () => {
     await db.asAdmin()
     const entry = await db.query<{ id: string }>(
-      `insert into public.time_entries (employee_id, entry_date, entry_type, job_id, duration_minutes, billable)
+      `insert into public.zeiteintraege (employee_id, entry_date, entry_type, job_id, duration_minutes, billable)
        values ($1, '2026-11-21', 'kundenarbeit', $2, 30, true) returning id`,
       [ids.geselle, ids.jobA],
     )
     await expect(
-      db.query('insert into public.work_report_time_entries (work_report_id, time_entry_id, employee_id) values ($1, $2, $3)', [
+      db.query('insert into public.arbeitsbericht_zeiteintraege (work_report_id, time_entry_id, employee_id) values ($1, $2, $3)', [
         reportId,
         entry.rows[0].id,
         ids.geselle,

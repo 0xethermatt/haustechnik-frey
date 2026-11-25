@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: 'Mitarbeiter' }
 export default async function EmployeesPage() {
   await requireOffice()
   const supabase = createClient()
-  const { data } = await supabase.from('employees').select('*').order('is_active', { ascending: false }).order('last_name')
+  const { data } = await supabase.from('mitarbeiter').select('*').order('is_active', { ascending: false }).order('last_name')
   const employees = (data ?? []) as Employee[]
   return (
     <>
