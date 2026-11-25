@@ -166,6 +166,11 @@ Invitation e-mails are visible in Mailpit at http://127.0.0.1:54324.
    users are invited from `/intern/benutzer`.
 5. Verify: `/intern` redirects to login; website pages unchanged; install the PWA on one Android and one iPhone.
 
+**Hosting decision (25.11.2026):** Supabase (region Frankfurt, `eu-central-1`) as the only data store; Vercel
+serverless functions pinned to Frankfurt (`vercel.json` → `regions: ["fra1"]`) so database round-trips stay short.
+A US provider with EU data residency was accepted by the business; the standard DPA (AVV) is still signed in both
+dashboards as a formality.
+
 ## 8. Backup & restore strategy (to be set up before production use)
 
 - **Supabase Pro plan** for daily automated backups (7 days); enable **Point-in-Time Recovery** if the budget allows
