@@ -3,6 +3,7 @@ import './ops.css'
 import { ThemeProvider } from '@/components/ops/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { ServiceWorkerRegister } from '@/components/ops/service-worker-register'
+import { isSupabaseConfigured } from '@/lib/ops/supabase/env'
 
 export const metadata: Metadata = {
   title: { default: 'Frey Betrieb', template: '%s · Frey Betrieb' },
@@ -32,11 +33,27 @@ export default function OpsRootLayout({ children }: { children: React.ReactNode 
     <html lang="de" suppressHydrationWarning>
       <body className="min-h-dvh font-sans">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
+          {isSupabaseConfigured() ? children : <NotConfigured />}
           <Toaster />
         </ThemeProvider>
         <ServiceWorkerRegister />
       </body>
     </html>
+  )
+}
+
+/** Hinweis statt Fehlerseite, solange die Datenbank-Zugangsdaten in Vercel fehlen. */
+function NotConfigured() {
+  return (
+    <div className="flex min-h-dvh items-center justify-center bg-muted/40 px-4">
+      <div className="max-w-sm rounded-2xl border bg-background p-6 text-center shadow-sm">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-lg font-bold text-primary-foreground">F</div>
+        <h1 className="text-lg font-semibold">Noch nicht eingerichtet</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Die Betriebsplattform ist installiert, aber noch nicht mit der Datenbank verbunden. Es fehlen die Supabase-Zugangsdaten in
+          den Vercel-Einstellungen.
+        </p>
+      </div>
+    </div>
   )
 }
