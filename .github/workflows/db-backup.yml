@@ -1,0 +1,34 @@
+name: Datenbank-Backup
+
+on:
+  schedule:
+    - cron: '17 2 * * *' # täglich ca. 3–4 Uhr deutscher Zeit
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Backup erstellen (verschlüsselt)
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: bash scripts/backup-db.sh backup
+      - uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_number }}
+          path: backup/*.gpg
+          retention-days: 90
+          if-no-files-found: error

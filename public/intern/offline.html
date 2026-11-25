@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Offline · Frey Betrieb</title>
+    <style>
+      :root { color-scheme: light dark; --fg: #1a1420; --muted: #6b6573; --bg: #fff; --primary: #6b2d8b; }
+      @media (prefers-color-scheme: dark) { :root { --fg: #f2eff5; --muted: #a39dab; --bg: #130f16; --primary: #c79ae0; } }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--fg); }
+      main { max-width: 22rem; padding: 2rem 1.25rem; text-align: center; }
+      .logo { width: 48px; height: 48px; border-radius: 14px; background: var(--primary); color: var(--bg); display: grid; place-items: center; font-weight: 700; margin: 0 auto 1.25rem; }
+      p { color: var(--muted); line-height: 1.5; }
+      button { margin-top: 1rem; height: 44px; padding: 0 1.25rem; border-radius: 10px; border: 0; background: var(--primary); color: var(--bg); font-size: 1rem; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="logo">F</div>
+      <h1>Keine Verbindung</h1>
+      <p>Die Seite konnte nicht geladen werden. Bereits eingegebene, noch nicht gespeicherte Berichte bleiben auf diesem Gerät gesichert.</p>
+      <button onclick="location.reload()">Erneut versuchen</button>
+    </main>
+  </body>
+</html>
