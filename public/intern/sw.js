@@ -4,7 +4,7 @@
  * zwischengespeichert – nur statische Build-Dateien und eine Offline-Seite.
  * Ungespeicherte Formulareingaben sichert die App selbst lokal.
  */
-const VERSION = 'frey-ops-v1'
+const VERSION = 'frey-ops-v2'
 const OFFLINE_URL = '/intern/offline.html'
 
 self.addEventListener('install', (event) => {

@@ -15,6 +15,7 @@ const buttonVariants = cva(
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
         success: 'bg-success text-success-foreground shadow-sm hover:bg-success/90',
+        brand: 'rounded-full bg-[#E8A030] font-bold text-white shadow-sm hover:bg-[#C8841A] hover:shadow-[0_0_40px_rgba(232,160,48,0.3)] focus-visible:ring-[#E8A030]',
       },
       size: {
         default: 'h-11 px-4 md:h-10',

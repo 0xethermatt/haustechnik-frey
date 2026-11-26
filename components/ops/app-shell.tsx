@@ -18,6 +18,7 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react'
+import Logo from '@/components/Logo'
 import { cn } from '@/lib/ops/utils'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { ThemeToggle } from './theme-toggle'
@@ -66,7 +67,7 @@ export function AppShell({
       {/* Desktop-Seitenleiste */}
       <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r bg-background md:flex">
         <div className="flex h-16 items-center gap-2.5 px-5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">F</div>
+          <Logo size={34} withText={false} />
           <div className="leading-tight">
             <div className="text-sm font-semibold">Frey Haustechnik</div>
             <div className="text-xs text-muted-foreground">Betriebsplattform</div>

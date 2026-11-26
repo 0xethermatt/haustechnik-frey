@@ -26,11 +26,11 @@ export function LoginForm({ next, linkError }: { next?: string; linkError?: bool
           {state.error}
         </p>
       ) : null}
-      <SubmitButton className="w-full" size="lg" pendingLabel="Anmelden …">
+      <SubmitButton variant="brand" className="w-full" size="lg" pendingLabel="Anmelden …">
         Anmelden
       </SubmitButton>
       <div className="text-center">
-        <Link href="/intern/passwort-vergessen" className="text-sm text-muted-foreground hover:text-foreground">
+        <Link href="/intern/passwort-vergessen" className="text-sm font-medium text-[#6B2D8B] hover:underline">
           Passwort vergessen?
         </Link>
       </div>
