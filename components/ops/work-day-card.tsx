@@ -3,11 +3,12 @@
 import { TimeInput } from '@/components/ui/time-input'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, Clock, GraduationCap, Hammer, Loader2, Pencil, Trash2 } from 'lucide-react'
+import { Check, Clock, GraduationCap, Loader2, Pencil, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { formatMinutes } from '@/lib/ops/domain/time'
+import { BERUFSSCHULTAG } from '@/lib/ops/domain/workday'
 import { cn } from '@/lib/ops/utils'
 import { deleteWorkDay, saveWorkDay } from '@/app/(ops)/intern/(app)/zeiten/actions'
 
@@ -57,7 +58,6 @@ export function WorkDayCard({
   const [end, setEnd] = useState(workDay?.end_time.slice(0, 5) ?? defaults.end)
   const [breakMinutes, setBreakMinutes] = useState(workDay?.break_minutes ?? defaults.breakMinutes)
   const [note, setNote] = useState(workDay?.note ?? '')
-  const [school, setSchool] = useState(workDay?.berufsschule ?? schoolDefault)
   const [error, setError] = useState<string>()
   const [pending, startTransition] = useTransition()
   const minutes = start && end ? spanMinutes(start, end, breakMinutes) : 0
@@ -73,13 +73,38 @@ export function WorkDayCard({
           end_time: end,
           break_minutes: breakMinutes,
           note,
-          berufsschule: school,
+          berufsschule: false,
         })
         if (!res.ok) {
           setError(Object.values(res.fieldErrors ?? {})[0] ?? res.error)
           return
         }
         toast.success('Arbeitszeit gespeichert')
+        setEditing(false)
+        router.refresh()
+      } catch {
+        setError('Keine Verbindung. Bitte erneut versuchen.')
+      }
+    })
+
+  const saveSchool = () =>
+    startTransition(async () => {
+      setError(undefined)
+      try {
+        const res = await saveWorkDay({
+          employee_id: employeeId,
+          work_date: date,
+          start_time: BERUFSSCHULTAG.start,
+          end_time: BERUFSSCHULTAG.end,
+          break_minutes: BERUFSSCHULTAG.breakMinutes,
+          note: '',
+          berufsschule: true,
+        })
+        if (!res.ok) {
+          setError(Object.values(res.fieldErrors ?? {})[0] ?? res.error)
+          return
+        }
+        toast.success('Berufsschule gespeichert')
         setEditing(false)
         router.refresh()
       } catch {
@@ -109,21 +134,36 @@ export function WorkDayCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             {workDay.berufsschule ? <GraduationCap className="h-3.5 w-3.5 text-primary" /> : null}
-            {workDay.berufsschule ? 'Berufsschule' : title}
+            {title}
           </div>
           <div className="tabular font-semibold">
-            {workDay.start_time.slice(0, 5)}–{workDay.end_time.slice(0, 5)} Uhr
-            <span className="font-normal text-muted-foreground">
-              {' '}
-              · {workDay.break_minutes ? `${workDay.break_minutes} min Pause · ` : ''}
-              {formatMinutes(workDay.duration_minutes)}
-            </span>
+            {workDay.berufsschule ? (
+              <>
+                Berufsschule
+                <span className="font-normal text-muted-foreground"> · {formatMinutes(workDay.duration_minutes)} pauschal</span>
+              </>
+            ) : (
+              <>
+                {workDay.start_time.slice(0, 5)}–{workDay.end_time.slice(0, 5)} Uhr
+                <span className="font-normal text-muted-foreground">
+                  {' '}
+                  · {workDay.break_minutes ? `${workDay.break_minutes} min Pause · ` : ''}
+                  {formatMinutes(workDay.duration_minutes)}
+                </span>
+              </>
+            )}
           </div>
           {workDay.note ? <div className="truncate text-xs text-muted-foreground">{workDay.note}</div> : null}
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setEditing(true)} aria-label="Arbeitszeit ändern">
-          <Pencil />
-        </Button>
+        {workDay.berufsschule ? (
+          <Button variant="ghost" size="icon" onClick={remove} disabled={pending} aria-label="Berufsschultag zurücksetzen">
+            <Trash2 />
+          </Button>
+        ) : (
+          <Button variant="ghost" size="icon" onClick={() => setEditing(true)} aria-label="Arbeitszeit ändern">
+            <Pencil />
+          </Button>
+        )}
       </div>
     )
   }
@@ -135,25 +175,17 @@ export function WorkDayCard({
         <span className="font-semibold">{title}</span>
         <span className="tabular ml-auto text-sm text-muted-foreground">{minutes > 0 ? formatMinutes(minutes) : '–'}</span>
       </div>
-      {canSchool || school ? (
-        <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1" role="radiogroup" aria-label="Art des Arbeitstags">
-          {[false, true].map((isSchool) => (
-            <button
-              key={String(isSchool)}
-              type="button"
-              role="radio"
-              aria-checked={school === isSchool}
-              onClick={() => setSchool(isSchool)}
-              className={cn(
-                'flex h-9 items-center justify-center gap-1.5 rounded-md text-sm text-muted-foreground',
-                school === isSchool && 'bg-background font-medium text-foreground shadow-sm',
-              )}
-            >
-              {isSchool ? <GraduationCap className="h-4 w-4" /> : <Hammer className="h-4 w-4" />}
-              {isSchool ? 'Berufsschule' : 'Betrieb'}
-            </button>
-          ))}
-        </div>
+      {canSchool ? (
+        <Button
+          type="button"
+          variant={schoolDefault ? 'default' : 'outline'}
+          className="w-full"
+          onClick={saveSchool}
+          disabled={pending}
+        >
+          {pending ? <Loader2 className="animate-spin" /> : <GraduationCap />}
+          {schoolDefault ? 'Berufsschule laut Plan · 8 Std. speichern' : 'Heute Berufsschule · 8 Std.'}
+        </Button>
       ) : null}
       <div className="grid grid-cols-3 gap-2">
         <label className="space-y-1 text-xs text-muted-foreground">
@@ -196,7 +228,7 @@ export function WorkDayCard({
         ) : null}
         <Button className="flex-1" size="lg" onClick={save} disabled={pending}>
           {pending ? <Loader2 className="animate-spin" /> : <Check />}
-          {workDay ? 'Speichern' : `${school ? 'Schule ' : ''}${start}–${end} speichern`}
+          {workDay ? 'Speichern' : `${start}–${end} speichern`}
         </Button>
       </div>
     </div>

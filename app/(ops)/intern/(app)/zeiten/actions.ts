@@ -7,6 +7,7 @@ import { fail, fromDbError, invalid, ok, type ActionResult } from '@/lib/ops/act
 import { absenceSchema, placeAbbreviationSchema, timeEntrySchema, workDaySchema } from '@/lib/ops/validation/schemas'
 import { berlinLocalToUtc, berlinToday } from '@/lib/ops/domain/dates'
 import { durationFromSpan } from '@/lib/ops/domain/time'
+import { BERUFSSCHULTAG } from '@/lib/ops/domain/workday'
 
 function revalidateTime() {
   revalidatePath('/intern', 'layout')
@@ -100,6 +101,13 @@ export async function saveWorkDay(input: unknown): Promise<ActionResult<{ id: st
   if (!ctx.isOffice && w.employee_id !== ctx.employee?.id) return fail('Nur die eigene Arbeitszeit erfassen.', { code: 'FORBIDDEN' })
   if (w.berufsschule && !ctx.isOffice && ctx.employee?.employment_role !== 'auszubildender')
     return fail('Berufsschule können nur Auszubildende eintragen.', { code: 'FORBIDDEN' })
+  if (w.berufsschule && !ctx.isOffice) {
+    // Azubis erfassen Schule pauschal (8 Stunden) – keine eigenen Zeitangaben
+    w.start_time = BERUFSSCHULTAG.start
+    w.end_time = BERUFSSCHULTAG.end
+    w.break_minutes = BERUFSSCHULTAG.breakMinutes
+    w.note = null
+  }
   if (w.work_date > berlinToday()) return fail('Arbeitszeit kann nicht im Voraus erfasst werden.', { code: 'INVALID' })
   const supabase = createClient()
   const { data, error } = await supabase

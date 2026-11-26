@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildTimesheetRows, defaultScheduleFor, placeLabel, shortCompanyName, sumTimesheet } from '@/lib/ops/domain/workday'
+import { BERUFSSCHULTAG, buildTimesheetRows, defaultScheduleFor, placeLabel, shortCompanyName, sumTimesheet } from '@/lib/ops/domain/workday'
 import { sheetName, buildTimesheetWorkbook } from '@/lib/ops/exports/timesheet-xlsx'
 import ExcelJS from 'exceljs'
 
@@ -111,5 +111,13 @@ describe('Berufsschultag im Stundenzettel', () => {
   it('zählt als Arbeitszeit und trägt „Schule“ als Bemerkung ein', () => {
     expect(school[5]).toMatchObject({ durationMinutes: 450, remarks: ['Schule'], isAbsence: false })
     expect(sumTimesheet(school)).toEqual({ minutes: 450, days: 1 })
+  })
+})
+
+describe('Berufsschule pauschal', () => {
+  it('ist genau 8 Stunden ohne Pause', () => {
+    const [sh, sm] = BERUFSSCHULTAG.start.split(':').map(Number)
+    const [eh, em] = BERUFSSCHULTAG.end.split(':').map(Number)
+    expect(eh * 60 + em - (sh * 60 + sm) - BERUFSSCHULTAG.breakMinutes).toBe(480)
   })
 })
