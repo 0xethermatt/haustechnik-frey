@@ -288,3 +288,11 @@ export const placeAbbreviationSchema = z.object({
   city: z.string().trim().min(1, 'Ort fehlt.').max(100),
   abbreviation: z.string().trim().min(1, 'Kürzel fehlt.').max(20),
 })
+
+export const photoPhases = ['bestand', 'rohinstallation', 'heizungsanlage', 'fertigmontage', 'inbetriebnahme', 'sonstiges'] as const
+
+export const photoUploadSchema = z.object({
+  job_id: z.uuid('Bitte einen Auftrag wählen.'),
+  phase: z.enum(photoPhases),
+  caption: optionalText(300),
+})

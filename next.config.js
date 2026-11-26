@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Fotos werden vorab verkleinert (~0,3 MB), das Standardlimit für Server Actions (1 MB) wäre zu knapp.
+  experimental: { serverActions: { bodySizeLimit: '5mb' } },
   async redirects() {
     return [
       {

@@ -27,6 +27,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { ReportStatusBadge } from '@/components/ops/status-badges'
 import { DurationInput } from './duration-input'
 import { JobPicker } from './job-picker'
+import { PhotoUploadButton } from '@/components/ops/photos/photo-upload-button'
 import { addDays, berlinToday, utcToBerlinTime } from '@/lib/ops/domain/dates'
 import { formatMinutes } from '@/lib/ops/domain/time'
 import { EMPLOYMENT_ROLE_LABELS, MATERIAL_UNITS } from '@/lib/ops/domain/labels'
@@ -369,6 +370,7 @@ export function ReportForm({
           />
         </div>
         {errors.report_date ? <p className="mt-1.5 text-sm text-destructive">{errors.report_date}</p> : null}
+        {state.job_id ? <PhotoUploadButton jobId={state.job_id} className="mt-3 w-full" label="Fotos zum Auftrag hinzufügen" /> : null}
       </Section>
 
       <Section title="Ausgeführte Arbeiten" step={2} error={errors.activities}>

@@ -4,6 +4,7 @@ import type {
   EmploymentRole,
   JobCategory,
   JobStatus,
+  PhotoPhase,
   ReportStatus,
   TimeEntryType,
 } from './types'
@@ -79,3 +80,15 @@ export const ABSENCE_TYPE_LABELS: Record<AbsenceType, string> = {
 }
 
 export const MATERIAL_UNITS = ['Stk', 'm', 'm²', 'kg', 'l', 'Pkg', 'Satz', 'Rolle', 'Std'] as const
+
+/** Reihenfolge entspricht dem Ablauf auf der Baustelle. */
+export const PHOTO_PHASES: PhotoPhase[] = ['bestand', 'rohinstallation', 'heizungsanlage', 'fertigmontage', 'inbetriebnahme', 'sonstiges']
+
+export const PHOTO_PHASE_LABELS: Record<PhotoPhase, string> = {
+  bestand: 'Bestand / vorher',
+  rohinstallation: 'Rohinstallation',
+  heizungsanlage: 'Heizungsanlage',
+  fertigmontage: 'Fertigmontage',
+  inbetriebnahme: 'Inbetriebnahme',
+  sonstiges: 'Sonstiges',
+}

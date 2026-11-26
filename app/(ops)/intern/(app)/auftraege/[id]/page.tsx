@@ -6,6 +6,9 @@ import { requireSession } from '@/lib/ops/auth'
 import { createClient } from '@/lib/ops/supabase/server'
 import { loadDirectory } from '@/lib/ops/data/common'
 import { loadReports } from '@/lib/ops/data/reports'
+import { loadJobPhotos } from '@/lib/ops/data/photos'
+import { PhotoGallery } from '@/components/ops/photos/photo-gallery'
+import { PhotoUploadButton } from '@/components/ops/photos/photo-upload-button'
 import { formatDate } from '@/lib/ops/domain/dates'
 import { formatMinutes, summarizeEntries } from '@/lib/ops/domain/time'
 import { JOB_CATEGORY_LABELS } from '@/lib/ops/domain/labels'
@@ -32,9 +35,10 @@ export default async function JobPage({ params }: { params: { id: string } }) {
     .maybeSingle()
   if (!job) notFound()
 
-  const [directory, reports, { data: entries }, { data: materials }] = await Promise.all([
+  const [directory, reports, photos, { data: entries }, { data: materials }] = await Promise.all([
     loadDirectory(supabase),
     loadReports(supabase, { jobId: job.id, limit: 500 }),
+    loadJobPhotos(supabase, job.id),
     supabase
       .from('zeiteintraege')
       .select('id, employee_id, entry_date, entry_type, started_at, ended_at, break_minutes, duration_minutes, billable')
@@ -188,6 +192,30 @@ export default async function JobPage({ params }: { params: { id: string } }) {
           </div>
 
           <div className="space-y-4">
+            <section className="space-y-3" aria-label="Fotos">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-sm font-semibold text-muted-foreground">Fotos ({photos.length})</h2>
+                <PhotoUploadButton
+                  jobId={job.id}
+                  jobLabel={`${customer ? customerName(customer) : 'Kunde'} · ${job.title}`}
+                  size="sm"
+                />
+              </div>
+              <div className="rounded-xl border bg-card p-3">
+                <PhotoGallery
+                  photos={photos.map((p) => ({
+                    id: p.id,
+                    phase: p.phase,
+                    caption: p.caption,
+                    taken_on: p.taken_on,
+                    by: directory.profileName(p.created_by) ?? 'Büro',
+                    thumbUrl: p.thumbUrl,
+                    fullUrl: p.fullUrl,
+                    canDelete: ctx.isOffice || p.created_by === ctx.userId,
+                  }))}
+                />
+              </div>
+            </section>
             <section className="space-y-2">
               <h2 className="text-sm font-semibold text-muted-foreground">Arbeitsberichte ({reports.length})</h2>
               {reports.length ? <ReportList reports={reports} directory={directory} /> : <EmptyState title="Noch keine Berichte" />}

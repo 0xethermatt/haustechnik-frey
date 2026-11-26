@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { formatMinutes } from '@/lib/ops/domain/time'
-import { BERUFSSCHULTAG } from '@/lib/ops/domain/workday'
+import { ARBEITSTAG_STANDARD, BERUFSSCHULTAG } from '@/lib/ops/domain/workday'
 import { cn } from '@/lib/ops/utils'
 import { deleteWorkDay, saveWorkDay } from '@/app/(ops)/intern/(app)/zeiten/actions'
 
@@ -87,30 +87,32 @@ export function WorkDayCard({
       }
     })
 
-  const saveSchool = () =>
+  const saveQuick = (times: { start: string; end: string; breakMinutes: number }, school: boolean) =>
     startTransition(async () => {
       setError(undefined)
       try {
         const res = await saveWorkDay({
           employee_id: employeeId,
           work_date: date,
-          start_time: BERUFSSCHULTAG.start,
-          end_time: BERUFSSCHULTAG.end,
-          break_minutes: BERUFSSCHULTAG.breakMinutes,
+          start_time: times.start,
+          end_time: times.end,
+          break_minutes: times.breakMinutes,
           note: '',
-          berufsschule: true,
+          berufsschule: school,
         })
         if (!res.ok) {
           setError(Object.values(res.fieldErrors ?? {})[0] ?? res.error)
           return
         }
-        toast.success('Berufsschule gespeichert')
+        toast.success(school ? 'Berufsschule gespeichert' : 'Arbeitszeit gespeichert')
         setEditing(false)
         router.refresh()
       } catch {
         setError('Keine Verbindung. Bitte erneut versuchen.')
       }
     })
+  const saveSchool = () => saveQuick(BERUFSSCHULTAG, true)
+  const saveStandard = () => saveQuick(ARBEITSTAG_STANDARD, false)
 
   const remove = () =>
     startTransition(async () => {
@@ -175,6 +177,10 @@ export function WorkDayCard({
         <span className="font-semibold">{title}</span>
         <span className="tabular ml-auto text-sm text-muted-foreground">{minutes > 0 ? formatMinutes(minutes) : '–'}</span>
       </div>
+      <Button type="button" size="lg" className="w-full" onClick={saveStandard} disabled={pending}>
+        {pending ? <Loader2 className="animate-spin" /> : <Check />}
+        8,5 Std. ({ARBEITSTAG_STANDARD.start}–{ARBEITSTAG_STANDARD.end})
+      </Button>
       {canSchool ? (
         <Button
           type="button"
@@ -226,7 +232,7 @@ export function WorkDayCard({
             Abbrechen
           </Button>
         ) : null}
-        <Button className="flex-1" size="lg" onClick={save} disabled={pending}>
+        <Button className="flex-1" size="lg" variant={workDay ? 'default' : 'outline'} onClick={save} disabled={pending}>
           {pending ? <Loader2 className="animate-spin" /> : <Check />}
           {workDay ? 'Speichern' : `${start}–${end} speichern`}
         </Button>

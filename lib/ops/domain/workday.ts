@@ -17,6 +17,9 @@ export const DEFAULT_SCHEDULE: Record<number, { start: string; end: string; brea
   7: null,
 }
 
+/** Üblicher Arbeitstag im Betrieb: 8,5 Stunden, ohne Pausenabzug. */
+export const ARBEITSTAG_STANDARD = { start: '07:30', end: '16:00', breakMinutes: 0 } as const
+
 /** Berufsschultag pauschal: 8 Stunden, ohne Angaben des Azubis. */
 export const BERUFSSCHULTAG = { start: '07:30', end: '15:30', breakMinutes: 0 } as const
 
