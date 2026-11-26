@@ -1,5 +1,6 @@
 'use client'
 
+import { TimeInput } from '@/components/ui/time-input'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Check, Clock, Loader2, Pencil, Trash2 } from 'lucide-react'
@@ -126,11 +127,11 @@ export function WorkDayCard({
       <div className="grid grid-cols-3 gap-2">
         <label className="space-y-1 text-xs text-muted-foreground">
           Beginn
-          <Input type="time" value={start} onChange={(e) => setStart(e.target.value)} aria-label="Beginn" />
+          <TimeInput value={start} onValueChange={setStart} aria-label="Beginn" />
         </label>
         <label className="space-y-1 text-xs text-muted-foreground">
           Ende
-          <Input type="time" value={end} onChange={(e) => setEnd(e.target.value)} aria-label="Ende" />
+          <TimeInput value={end} onValueChange={setEnd} aria-label="Ende" />
         </label>
         <label className="space-y-1 text-xs text-muted-foreground">
           Pause (min)
