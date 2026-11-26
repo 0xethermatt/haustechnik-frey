@@ -173,7 +173,7 @@ export function CustomerForm({ customerId, initial, canEditNumbers }: { customer
         <CardHeader>
           <CardTitle>Rechnungsadresse</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-[1fr_8rem_1fr]">
+        <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_8rem_minmax(0,1fr)]">
           <Field label="Straße und Hausnummer" htmlFor="c-street" error={err('billing_street')}>
             <Input id="c-street" value={v.billing_street} onChange={set('billing_street')} />
           </Field>

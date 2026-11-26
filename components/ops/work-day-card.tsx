@@ -1,12 +1,14 @@
 'use client'
 
+import { TimeInput } from '@/components/ui/time-input'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, Clock, Loader2, Pencil, Trash2 } from 'lucide-react'
+import { Check, Clock, GraduationCap, Loader2, Pencil, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { formatMinutes } from '@/lib/ops/domain/time'
+import { ARBEITSTAG_STANDARD, BERUFSSCHULTAG } from '@/lib/ops/domain/workday'
 import { cn } from '@/lib/ops/utils'
 import { deleteWorkDay, saveWorkDay } from '@/app/(ops)/intern/(app)/zeiten/actions'
 
@@ -17,6 +19,7 @@ export interface WorkDayValue {
   break_minutes: number
   duration_minutes: number
   note: string | null
+  berufsschule?: boolean
 }
 
 function spanMinutes(start: string, end: string, breakMinutes: number) {
@@ -35,6 +38,8 @@ export function WorkDayCard({
   workDay,
   defaults,
   title,
+  canSchool = false,
+  schoolDefault = false,
   className,
 }: {
   employeeId: string
@@ -42,6 +47,9 @@ export function WorkDayCard({
   workDay?: WorkDayValue
   defaults: { start: string; end: string; breakMinutes: number }
   title: string
+  /** Azubis können den Tag als Berufsschultag erfassen */
+  canSchool?: boolean
+  schoolDefault?: boolean
   className?: string
 }) {
   const router = useRouter()
@@ -65,6 +73,7 @@ export function WorkDayCard({
           end_time: end,
           break_minutes: breakMinutes,
           note,
+          berufsschule: false,
         })
         if (!res.ok) {
           setError(Object.values(res.fieldErrors ?? {})[0] ?? res.error)
@@ -77,6 +86,33 @@ export function WorkDayCard({
         setError('Keine Verbindung. Bitte erneut versuchen.')
       }
     })
+
+  const saveQuick = (times: { start: string; end: string; breakMinutes: number }, school: boolean) =>
+    startTransition(async () => {
+      setError(undefined)
+      try {
+        const res = await saveWorkDay({
+          employee_id: employeeId,
+          work_date: date,
+          start_time: times.start,
+          end_time: times.end,
+          break_minutes: times.breakMinutes,
+          note: '',
+          berufsschule: school,
+        })
+        if (!res.ok) {
+          setError(Object.values(res.fieldErrors ?? {})[0] ?? res.error)
+          return
+        }
+        toast.success(school ? 'Berufsschule gespeichert' : 'Arbeitszeit gespeichert')
+        setEditing(false)
+        router.refresh()
+      } catch {
+        setError('Keine Verbindung. Bitte erneut versuchen.')
+      }
+    })
+  const saveSchool = () => saveQuick(BERUFSSCHULTAG, true)
+  const saveStandard = () => saveQuick(ARBEITSTAG_STANDARD, false)
 
   const remove = () =>
     startTransition(async () => {
@@ -98,20 +134,38 @@ export function WorkDayCard({
           <Check className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-xs text-muted-foreground">{title}</div>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            {workDay.berufsschule ? <GraduationCap className="h-3.5 w-3.5 text-primary" /> : null}
+            {title}
+          </div>
           <div className="tabular font-semibold">
-            {workDay.start_time.slice(0, 5)}–{workDay.end_time.slice(0, 5)} Uhr
-            <span className="font-normal text-muted-foreground">
-              {' '}
-              · {workDay.break_minutes ? `${workDay.break_minutes} min Pause · ` : ''}
-              {formatMinutes(workDay.duration_minutes)}
-            </span>
+            {workDay.berufsschule ? (
+              <>
+                Berufsschule
+                <span className="font-normal text-muted-foreground"> · {formatMinutes(workDay.duration_minutes)} pauschal</span>
+              </>
+            ) : (
+              <>
+                {workDay.start_time.slice(0, 5)}–{workDay.end_time.slice(0, 5)} Uhr
+                <span className="font-normal text-muted-foreground">
+                  {' '}
+                  · {workDay.break_minutes ? `${workDay.break_minutes} min Pause · ` : ''}
+                  {formatMinutes(workDay.duration_minutes)}
+                </span>
+              </>
+            )}
           </div>
           {workDay.note ? <div className="truncate text-xs text-muted-foreground">{workDay.note}</div> : null}
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setEditing(true)} aria-label="Arbeitszeit ändern">
-          <Pencil />
-        </Button>
+        {workDay.berufsschule ? (
+          <Button variant="ghost" size="icon" onClick={remove} disabled={pending} aria-label="Berufsschultag zurücksetzen">
+            <Trash2 />
+          </Button>
+        ) : (
+          <Button variant="ghost" size="icon" onClick={() => setEditing(true)} aria-label="Arbeitszeit ändern">
+            <Pencil />
+          </Button>
+        )}
       </div>
     )
   }
@@ -123,14 +177,30 @@ export function WorkDayCard({
         <span className="font-semibold">{title}</span>
         <span className="tabular ml-auto text-sm text-muted-foreground">{minutes > 0 ? formatMinutes(minutes) : '–'}</span>
       </div>
+      <Button type="button" size="lg" className="w-full" onClick={saveStandard} disabled={pending}>
+        {pending ? <Loader2 className="animate-spin" /> : <Check />}
+        8,5 Std. ({ARBEITSTAG_STANDARD.start}–{ARBEITSTAG_STANDARD.end})
+      </Button>
+      {canSchool ? (
+        <Button
+          type="button"
+          variant={schoolDefault ? 'default' : 'outline'}
+          className="w-full"
+          onClick={saveSchool}
+          disabled={pending}
+        >
+          {pending ? <Loader2 className="animate-spin" /> : <GraduationCap />}
+          {schoolDefault ? 'Berufsschule laut Plan · 8 Std. speichern' : 'Heute Berufsschule · 8 Std.'}
+        </Button>
+      ) : null}
       <div className="grid grid-cols-3 gap-2">
         <label className="space-y-1 text-xs text-muted-foreground">
           Beginn
-          <Input type="time" value={start} onChange={(e) => setStart(e.target.value)} aria-label="Beginn" />
+          <TimeInput value={start} onValueChange={setStart} aria-label="Beginn" />
         </label>
         <label className="space-y-1 text-xs text-muted-foreground">
           Ende
-          <Input type="time" value={end} onChange={(e) => setEnd(e.target.value)} aria-label="Ende" />
+          <TimeInput value={end} onValueChange={setEnd} aria-label="Ende" />
         </label>
         <label className="space-y-1 text-xs text-muted-foreground">
           Pause (min)
@@ -162,7 +232,7 @@ export function WorkDayCard({
             Abbrechen
           </Button>
         ) : null}
-        <Button className="flex-1" size="lg" onClick={save} disabled={pending}>
+        <Button className="flex-1" size="lg" variant={workDay ? 'default' : 'outline'} onClick={save} disabled={pending}>
           {pending ? <Loader2 className="animate-spin" /> : <Check />}
           {workDay ? 'Speichern' : `${start}–${end} speichern`}
         </Button>

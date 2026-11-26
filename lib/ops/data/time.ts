@@ -78,6 +78,7 @@ export interface WorkDayRow {
   break_minutes: number
   duration_minutes: number
   note: string | null
+  berufsschule: boolean
   created_at: string
 }
 
@@ -87,7 +88,7 @@ export async function loadWorkDays(
 ): Promise<WorkDayRow[]> {
   let q = supabase
     .from('arbeitstage')
-    .select('id, employee_id, work_date, start_time, end_time, break_minutes, duration_minutes, note, created_at')
+    .select('id, employee_id, work_date, start_time, end_time, break_minutes, duration_minutes, note, berufsschule, created_at')
     .gte('work_date', from)
     .lte('work_date', to)
   if (employeeIds) q = q.in('employee_id', employeeIds)

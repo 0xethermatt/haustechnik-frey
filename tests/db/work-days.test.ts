@@ -22,6 +22,22 @@ describe('Arbeitstage', () => {
     expect(res.rows[0].duration_minutes).toBe(480)
   })
 
+  it('Berufsschultag ist standardmäßig aus und kann vom Mitarbeiter gesetzt werden', async () => {
+    await db.as(ids.geselleUser)
+    expect((await db.query<{ berufsschule: boolean }>('select berufsschule from public.arbeitstage where employee_id = $1', [ids.geselle])).rows[0].berufsschule).toBe(false)
+    await db.query(
+      `insert into public.arbeitstage (employee_id, work_date, start_time, end_time, break_minutes, berufsschule)
+       values ($1, '2026-11-19', '08:00', '15:30', 0, true)`,
+      [ids.geselle],
+    )
+    const r = await db.query<{ berufsschule: boolean; duration_minutes: number }>(
+      `select berufsschule, duration_minutes from public.arbeitstage where employee_id = $1 and work_date = '2026-11-19'`,
+      [ids.geselle],
+    )
+    expect(r.rows[0]).toEqual({ berufsschule: true, duration_minutes: 450 })
+    await db.query(`delete from public.arbeitstage where employee_id = $1 and work_date = '2026-11-19'`, [ids.geselle])
+  })
+
   it('nur ein Arbeitstag pro Mitarbeiter und Datum', async () => {
     await db.as(ids.geselleUser)
     await expect(insert(ids.geselle)).rejects.toThrow(/duplicate key/)

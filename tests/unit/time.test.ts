@@ -99,6 +99,18 @@ describe('Prüfungen', () => {
   })
 })
 
+describe('Berufsschultag (Azubi)', () => {
+  const absences = [{ absence_type: 'berufsschule' as const, start_date: '2026-11-24', end_date: '2026-11-24', half_day: false }]
+  const base = { date: '2026-11-24', today: '2026-11-25', entries: [], absences }
+
+  it('Berufsschultag mit eigener Arbeitszeit ist kein Widerspruch', () => {
+    const codes = (workDay: { duration_minutes: number; break_minutes: number; berufsschule?: boolean }) =>
+      analyzeDay({ ...base, workDay }).map((f) => f.code)
+    expect(codes({ duration_minutes: 450, break_minutes: 0, berufsschule: true })).toEqual([])
+    expect(codes({ duration_minutes: 450, break_minutes: 0 })).toEqual(['ABSENCE_WITH_TIME'])
+  })
+})
+
 describe('Arbeitstag (Beginn/Ende/Pause) als Lohngrundlage', () => {
   const workDay = { duration_minutes: 480, break_minutes: 30 }
 

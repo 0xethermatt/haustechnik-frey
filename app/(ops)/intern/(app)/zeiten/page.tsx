@@ -41,11 +41,12 @@ export default async function TimePage({ searchParams }: { searchParams: { datum
     loadAbsences(supabase, { from: weekStart, to: weekEnd, employeeIds: [employeeId] }),
     loadWorkDays(supabase, { from: weekStart, to: weekEnd, employeeIds: [employeeId] }),
     loadJobOptions(supabase),
-    supabase.from('mitarbeiter').select('start_date, end_date').eq('id', employeeId).maybeSingle(),
+    supabase.from('mitarbeiter').select('start_date, end_date, employment_role').eq('id', employeeId).maybeSingle(),
   ])
   const days = buildDays({ from: weekStart, to: weekEnd, today, entries, absences, workDays, employment: employment.data ?? undefined })
   const day = days.find((d) => d.date === date)!
   const isOwn = employeeId === ctx.employee?.id
+  const isApprentice = employment.data?.employment_role === 'auszubildender'
   const canAdd = isOwn || ctx.isOffice
 
   const href = (d: string) => {
@@ -109,7 +110,7 @@ export default async function TimePage({ searchParams }: { searchParams: { datum
         </div>
         <WeekStrip days={days} selected={date} hrefFor={href} />
 
-        {canAdd && !(day.absence && !day.absence.half_day) ? (
+        {canAdd && (!(day.absence && !day.absence.half_day) || (isApprentice && day.absence?.absence_type === 'berufsschule')) ? (
           <WorkDayCard
             key={`${employeeId}-${date}-${day.workDay?.id ?? 'neu'}`}
             employeeId={employeeId}
@@ -117,6 +118,8 @@ export default async function TimePage({ searchParams }: { searchParams: { datum
             workDay={day.workDay}
             defaults={defaultScheduleFor(date)}
             title={date === today ? 'Arbeitszeit heute' : `Arbeitszeit ${formatDateLong(date)}`}
+            canSchool={isApprentice}
+            schoolDefault={day.absence?.absence_type === 'berufsschule'}
           />
         ) : null}
 

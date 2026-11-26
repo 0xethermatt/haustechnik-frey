@@ -6,7 +6,7 @@ import { requireSession } from '@/lib/ops/auth'
 import { createClient } from '@/lib/ops/supabase/server'
 import { createAdminClient } from '@/lib/ops/supabase/admin'
 import { fail, fromDbError, invalid, ok, type ActionResult } from '@/lib/ops/actions'
-import { inviteSchema, userAccessSchema } from '@/lib/ops/validation/schemas'
+import { createUserSchema, inviteSchema, userAccessSchema } from '@/lib/ops/validation/schemas'
 
 /**
  * Einladung per E-Mail (keine öffentliche Registrierung). Der Service-Role-Schlüssel
@@ -41,6 +41,47 @@ export async function inviteUser(input: unknown): Promise<ActionResult<{ id: str
     p_employee_id: parsed.data.employee_id,
   })
   if (accessError) return fromDbError(accessError)
+  revalidatePath('/intern/benutzer')
+  return ok({ id: data.user.id })
+}
+
+/**
+ * Zugang direkt mit Startpasswort anlegen (ohne E-Mail-Versand). Der Admin gibt das Passwort
+ * persönlich weiter; beim ersten Login muss die Person ein eigenes Passwort festlegen.
+ */
+export async function createUserWithPassword(input: unknown): Promise<ActionResult<{ id: string }>> {
+  const ctx = await requireSession()
+  if (!ctx.isAdmin) return fail('Nur Administratoren dürfen Zugänge anlegen.', { code: 'FORBIDDEN' })
+  const parsed = createUserSchema.safeParse(input)
+  if (!parsed.success) return invalid(parsed.error)
+
+  const admin = createAdminClient()
+  const { data, error } = await admin.auth.admin.createUser({
+    email: parsed.data.email,
+    password: parsed.data.password,
+    email_confirm: true,
+    user_metadata: { display_name: parsed.data.display_name, must_change_password: true },
+  })
+  if (error || !data.user) {
+    const exists = error?.code === 'email_exists' || /already|registered/i.test(error?.message ?? '')
+    return fail(exists ? 'Für diese E-Mail existiert bereits ein Zugang.' : 'Zugang konnte nicht angelegt werden.', {
+      code: exists ? 'DUPLICATE' : 'UNKNOWN',
+      fieldErrors: exists ? { email: 'Existiert bereits.' } : undefined,
+    })
+  }
+
+  const supabase = createClient()
+  const { error: accessError } = await supabase.rpc('zugang_setzen', {
+    p_user_id: data.user.id,
+    p_roles: parsed.data.roles,
+    p_is_active: true,
+    p_display_name: parsed.data.display_name,
+    p_employee_id: parsed.data.employee_id,
+  })
+  if (accessError) {
+    await admin.auth.admin.deleteUser(data.user.id)
+    return fromDbError(accessError)
+  }
   revalidatePath('/intern/benutzer')
   return ok({ id: data.user.id })
 }

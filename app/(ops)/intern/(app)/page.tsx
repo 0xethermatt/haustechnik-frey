@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { Employee, JobStatus } from '@/lib/ops/domain/types'
 import { customerName, formatJobNumber, fullName } from '@/lib/ops/utils'
+import { INTERNAL_KINDS, INTERNAL_KIND_LABELS } from '@/lib/ops/domain/internal-work'
 
 export default async function HomePage() {
   const ctx = await requireSession()
@@ -51,6 +52,7 @@ async function EmployeeToday({ ctx }: { ctx: SessionContext }) {
   const open = myReports.filter((r) => r.status === 'entwurf' || r.status === 'korrektur_erforderlich')
   const activeJobs = jobs.filter((j) => ['geplant', 'in_bearbeitung'].includes(j.status)).slice(0, 8)
   const firstName = ctx.employee?.first_name ?? ctx.profile.display_name.split(' ')[0]
+  const isApprentice = ctx.employee?.employment_role === 'auszubildender'
 
   return (
     <>
@@ -61,8 +63,18 @@ async function EmployeeToday({ ctx }: { ctx: SessionContext }) {
             <Plus className="!size-5" /> Neuer Arbeitsbericht
           </Link>
         </Button>
+        {employeeId ? (
+          <div className="flex items-center gap-2 text-sm">
+            <span className="shrink-0 text-muted-foreground">Ohne Kunde:</span>
+            {INTERNAL_KINDS.slice(0, 3).map((k) => (
+              <Button key={k} asChild variant="outline" size="sm" className="flex-1">
+                <Link href={`/intern/berichte/neu?art=${k}`}>{INTERNAL_KIND_LABELS[k]}</Link>
+              </Button>
+            ))}
+          </div>
+        ) : null}
 
-        {employeeId && !day.absence && isRegularWorkday(today) ? (
+        {employeeId && (!day.absence || (isApprentice && day.absence.absence_type === 'berufsschule')) && (isRegularWorkday(today) || day.absence) ? (
           <WorkDayCard
             key={day.workDay?.id ?? 'neu'}
             employeeId={employeeId}
@@ -70,6 +82,8 @@ async function EmployeeToday({ ctx }: { ctx: SessionContext }) {
             workDay={day.workDay}
             defaults={defaultScheduleFor(today)}
             title="Arbeitszeit heute"
+            canSchool={isApprentice}
+            schoolDefault={day.absence?.absence_type === 'berufsschule'}
           />
         ) : null}
 
@@ -204,7 +218,7 @@ async function OfficeDashboard({ ctx }: { ctx: SessionContext }) {
     { label: 'Zur Prüfung', value: submitted.length, href: '/intern/berichte?status=eingereicht', icon: ClipboardCheck, tone: 'text-primary' },
     { label: 'Korrektur angefordert', value: corrections.length, href: '/intern/berichte?status=korrektur_erforderlich', icon: FileWarning, tone: 'text-warning' },
     { label: 'Abrechnungsbereit', value: ready.length, href: '/intern/auftraege?status=abrechnungsbereit', icon: Receipt, tone: 'text-success' },
-    { label: 'Fehlende Zeiten', value: missing.reduce((n, m) => n + m.days.length, 0), href: '/intern/zeiten/uebersicht', icon: TimerOff, tone: 'text-destructive' },
+    { label: 'Fehlende Zeiten', value: missing.reduce((n, m) => n + m.days.length, 0), href: '/intern/abgabe', icon: TimerOff, tone: 'text-destructive' },
   ]
 
   return (
@@ -231,7 +245,7 @@ async function OfficeDashboard({ ctx }: { ctx: SessionContext }) {
           ))}
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
           <div className="space-y-4">
             <section className="space-y-2">
               <SectionTitle title="Warten auf Freigabe" href="/intern/berichte?status=eingereicht" />

@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { AlertTriangle, Building2, Check, ChevronRight, Loader2, MapPin, Plus, Search, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
+import { INTERNAL_KINDS, INTERNAL_KIND_LABELS } from '@/lib/ops/domain/internal-work'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -57,6 +59,7 @@ export function JobPicker({
   error?: string
   disabled?: boolean
 }) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<Step>('pick')
   const [query, setQuery] = useState('')
@@ -140,6 +143,21 @@ export function JobPicker({
               <Button type="button" variant="outline" className="w-full justify-start" onClick={() => setStep('customer')}>
                 <Plus /> Neuer Auftrag (Kunde suchen oder anlegen)
               </Button>
+              <div>
+                <div className="mb-1.5 text-xs font-medium text-muted-foreground">Arbeit ohne Kunde</div>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {INTERNAL_KINDS.map((k) => (
+                    <button
+                      key={k}
+                      type="button"
+                      onClick={() => router.push(`/intern/berichte/neu?art=${k}`)}
+                      className="h-10 rounded-lg border bg-background text-sm font-medium active:bg-accent"
+                    >
+                      {INTERNAL_KIND_LABELS[k]}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <ul className="divide-y rounded-xl border">
                 {filtered.length === 0 ? (
                   <li className="p-4 text-center text-sm text-muted-foreground">Kein passender Auftrag.</li>
@@ -338,7 +356,7 @@ function NewCustomerForm({
         const res = await createCustomer({
           customer: { ...f, company_name: isCompany ? f.company_name : null },
           service_location: null,
-          service_location_same_as_billing: true,
+          service_location_if_complete: true,
         })
         if (!res.ok) {
           setErrors(res.fieldErrors ?? {})
@@ -349,7 +367,7 @@ function NewCustomerForm({
           id: res.data.id,
           customer_number: 0,
           name: isCompany && f.company_name ? f.company_name : [f.first_name, f.last_name].filter(Boolean).join(' '),
-          place: `${f.billing_postal_code} ${f.billing_city}`,
+          place: [f.billing_postal_code, f.billing_city].filter(Boolean).join(' '),
           limited: false,
           locations: res.data.location_id
             ? [{ id: res.data.location_id, label: null, street: f.billing_street, postal_code: f.billing_postal_code, city: f.billing_city }]
@@ -387,7 +405,7 @@ function NewCustomerForm({
       </div>
       {isCompany ? (
         <Field label="Firmenname" htmlFor="nc-company" error={errors['customer.last_name']}>
-          <Input id="nc-company" value={f.company_name} onChange={set('company_name')} autoComplete="off" />
+          <Input id="nc-company" value={f.company_name} onChange={set('company_name')} autoComplete="off" autoFocus />
         </Field>
       ) : null}
       <div className="grid grid-cols-2 gap-3">
@@ -395,23 +413,26 @@ function NewCustomerForm({
           <Input id="nc-first" value={f.first_name} onChange={set('first_name')} autoComplete="off" />
         </Field>
         <Field label={isCompany ? 'Ansprechpartner' : 'Nachname'} htmlFor="nc-last" error={!isCompany ? errors['customer.last_name'] : undefined} optional={isCompany}>
-          <Input id="nc-last" value={f.last_name} onChange={set('last_name')} autoComplete="off" />
+          <Input id="nc-last" value={f.last_name} onChange={set('last_name')} autoComplete="off" autoFocus={!isCompany} />
         </Field>
       </div>
-      <Field label="Straße und Hausnummer" htmlFor="nc-street" error={errors.billing_street}>
+      <Field label="Straße und Hausnummer" htmlFor="nc-street" error={errors.billing_street} optional>
         <Input id="nc-street" value={f.billing_street} onChange={set('billing_street')} autoComplete="off" />
       </Field>
-      <div className="grid grid-cols-[7rem_1fr] gap-3">
-        <Field label="PLZ" htmlFor="nc-plz" error={errors['customer.billing_postal_code']}>
+      <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3">
+        <Field label="PLZ" htmlFor="nc-plz" error={errors['customer.billing_postal_code']} optional>
           <Input id="nc-plz" value={f.billing_postal_code} onChange={set('billing_postal_code')} inputMode="numeric" maxLength={5} />
         </Field>
-        <Field label="Ort" htmlFor="nc-city">
+        <Field label="Ort" htmlFor="nc-city" optional>
           <Input id="nc-city" value={f.billing_city} onChange={set('billing_city')} />
         </Field>
       </div>
       <Field label="Telefon" htmlFor="nc-phone" optional>
         <Input id="nc-phone" value={f.phone} onChange={set('phone')} type="tel" inputMode="tel" />
       </Field>
+      <p className="-mt-1 text-xs text-muted-foreground">
+        Nur der Name ist nötig. Adresse und Telefon kann das Büro später ergänzen.
+      </p>
 
       {duplicates.length > 0 ? (
         <div className="space-y-2 rounded-xl border border-warning/40 bg-warning/5 p-3">
@@ -474,7 +495,12 @@ function QuickJobForm({
   const submit = () => {
     startTransition(async () => {
       try {
-        const res = await quickCreateJob({ customer_id: customer.id, service_location_id: locationId, title, category })
+        const res = await quickCreateJob({
+          customer_id: customer.id,
+          service_location_id: locationId,
+          title: title.trim() || JOB_CATEGORY_LABELS[category],
+          category,
+        })
         if (!res.ok) {
           setError(res.fieldErrors?.title ?? res.error)
           return
@@ -524,10 +550,9 @@ function QuickJobForm({
         </Field>
       ) : null}
 
-      <Field label="Was ist zu tun?" htmlFor="qj-title" error={error}>
+      <Field label="Was ist zu tun?" htmlFor="qj-title" error={error} optional>
         <Input
           id="qj-title"
-          autoFocus
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="z. B. Wasserhahn austauschen"

@@ -113,6 +113,8 @@ export function isRegularWorkday(date: string): boolean {
 export interface WorkDayTimes {
   duration_minutes: number
   break_minutes: number
+  /** Berufsschultag (Azubi) */
+  berufsschule?: boolean
 }
 
 export interface DayTotals {
@@ -202,7 +204,8 @@ export function analyzeDay(input: AnalyzeDayInput): DayFlag[] {
     })
   }
 
-  if (absence && !absence.half_day && (workDay || totals.allocatedMinutes > 0)) {
+  const schoolDay = !!workDay?.berufsschule && absence?.absence_type === 'berufsschule'
+  if (absence && !absence.half_day && !schoolDay && (workDay || totals.allocatedMinutes > 0)) {
     flags.push({
       code: 'ABSENCE_WITH_TIME',
       severity: 'warning',

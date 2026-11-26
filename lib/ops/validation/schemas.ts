@@ -75,6 +75,8 @@ export const customerCreateSchema = z.object({
   /** Einsatzort = Rechnungsadresse übernehmen oder separat angeben */
   service_location: serviceLocationSchema.nullable(),
   service_location_same_as_billing: z.boolean().default(false),
+  /** Schnellanlage: Einsatzort nur anlegen, wenn die Adresse vollständig ist – sonst ohne Fehler weglassen */
+  service_location_if_complete: z.boolean().default(false),
 })
 
 export const jobSchema = z.object({
@@ -240,6 +242,10 @@ export const inviteSchema = z.object({
   employee_id: z.uuid().nullable().optional().transform((v) => v ?? null),
 })
 
+export const createUserSchema = inviteSchema.extend({
+  password: z.string().min(10, 'Mindestens 10 Zeichen.').max(72, 'Höchstens 72 Zeichen.'),
+})
+
 export const userAccessSchema = z.object({
   user_id: z.uuid(),
   roles: z.array(z.enum(appRoles)),
@@ -266,6 +272,7 @@ export const workDaySchema = z
     end_time: timeOfDay,
     break_minutes: z.number().int().min(0).max(600),
     note: optionalText(500),
+    berufsschule: z.boolean().default(false),
   })
   .refine((w) => w.end_time > w.start_time, { message: 'Ende muss nach dem Beginn liegen.', path: ['end_time'] })
   .refine(
@@ -280,4 +287,12 @@ export const workDaySchema = z
 export const placeAbbreviationSchema = z.object({
   city: z.string().trim().min(1, 'Ort fehlt.').max(100),
   abbreviation: z.string().trim().min(1, 'Kürzel fehlt.').max(20),
+})
+
+export const photoPhases = ['bestand', 'rohinstallation', 'heizungsanlage', 'fertigmontage', 'inbetriebnahme', 'sonstiges'] as const
+
+export const photoUploadSchema = z.object({
+  job_id: z.uuid('Bitte einen Auftrag wählen.'),
+  phase: z.enum(photoPhases),
+  caption: optionalText(300),
 })

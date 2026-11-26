@@ -115,22 +115,25 @@ export async function createCustomer(input: unknown): Promise<ActionResult<{ id:
   const ctx = await requireSession()
   const parsed = customerCreateSchema.safeParse(input)
   if (!parsed.success) return invalid(parsed.error)
-  const { customer, service_location, service_location_same_as_billing } = parsed.data
+  const { customer, service_location, service_location_same_as_billing, service_location_if_complete } = parsed.data
 
   let location = service_location
-  if (service_location_same_as_billing) {
+  if (service_location_same_as_billing || service_location_if_complete) {
     const loc = serviceLocationSchema.safeParse({
       street: customer.billing_street,
       postal_code: customer.billing_postal_code,
       city: customer.billing_city,
     })
-    if (!loc.success) {
+    if (loc.success) {
+      location = loc.data
+    } else if (service_location_if_complete) {
+      location = null
+    } else {
       return fail('Für den Einsatzort bitte Straße, PLZ und Ort der Rechnungsadresse angeben.', {
         code: 'INVALID',
         fieldErrors: { billing_street: 'Adresse unvollständig.' },
       })
     }
-    location = loc.data
   }
 
   const supabase = createClient()

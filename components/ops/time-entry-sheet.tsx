@@ -1,5 +1,6 @@
 'use client'
 
+import { TimeInput } from '@/components/ui/time-input'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Plus, Trash2 } from 'lucide-react'
@@ -190,10 +191,10 @@ export function TimeEntrySheet({
             {e.useSpan ? (
               <div className="grid grid-cols-3 gap-2">
                 <Field label="Beginn" htmlFor="te-start">
-                  <Input id="te-start" type="time" value={e.start_time} onChange={(ev) => set({ start_time: ev.target.value })} required />
+                  <TimeInput id="te-start" value={e.start_time} onValueChange={(v) => set({ start_time: v })} required />
                 </Field>
                 <Field label="Ende" htmlFor="te-end" error={errors.end_time}>
-                  <Input id="te-end" type="time" value={e.end_time} onChange={(ev) => set({ end_time: ev.target.value })} required />
+                  <TimeInput id="te-end" value={e.end_time} onValueChange={(v) => set({ end_time: v })} required />
                 </Field>
                 {e.entry_type !== 'pause' ? (
                   <Field label="Pause (min)" htmlFor="te-break" error={errors.break_minutes}>

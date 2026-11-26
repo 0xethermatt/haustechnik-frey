@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildTimesheetRows, defaultScheduleFor, placeLabel, shortCompanyName, sumTimesheet } from '@/lib/ops/domain/workday'
+import { BERUFSSCHULTAG, buildTimesheetRows, defaultScheduleFor, placeLabel, shortCompanyName, sumTimesheet } from '@/lib/ops/domain/workday'
 import { sheetName, buildTimesheetWorkbook } from '@/lib/ops/exports/timesheet-xlsx'
 import ExcelJS from 'exceljs'
 
@@ -96,5 +96,28 @@ describe('Excel-Export', () => {
     expect(ws.getCell(6, 5).numFmt).toBe('[h]:mm')
     expect(ws.getCell(7, 8).value).toBe('Weiß LA, Schulz Elchingen, Lager, TÜV')
     expect(asTime(ws.getCell(37, 5).value)).toBe('14:00')
+  })
+})
+
+describe('Berufsschultag im Stundenzettel', () => {
+  const school = buildTimesheetRows({
+    month: '2026-10',
+    abbreviations,
+    workDays: [{ work_date: '2026-10-06', start_time: '08:00:00', end_time: '15:30:00', break_minutes: 0, duration_minutes: 450, note: null, berufsschule: true, created_at: '2026-10-06T15:40:00Z' }],
+    entries: [],
+    absences: [{ absence_type: 'berufsschule', start_date: '2026-10-06', end_date: '2026-10-06', half_day: false }],
+  })
+
+  it('zählt als Arbeitszeit und trägt „Schule“ als Bemerkung ein', () => {
+    expect(school[5]).toMatchObject({ durationMinutes: 450, remarks: ['Schule'], isAbsence: false })
+    expect(sumTimesheet(school)).toEqual({ minutes: 450, days: 1 })
+  })
+})
+
+describe('Berufsschule pauschal', () => {
+  it('ist genau 8 Stunden ohne Pause', () => {
+    const [sh, sm] = BERUFSSCHULTAG.start.split(':').map(Number)
+    const [eh, em] = BERUFSSCHULTAG.end.split(':').map(Number)
+    expect(eh * 60 + em - (sh * 60 + sm) - BERUFSSCHULTAG.breakMinutes).toBe(480)
   })
 })

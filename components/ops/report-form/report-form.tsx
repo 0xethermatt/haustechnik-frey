@@ -1,5 +1,6 @@
 'use client'
 
+import { TimeInput } from '@/components/ui/time-input'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
@@ -26,6 +27,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { ReportStatusBadge } from '@/components/ops/status-badges'
 import { DurationInput } from './duration-input'
 import { JobPicker } from './job-picker'
+import { PhotoUploadButton } from '@/components/ops/photos/photo-upload-button'
 import { addDays, berlinToday, utcToBerlinTime } from '@/lib/ops/domain/dates'
 import { formatMinutes } from '@/lib/ops/domain/time'
 import { EMPLOYMENT_ROLE_LABELS, MATERIAL_UNITS } from '@/lib/ops/domain/labels'
@@ -368,6 +370,7 @@ export function ReportForm({
           />
         </div>
         {errors.report_date ? <p className="mt-1.5 text-sm text-destructive">{errors.report_date}</p> : null}
+        {state.job_id ? <PhotoUploadButton jobId={state.job_id} className="mt-3 w-full" label="Fotos zum Auftrag hinzufügen" /> : null}
       </Section>
 
       <Section title="Ausgeführte Arbeiten" step={2} error={errors.activities}>
@@ -496,21 +499,19 @@ export function ReportForm({
               {p.useSpan ? (
                 <div className="grid grid-cols-3 gap-2">
                   <Field label="Beginn" htmlFor={`start-${p.employee_id}`}>
-                    <Input
+                    <TimeInput
                       id={`start-${p.employee_id}`}
-                      type="time"
                       value={p.start_time}
                       disabled={locked}
-                      onChange={(e) => updateParticipant(update, p.employee_id, { start_time: e.target.value })}
+                      onValueChange={(v) => updateParticipant(update, p.employee_id, { start_time: v })}
                     />
                   </Field>
                   <Field label="Ende" htmlFor={`end-${p.employee_id}`}>
-                    <Input
+                    <TimeInput
                       id={`end-${p.employee_id}`}
-                      type="time"
                       value={p.end_time}
                       disabled={locked}
-                      onChange={(e) => updateParticipant(update, p.employee_id, { end_time: e.target.value })}
+                      onValueChange={(v) => updateParticipant(update, p.employee_id, { end_time: v })}
                     />
                   </Field>
                   <Field label="Pause (min)" htmlFor={`break-${p.employee_id}`}>

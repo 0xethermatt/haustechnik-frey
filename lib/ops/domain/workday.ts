@@ -17,6 +17,12 @@ export const DEFAULT_SCHEDULE: Record<number, { start: string; end: string; brea
   7: null,
 }
 
+/** Üblicher Arbeitstag im Betrieb: 8,5 Stunden, ohne Pausenabzug. */
+export const ARBEITSTAG_STANDARD = { start: '07:30', end: '16:00', breakMinutes: 0 } as const
+
+/** Berufsschultag pauschal: 8 Stunden, ohne Angaben des Azubis. */
+export const BERUFSSCHULTAG = { start: '07:30', end: '15:30', breakMinutes: 0 } as const
+
 export function defaultScheduleFor(date: string) {
   return DEFAULT_SCHEDULE[isoWeekday(date)] ?? { start: '07:30', end: '16:00', breakMinutes: 0 }
 }
@@ -39,6 +45,7 @@ export interface WorkDayInput {
   break_minutes: number
   duration_minutes: number
   note: string | null
+  berufsschule?: boolean
   created_at: string
 }
 
@@ -155,6 +162,7 @@ export function buildTimesheetRows(opts: {
       else if (e.entry_type === 'intern') add(e.note || ENTRY_REMARK.intern)
       else add(ENTRY_REMARK[e.entry_type])
     }
+    if (wd?.berufsschule) add('Schule')
     add(wd?.note)
     if (absence) add(ABSENCE_REMARK[absence.absence_type] + (absence.half_day ? ' (½ Tag)' : ''))
     else if (holiday && !wd) add(holiday)

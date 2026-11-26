@@ -8,6 +8,7 @@ export type NavIcon =
   | 'timeOverview'
   | 'employees'
   | 'users'
+  | 'check'
 
 export interface NavItem {
   href: string
@@ -18,6 +19,7 @@ export interface NavItem {
 export function navItemsFor(roles: { isOffice: boolean; isAdmin: boolean; isEmployee: boolean }): NavItem[] {
   const items: NavItem[] = [
     { href: '/intern', label: roles.isOffice ? 'Übersicht' : 'Heute', icon: 'home' },
+    ...(roles.isOffice ? [{ href: '/intern/abgabe', label: 'Kontrolle', icon: 'check' as const }] : []),
     { href: '/intern/berichte', label: 'Berichte', icon: 'reports' },
     { href: '/intern/kalender', label: 'Kalender', icon: 'calendar' },
     { href: '/intern/auftraege', label: 'Aufträge', icon: 'jobs' },

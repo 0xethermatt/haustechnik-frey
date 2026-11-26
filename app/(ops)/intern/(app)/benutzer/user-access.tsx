@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, Mail, Pencil } from 'lucide-react'
+import { Check, Copy, KeyRound, Loader2, Mail, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,7 +12,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { APP_ROLE_LABELS } from '@/lib/ops/domain/labels'
 import type { AppRole } from '@/lib/ops/domain/types'
 import { cn } from '@/lib/ops/utils'
-import { inviteUser, setUserAccess } from './actions'
+import { createUserWithPassword, inviteUser, setUserAccess } from './actions'
 
 const ROLES: { role: AppRole; hint: string }[] = [
   { role: 'employee', hint: 'Eigene Aufträge, Berichte und Zeiten' },
@@ -50,6 +50,129 @@ function RolePicker({ roles, onChange }: { roles: AppRole[]; onChange: (r: AppRo
   )
 }
 
+const WORDS = ['Kupfer', 'Rohr', 'Wasser', 'Heizung', 'Ventil', 'Brenner', 'Pumpe', 'Dusche', 'Fliese', 'Zange', 'Schlauch', 'Sonne', 'Berg', 'Wald', 'Fluss', 'Apfel']
+
+function generatePassword() {
+  const buf = new Uint32Array(4)
+  crypto.getRandomValues(buf)
+  return `${WORDS[buf[0] % WORDS.length]}-${WORDS[buf[1] % WORDS.length]}-${WORDS[buf[2] % WORDS.length]}-${1000 + (buf[3] % 9000)}`
+}
+
+export function CreateUserSheet({ employees }: { employees: EmployeeOption[] }) {
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const blank = () => ({ email: '', display_name: '', roles: ['employee'] as AppRole[], employee_id: '', password: generatePassword() })
+  const [v, setV] = useState(blank)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [created, setCreated] = useState<{ email: string; password: string } | null>(null)
+  const [copied, setCopied] = useState(false)
+  const [pending, start] = useTransition()
+
+  const close = (next: boolean) => {
+    setOpen(next)
+    if (!next) {
+      setCreated(null)
+      setCopied(false)
+      setErrors({})
+      setV(blank())
+    }
+  }
+
+  return (
+    <>
+      <Button onClick={() => close(true)}>
+        <KeyRound /> Zugang anlegen
+      </Button>
+      <Sheet open={open} onOpenChange={close}>
+        <SheetContent
+          title={created ? 'Zugang angelegt' : 'Zugang mit Passwort anlegen'}
+          description={created ? undefined : 'Ohne E-Mail-Versand. Du gibst das Startpasswort persönlich weiter, beim ersten Login wird ein eigenes verlangt.'}
+        >
+          {created ? (
+            <div className="space-y-4">
+              <div className="space-y-2 rounded-xl border bg-muted p-4 text-sm">
+                <div>
+                  <div className="text-xs text-muted-foreground">E-Mail</div>
+                  <div className="font-medium">{created.email}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Startpasswort (wird nur jetzt angezeigt)</div>
+                  <div className="font-mono text-base font-semibold">{created.password}</div>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  navigator.clipboard
+                    .writeText(`Zugang Frey Haustechnik\nAdresse: https://haustechnik-frey.de/intern\nE-Mail: ${created.email}\nStartpasswort: ${created.password}\n(beim ersten Login ein eigenes Passwort festlegen)`)
+                    .then(() => setCopied(true))
+                    .catch(() => toast.error('Kopieren nicht möglich – bitte abschreiben.'))
+                }}
+              >
+                {copied ? <Check /> : <Copy />} {copied ? 'Kopiert' : 'Zugangsdaten kopieren (z. B. für WhatsApp)'}
+              </Button>
+              <Button type="button" className="w-full" onClick={() => close(false)}>
+                Fertig
+              </Button>
+            </div>
+          ) : (
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault()
+                start(async () => {
+                  const res = await createUserWithPassword({ ...v, employee_id: v.employee_id || null }).catch(() => null)
+                  if (!res) return void toast.error('Keine Verbindung.')
+                  if (!res.ok) {
+                    setErrors(res.fieldErrors ?? {})
+                    return void toast.error(res.error)
+                  }
+                  setCreated({ email: v.email.trim().toLowerCase(), password: v.password })
+                  router.refresh()
+                })
+              }}
+            >
+              <Field label="Name" htmlFor="c-name" error={errors.display_name}>
+                <Input id="c-name" value={v.display_name} onChange={(e) => setV({ ...v, display_name: e.target.value })} autoComplete="off" />
+              </Field>
+              <Field label="E-Mail" htmlFor="c-email" error={errors.email}>
+                <Input id="c-email" type="email" value={v.email} onChange={(e) => setV({ ...v, email: e.target.value })} autoComplete="off" />
+              </Field>
+              <Field label="Startpasswort" htmlFor="c-pw" error={errors.password}>
+                <div className="flex gap-2">
+                  <Input id="c-pw" value={v.password} onChange={(e) => setV({ ...v, password: e.target.value })} className="font-mono" autoComplete="off" />
+                  <Button type="button" variant="outline" onClick={() => setV({ ...v, password: generatePassword() })}>
+                    Neu
+                  </Button>
+                </div>
+              </Field>
+              <Field label="Rollen" error={errors.roles}>
+                <RolePicker roles={v.roles} onChange={(roles) => setV({ ...v, roles })} />
+              </Field>
+              <Field label="Mitarbeiterdatensatz" htmlFor="c-emp" optional hint="Für Mitarbeiter erforderlich, damit Zeiten zugeordnet werden">
+                <NativeSelect id="c-emp" value={v.employee_id} onChange={(e) => setV({ ...v, employee_id: e.target.value })}>
+                  <option value="">Keiner</option>
+                  {employees.map((e) => (
+                    <option key={e.id} value={e.id} disabled={e.linked}>
+                      {e.name}
+                      {e.linked ? ' (bereits verknüpft)' : ''}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </Field>
+              <Button type="submit" className="w-full" size="lg" disabled={pending}>
+                {pending ? <Loader2 className="animate-spin" /> : null} Zugang anlegen
+              </Button>
+            </form>
+          )}
+        </SheetContent>
+      </Sheet>
+    </>
+  )
+}
+
 export function InviteUserSheet({ employees }: { employees: EmployeeOption[] }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -59,7 +182,7 @@ export function InviteUserSheet({ employees }: { employees: EmployeeOption[] }) 
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
+      <Button variant="outline" onClick={() => setOpen(true)}>
         <Mail /> Einladen
       </Button>
       <Sheet open={open} onOpenChange={setOpen}>

@@ -6,7 +6,7 @@ import type { AppRole } from '@/lib/ops/domain/types'
 import { PageBody, PageHeader } from '@/components/ops/page-header'
 import { Badge } from '@/components/ui/badge'
 import { fullName } from '@/lib/ops/utils'
-import { EditAccessSheet, InviteUserSheet } from './user-access'
+import { CreateUserSheet, EditAccessSheet, InviteUserSheet } from './user-access'
 
 export const metadata: Metadata = { title: 'Zugänge' }
 
@@ -26,7 +26,12 @@ export default async function UsersPage() {
       <PageHeader
         title="Zugänge"
         description="Nur eingeladene Personen können sich anmelden. Rollen werden in der Datenbank geprüft."
-        actions={<InviteUserSheet employees={options} />}
+        actions={
+          <div className="flex gap-2">
+            <CreateUserSheet employees={options} />
+            <InviteUserSheet employees={options} />
+          </div>
+        }
       />
       <PageBody>
         <ul className="divide-y overflow-hidden rounded-xl border bg-card">

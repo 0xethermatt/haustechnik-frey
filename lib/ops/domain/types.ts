@@ -14,6 +14,7 @@ export type JobCategory =
   | 'sonstiges'
 export type ReportStatus = 'entwurf' | 'eingereicht' | 'freigegeben' | 'korrektur_erforderlich'
 export type TimeEntryType = 'kundenarbeit' | 'fahrzeit' | 'materialbeschaffung' | 'lager' | 'intern' | 'pause'
+export type PhotoPhase = 'bestand' | 'rohinstallation' | 'heizungsanlage' | 'fertigmontage' | 'inbetriebnahme' | 'sonstiges'
 export type AbsenceType = 'urlaub' | 'krank' | 'berufsschule' | 'feiertag' | 'sonstiges'
 
 export interface Profile {
