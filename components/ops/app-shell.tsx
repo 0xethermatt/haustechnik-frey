@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import {
   CalendarDays,
+  ClipboardCheck,
   Clock,
   FileText,
   Home,
@@ -35,6 +36,7 @@ const ICONS: Record<NavIcon, LucideIcon> = {
   timeOverview: Timer,
   employees: Users,
   users: ShieldCheck,
+  check: ClipboardCheck,
 }
 
 function isActive(pathname: string, href: string) {
@@ -58,7 +60,7 @@ export function AppShell({
   const [moreOpen, setMoreOpen] = useState(false)
 
   const primaryMobile = items.filter((i) => ['home', 'reports'].includes(i.icon))
-  const thirdMobile = items.find((i) => i.icon === 'time') ?? items.find((i) => i.icon === 'calendar')
+  const thirdMobile = items.find((i) => i.icon === 'check') ?? items.find((i) => i.icon === 'time') ?? items.find((i) => i.icon === 'calendar')
   const mobileTabs = [...primaryMobile, ...(thirdMobile ? [thirdMobile] : [])]
   const moreItems = items.filter((i) => !mobileTabs.includes(i))
 

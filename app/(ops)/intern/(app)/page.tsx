@@ -204,7 +204,7 @@ async function OfficeDashboard({ ctx }: { ctx: SessionContext }) {
     { label: 'Zur Prüfung', value: submitted.length, href: '/intern/berichte?status=eingereicht', icon: ClipboardCheck, tone: 'text-primary' },
     { label: 'Korrektur angefordert', value: corrections.length, href: '/intern/berichte?status=korrektur_erforderlich', icon: FileWarning, tone: 'text-warning' },
     { label: 'Abrechnungsbereit', value: ready.length, href: '/intern/auftraege?status=abrechnungsbereit', icon: Receipt, tone: 'text-success' },
-    { label: 'Fehlende Zeiten', value: missing.reduce((n, m) => n + m.days.length, 0), href: '/intern/zeiten/uebersicht', icon: TimerOff, tone: 'text-destructive' },
+    { label: 'Fehlende Zeiten', value: missing.reduce((n, m) => n + m.days.length, 0), href: '/intern/abgabe', icon: TimerOff, tone: 'text-destructive' },
   ]
 
   return (
