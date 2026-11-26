@@ -242,6 +242,10 @@ export const inviteSchema = z.object({
   employee_id: z.uuid().nullable().optional().transform((v) => v ?? null),
 })
 
+export const createUserSchema = inviteSchema.extend({
+  password: z.string().min(10, 'Mindestens 10 Zeichen.').max(72, 'Höchstens 72 Zeichen.'),
+})
+
 export const userAccessSchema = z.object({
   user_id: z.uuid(),
   roles: z.array(z.enum(appRoles)),

@@ -25,10 +25,12 @@ export async function signIn(_prev: AuthFormState, formData: FormData): Promise<
   const parsed = credentials.safeParse({ email: formData.get('email'), password: formData.get('password') })
   if (!parsed.success) return { error: 'Bitte E-Mail und Passwort eingeben.' }
   let error: AuthErrorLike | null = null
+  let mustChangePassword = false
   try {
     const supabase = createClient()
     const res = await supabase.auth.signInWithPassword(parsed.data)
     error = res.error
+    mustChangePassword = res.data.user?.user_metadata?.must_change_password === true
   } catch (e) {
     error = { name: 'ClientSetupError', message: e instanceof Error ? e.message : String(e) }
   }
@@ -37,7 +39,7 @@ export async function signIn(_prev: AuthFormState, formData: FormData): Promise<
     console.error('[login]', JSON.stringify({ code: error.code, status: error.status, name: error.name, message: error.message }))
     return { error: loginErrorMessage(error) }
   }
-  redirect(safeNext(formData.get('next')))
+  redirect(mustChangePassword ? '/intern/passwort' : safeNext(formData.get('next')))
 }
 
 export async function signOut() {
@@ -70,7 +72,10 @@ export async function updatePassword(_prev: AuthFormState, formData: FormData): 
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return { error: 'Der Link ist abgelaufen. Bitte erneut anfordern.' }
-  const { error } = await supabase.auth.updateUser({ password: parsed.data.password })
+  const { error } = await supabase.auth.updateUser({
+    password: parsed.data.password,
+    data: { must_change_password: false },
+  })
   if (error) return { error: error.code === 'same_password' ? 'Bitte ein neues Passwort wählen.' : 'Passwort konnte nicht gespeichert werden.' }
   redirect('/intern')
 }
