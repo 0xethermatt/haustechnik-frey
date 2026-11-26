@@ -115,7 +115,7 @@ export function JobForm({
               ))}
             </NativeSelect>
           </Field>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 md:col-span-2">
             <Field label="Beginn" htmlFor="j-start" error={errors.start_date}>
               <Input id="j-start" type="date" value={v.start_date} onChange={(e) => set('start_date', e.target.value)} />
             </Field>

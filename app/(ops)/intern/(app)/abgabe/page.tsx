@@ -106,7 +106,7 @@ export default async function SubmissionCheckPage({ searchParams }: { searchPara
         <div className="flex items-center justify-between">
           <Button asChild variant="ghost" size="sm">
             <Link href={link(addDays(from, -7))}>
-              <ChevronLeft /> Vorwoche
+              <ChevronLeft /> Zurück
             </Link>
           </Button>
           <Button asChild variant="ghost" size="sm">
@@ -115,11 +115,11 @@ export default async function SubmissionCheckPage({ searchParams }: { searchPara
           {addDays(from, 7) <= today ? (
             <Button asChild variant="ghost" size="sm">
               <Link href={link(addDays(from, 7))}>
-                Nächste Woche <ChevronRight />
+                Weiter <ChevronRight />
               </Link>
             </Button>
           ) : (
-            <span className="w-28" />
+            <span className="w-20" />
           )}
         </div>
 
