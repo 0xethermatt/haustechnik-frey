@@ -75,6 +75,8 @@ export const customerCreateSchema = z.object({
   /** Einsatzort = Rechnungsadresse übernehmen oder separat angeben */
   service_location: serviceLocationSchema.nullable(),
   service_location_same_as_billing: z.boolean().default(false),
+  /** Schnellanlage: Einsatzort nur anlegen, wenn die Adresse vollständig ist – sonst ohne Fehler weglassen */
+  service_location_if_complete: z.boolean().default(false),
 })
 
 export const jobSchema = z.object({
