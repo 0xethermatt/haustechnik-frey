@@ -98,3 +98,18 @@ describe('Excel-Export', () => {
     expect(asTime(ws.getCell(37, 5).value)).toBe('14:00')
   })
 })
+
+describe('Berufsschultag im Stundenzettel', () => {
+  const school = buildTimesheetRows({
+    month: '2026-10',
+    abbreviations,
+    workDays: [{ work_date: '2026-10-06', start_time: '08:00:00', end_time: '15:30:00', break_minutes: 0, duration_minutes: 450, note: null, berufsschule: true, created_at: '2026-10-06T15:40:00Z' }],
+    entries: [],
+    absences: [{ absence_type: 'berufsschule', start_date: '2026-10-06', end_date: '2026-10-06', half_day: false }],
+  })
+
+  it('zählt als Arbeitszeit und trägt „Schule“ als Bemerkung ein', () => {
+    expect(school[5]).toMatchObject({ durationMinutes: 450, remarks: ['Schule'], isAbsence: false })
+    expect(sumTimesheet(school)).toEqual({ minutes: 450, days: 1 })
+  })
+})

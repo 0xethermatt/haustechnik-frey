@@ -27,6 +27,7 @@ const STATUS: Record<AbgabeStatus, { label: string; variant: BadgeProps['variant
   entwurf: { label: 'Nicht eingereicht', variant: 'warning' },
   offen: { label: 'Heute noch offen', variant: 'muted' },
   frei: { label: 'Frei', variant: 'muted' },
+  schule: { label: 'Berufsschule', variant: 'secondary' },
 }
 
 function reportsOf(entries: TimeEntryRow[]): AbgabeReport[] {
@@ -83,6 +84,7 @@ export default async function SubmissionCheckPage({ searchParams }: { searchPara
             reports,
             free: isoWeekday(date) > 5 || !!holiday || !!absence,
             isToday: date === today,
+            school: workDay?.berufsschule,
           })
           return { employee: e, workDay, absence, holiday, reports, ...result }
         })
@@ -171,7 +173,7 @@ export default async function SubmissionCheckPage({ searchParams }: { searchPara
                         <span className="tabular shrink-0 text-xs text-muted-foreground">{formatMinutes(rep.minutes)}</span>
                       </Link>
                     ))}
-                    {!r.reports.length && !r.absence ? (
+                    {!r.reports.length && !r.absence && r.status !== 'schule' ? (
                       <div className="flex items-center gap-1 text-muted-foreground">
                         <Minus className="h-3 w-3" /> kein Bericht
                       </div>

@@ -1,6 +1,6 @@
 import type { ReportStatus } from './types'
 
-export type AbgabeStatus = 'ok' | 'luecke' | 'kein_bericht' | 'entwurf' | 'keine_arbeitszeit' | 'nichts' | 'frei' | 'offen'
+export type AbgabeStatus = 'ok' | 'luecke' | 'kein_bericht' | 'entwurf' | 'keine_arbeitszeit' | 'nichts' | 'frei' | 'offen' | 'schule'
 
 export interface AbgabeReport {
   id: string
@@ -25,12 +25,15 @@ export function analyzeAbgabe(input: {
   free: boolean
   /** Heutiger Tag: noch nicht abgeschlossen */
   isToday: boolean
+  /** Arbeitstag ist ein Berufsschultag: kein Bericht nötig */
+  school?: boolean
   toleranceMinutes?: number
 }): { status: AbgabeStatus; gapMinutes: number } {
   const tolerance = input.toleranceMinutes ?? 15
   const { presentMinutes, allocatedMinutes, reports } = input
   const gap = presentMinutes == null ? 0 : presentMinutes - allocatedMinutes
 
+  if (input.school && presentMinutes != null && reports.length === 0) return { status: 'schule', gapMinutes: 0 }
   if (input.free && reports.length === 0) return { status: 'frei', gapMinutes: 0 }
 
   let status: AbgabeStatus

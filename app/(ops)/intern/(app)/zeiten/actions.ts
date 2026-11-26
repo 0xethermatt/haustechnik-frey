@@ -98,6 +98,8 @@ export async function saveWorkDay(input: unknown): Promise<ActionResult<{ id: st
   if (!parsed.success) return invalid(parsed.error)
   const w = parsed.data
   if (!ctx.isOffice && w.employee_id !== ctx.employee?.id) return fail('Nur die eigene Arbeitszeit erfassen.', { code: 'FORBIDDEN' })
+  if (w.berufsschule && !ctx.isOffice && ctx.employee?.employment_role !== 'auszubildender')
+    return fail('Berufsschule können nur Auszubildende eintragen.', { code: 'FORBIDDEN' })
   if (w.work_date > berlinToday()) return fail('Arbeitszeit kann nicht im Voraus erfasst werden.', { code: 'INVALID' })
   const supabase = createClient()
   const { data, error } = await supabase

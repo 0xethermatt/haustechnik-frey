@@ -272,6 +272,7 @@ export const workDaySchema = z
     end_time: timeOfDay,
     break_minutes: z.number().int().min(0).max(600),
     note: optionalText(500),
+    berufsschule: z.boolean().default(false),
   })
   .refine((w) => w.end_time > w.start_time, { message: 'Ende muss nach dem Beginn liegen.', path: ['end_time'] })
   .refine(

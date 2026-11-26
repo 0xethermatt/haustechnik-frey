@@ -133,6 +133,8 @@ maintained by the office, unknown towns written out), manual entries (Lager, Mat
 ("Schule", "Urlaub", "Krank" – red). `/intern/zeiten/stundenzettel` shows the month and downloads an `.xlsx` in the
 same layout (real Excel time values, one employee per printed A4 page).
 
+**ADR-7c – Berufsschule as a work-day variant (added 26.11.2026).** Apprentices record school days themselves via the work-day card (toggle "Betrieb / Berufsschule"). Stored as `arbeitstage.berufsschule` (boolean) instead of a new time-entry type: school hours count as working time, need no work report, appear as "Schule" on the timesheet and as "Berufsschule" (no problem) in the submission check. The office-managed absence type `berufsschule` still exists (planning of block weeks); an apprentice can additionally record the hours on such a day without triggering the absence-with-time warning. Only employees with role `auszubildender` (or the office) may set the flag (enforced in `saveWorkDay`).
+
 **ADR-8 – Daily consistency checks are hints, not rules.** Flags: overlapping spans (error), missing times on past
 regular workdays (warning), absence with work time, > 10 h/day, break hint following ArbZG §4 thresholds (info),
 unsubmitted reports. **No** overtime, vacation balance or payroll calculation.

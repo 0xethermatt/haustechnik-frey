@@ -51,6 +51,7 @@ async function EmployeeToday({ ctx }: { ctx: SessionContext }) {
   const open = myReports.filter((r) => r.status === 'entwurf' || r.status === 'korrektur_erforderlich')
   const activeJobs = jobs.filter((j) => ['geplant', 'in_bearbeitung'].includes(j.status)).slice(0, 8)
   const firstName = ctx.employee?.first_name ?? ctx.profile.display_name.split(' ')[0]
+  const isApprentice = ctx.employee?.employment_role === 'auszubildender'
 
   return (
     <>
@@ -62,7 +63,7 @@ async function EmployeeToday({ ctx }: { ctx: SessionContext }) {
           </Link>
         </Button>
 
-        {employeeId && !day.absence && isRegularWorkday(today) ? (
+        {employeeId && (!day.absence || (isApprentice && day.absence.absence_type === 'berufsschule')) && (isRegularWorkday(today) || day.absence) ? (
           <WorkDayCard
             key={day.workDay?.id ?? 'neu'}
             employeeId={employeeId}
@@ -70,6 +71,8 @@ async function EmployeeToday({ ctx }: { ctx: SessionContext }) {
             workDay={day.workDay}
             defaults={defaultScheduleFor(today)}
             title="Arbeitszeit heute"
+            canSchool={isApprentice}
+            schoolDefault={day.absence?.absence_type === 'berufsschule'}
           />
         ) : null}
 
