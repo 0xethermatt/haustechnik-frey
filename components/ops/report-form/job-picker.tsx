@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { AlertTriangle, Building2, Check, ChevronRight, Loader2, MapPin, Plus, Search, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
+import { INTERNAL_KINDS, INTERNAL_KIND_LABELS } from '@/lib/ops/domain/internal-work'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -57,6 +59,7 @@ export function JobPicker({
   error?: string
   disabled?: boolean
 }) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<Step>('pick')
   const [query, setQuery] = useState('')
@@ -140,6 +143,21 @@ export function JobPicker({
               <Button type="button" variant="outline" className="w-full justify-start" onClick={() => setStep('customer')}>
                 <Plus /> Neuer Auftrag (Kunde suchen oder anlegen)
               </Button>
+              <div>
+                <div className="mb-1.5 text-xs font-medium text-muted-foreground">Arbeit ohne Kunde</div>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {INTERNAL_KINDS.map((k) => (
+                    <button
+                      key={k}
+                      type="button"
+                      onClick={() => router.push(`/intern/berichte/neu?art=${k}`)}
+                      className="h-10 rounded-lg border bg-background text-sm font-medium active:bg-accent"
+                    >
+                      {INTERNAL_KIND_LABELS[k]}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <ul className="divide-y rounded-xl border">
                 {filtered.length === 0 ? (
                   <li className="p-4 text-center text-sm text-muted-foreground">Kein passender Auftrag.</li>

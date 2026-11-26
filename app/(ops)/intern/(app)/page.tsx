@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { Employee, JobStatus } from '@/lib/ops/domain/types'
 import { customerName, formatJobNumber, fullName } from '@/lib/ops/utils'
+import { INTERNAL_KINDS, INTERNAL_KIND_LABELS } from '@/lib/ops/domain/internal-work'
 
 export default async function HomePage() {
   const ctx = await requireSession()
@@ -62,6 +63,16 @@ async function EmployeeToday({ ctx }: { ctx: SessionContext }) {
             <Plus className="!size-5" /> Neuer Arbeitsbericht
           </Link>
         </Button>
+        {employeeId ? (
+          <div className="flex items-center gap-2 text-sm">
+            <span className="shrink-0 text-muted-foreground">Ohne Kunde:</span>
+            {INTERNAL_KINDS.slice(0, 3).map((k) => (
+              <Button key={k} asChild variant="outline" size="sm" className="flex-1">
+                <Link href={`/intern/berichte/neu?art=${k}`}>{INTERNAL_KIND_LABELS[k]}</Link>
+              </Button>
+            ))}
+          </div>
+        ) : null}
 
         {employeeId && (!day.absence || (isApprentice && day.absence.absence_type === 'berufsschule')) && (isRegularWorkday(today) || day.absence) ? (
           <WorkDayCard
