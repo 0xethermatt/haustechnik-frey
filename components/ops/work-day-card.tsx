@@ -157,6 +157,11 @@ export function WorkDayCard({
           </div>
           {workDay.note ? <div className="truncate text-xs text-muted-foreground">{workDay.note}</div> : null}
         </div>
+        {canSchool && !workDay.berufsschule ? (
+          <Button variant="outline" size="sm" onClick={saveSchool} disabled={pending}>
+            {pending ? <Loader2 className="animate-spin" /> : <GraduationCap />} Schule
+          </Button>
+        ) : null}
         {workDay.berufsschule ? (
           <Button variant="ghost" size="icon" onClick={remove} disabled={pending} aria-label="Berufsschultag zurücksetzen">
             <Trash2 />

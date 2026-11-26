@@ -6,6 +6,7 @@ import { loadDirectory, loadJobOptions } from '@/lib/ops/data/common'
 import { loadReports } from '@/lib/ops/data/reports'
 import { buildDays, loadAbsences, loadTimeEntries, loadWorkDays } from '@/lib/ops/data/time'
 import { WorkDayCard } from '@/components/ops/work-day-card'
+import { OwnWorkDay } from '@/components/ops/own-work-day'
 import { defaultScheduleFor } from '@/lib/ops/domain/workday'
 import { isRegularWorkday } from '@/lib/ops/domain/time'
 import { addDays, berlinToday, formatDateLong, formatDateShort, startOfWeek } from '@/lib/ops/domain/dates'
@@ -235,6 +236,7 @@ async function OfficeDashboard({ ctx }: { ctx: SessionContext }) {
         }
       />
       <PageBody>
+        <OwnWorkDay ctx={ctx} className="max-w-xl" />
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {kpis.map((k) => (
             <Link key={k.label} href={k.href} className="rounded-xl border bg-card p-4 shadow-sm transition-colors hover:border-primary/40">
