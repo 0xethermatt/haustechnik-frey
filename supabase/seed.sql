@@ -253,6 +253,9 @@ insert into public.fehlzeiten (employee_id, absence_type, start_date, end_date, 
 update public.auftraege set status = 'abrechnungsbereit'
 where id in ('b1000000-0000-4000-8000-000000000002', 'b1000000-0000-4000-8000-000000000009');
 
+-- Aus den Berichten automatisch entstandene Arbeitstage werden durch die echten Erfassungszeiten unten ersetzt.
+delete from public.arbeitstage where automatisch;
+
 -- Arbeitstage (Beginn/Ende/Pause) der letzten ~8 Wochen, ohne heute.
 -- Bewusst offen gelassen: Lukas Brenner am letzten Werktag (zeigt die Erinnerung „Arbeitszeit fehlt“).
 do $$

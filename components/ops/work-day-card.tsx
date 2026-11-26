@@ -20,6 +20,7 @@ export interface WorkDayValue {
   duration_minutes: number
   note: string | null
   berufsschule?: boolean
+  automatisch?: boolean
 }
 
 function spanMinutes(start: string, end: string, breakMinutes: number) {
@@ -156,6 +157,7 @@ export function WorkDayCard({
             )}
           </div>
           {workDay.note ? <div className="truncate text-xs text-muted-foreground">{workDay.note}</div> : null}
+          {workDay.automatisch ? <div className="text-xs text-muted-foreground">Aus dem Bericht übernommen – bei Abweichung über den Stift ändern</div> : null}
         </div>
         {canSchool && !workDay.berufsschule ? (
           <Button variant="outline" size="sm" onClick={saveSchool} disabled={pending}>

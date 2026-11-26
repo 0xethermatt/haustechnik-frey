@@ -213,6 +213,9 @@ insert into public.fehlzeiten (employee_id, absence_type, start_date, end_date, 
   ('e9000000-0000-4000-8000-000000000005', 'krank', pg_temp.wd(2), pg_temp.wd(1), false, null),
   ('e9000000-0000-4000-8000-000000000003', 'urlaub', public.berlin_heute() + 7, public.berlin_heute() + 11, false, 'Genehmigt');
 
+-- Aus den Berichten automatisch entstandene Arbeitstage werden durch die Erfassungszeiten unten ersetzt.
+delete from public.arbeitstage where automatisch and employee_id::text like 'e9000000-%';
+
 -- Arbeitstage (Beginn/Ende/Pause) der letzten 5 Wochen für die Demo-Mitarbeiter, ohne heute.
 -- Offen gelassen: Lukas Brenner am letzten Werktag (zeigt die Erinnerung „Arbeitszeit fehlt“).
 do $$

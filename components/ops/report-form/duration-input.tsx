@@ -5,7 +5,7 @@ import { Minus, Plus } from 'lucide-react'
 import { formatMinutes, parseDurationToMinutes } from '@/lib/ops/domain/time'
 import { cn } from '@/lib/ops/utils'
 
-const QUICK = [60, 120, 240, 480]
+const QUICK = [120, 240, 480, 510]
 const STEP = 15
 
 /** Stundeneingabe für Daumenbedienung: ±15 min, Schnellwahl oder Eingabe („2,5“ / „2:30“). */
@@ -94,7 +94,7 @@ export function DurationInput({
               value === m && 'border-primary bg-primary/5 font-medium text-primary',
             )}
           >
-            {m / 60} h
+            {String(m / 60).replace('.', ',')} h
           </button>
         ))}
       </div>
