@@ -231,7 +231,7 @@ async function OfficeDashboard({ ctx }: { ctx: SessionContext }) {
           ))}
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
           <div className="space-y-4">
             <section className="space-y-2">
               <SectionTitle title="Warten auf Freigabe" href="/intern/berichte?status=eingereicht" />

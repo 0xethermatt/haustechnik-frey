@@ -91,7 +91,7 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
           </Card>
         ) : null}
 
-        <div className="grid gap-4 md:grid-cols-[1fr_18rem]">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_18rem]">
           <div className="space-y-4">
             <Card>
               <CardHeader>

@@ -401,7 +401,7 @@ function NewCustomerForm({
       <Field label="Straße und Hausnummer" htmlFor="nc-street" error={errors.billing_street} optional>
         <Input id="nc-street" value={f.billing_street} onChange={set('billing_street')} autoComplete="off" />
       </Field>
-      <div className="grid grid-cols-[7rem_1fr] gap-3">
+      <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3">
         <Field label="PLZ" htmlFor="nc-plz" error={errors['customer.billing_postal_code']} optional>
           <Input id="nc-plz" value={f.billing_postal_code} onChange={set('billing_postal_code')} inputMode="numeric" maxLength={5} />
         </Field>

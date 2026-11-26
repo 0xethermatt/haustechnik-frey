@@ -135,7 +135,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: { a
         </div>
 
         {view === 'woche' ? (
-          <div className="grid gap-2 md:grid-cols-7">
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-7">
             {eachDay(from, to).map((d) => {
               const dayReports = byDay(d)
               const holiday = holidayName(d)
@@ -171,7 +171,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: { a
             })}
           </div>
         ) : (
-          <div className="grid gap-4 lg:grid-cols-[1fr_20rem]">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
             <div className="space-y-2">
               {holidayName(date) ? <p className="text-sm text-muted-foreground">Feiertag: {holidayName(date)}</p> : null}
               {reports.length ? (

@@ -122,7 +122,7 @@ export function AppShell({
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 pb-28 md:pb-10">{children}</main>
+      <main className="min-w-0 flex-1 overflow-x-clip pb-28 md:pb-10">{children}</main>
 
       {/* Mobile Tab-Leiste – für Bedienung mit dem Daumen */}
       <nav

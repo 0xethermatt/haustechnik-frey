@@ -72,7 +72,7 @@ export function AddLocationSheet({ customerId }: { customerId: string }) {
             <Field label="Straße und Hausnummer" htmlFor="sl-street" error={errors.street}>
               <Input id="sl-street" value={v.street} onChange={set('street')} />
             </Field>
-            <div className="grid grid-cols-[7rem_1fr] gap-3">
+            <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3">
               <Field label="PLZ" htmlFor="sl-plz" error={errors.postal_code}>
                 <Input id="sl-plz" value={v.postal_code} onChange={set('postal_code')} inputMode="numeric" maxLength={5} />
               </Field>

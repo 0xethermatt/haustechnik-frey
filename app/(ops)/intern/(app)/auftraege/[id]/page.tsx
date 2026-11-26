@@ -121,7 +121,7 @@ export default async function JobPage({ params }: { params: { id: string } }) {
           </Card>
         ) : null}
 
-        <div className="grid gap-4 md:grid-cols-[20rem_1fr]">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-[20rem_minmax(0,1fr)]">
           <div className="space-y-4">
             <Card>
               <CardHeader>
