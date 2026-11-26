@@ -1,20 +1,22 @@
--- Update 26.11.2026: Berufsschule (Arbeitstage) + Auftragsfotos. Einmal im Supabase SQL Editor ausführen.
--- Reihenfolge ist egal zum Merge-Zeitpunkt, aber VOR dem Merge ausführen.
+-- Update 26.11.2026: Berufsschule (Arbeitstage) + Auftragsfotos.
+-- Beliebig oft ausführbar (fehlendes wird ergänzt, Vorhandenes bleibt unverändert).
+-- Im Supabase SQL Editor komplett einfügen und „Run“ klicken. Erwartet: „Success. No rows returned“.
 
--- Berufsschultag: Azubis tragen die Schulzeiten selbst als Arbeitstag ein (zählt als Arbeitszeit,
--- braucht keinen Arbeitsbericht). Im Stundenzettel erscheint „Schule“.
+-- 1) Berufsschultag: Azubis tragen die Schule pauschal als Arbeitstag ein (zählt als Arbeitszeit).
 alter table public.arbeitstage add column if not exists berufsschule boolean not null default false;
 
--- Fotos zu Aufträgen (Rohrverlegung, Heizungsanlage, Fertigmontage, Inbetriebnahme …).
--- Sichtbar für alle, die den Auftrag sehen dürfen (zugewiesene Mitarbeiter, Büro, Admin).
--- Die Bilddateien liegen im privaten Storage-Bucket „auftragsfotos“ (Pfad: <auftrags-id>/<foto-id>.jpg),
--- hier stehen nur die Metadaten.
+-- 2) Fotos zu Aufträgen: Metadaten in der Tabelle, Bilddateien im privaten Storage-Bucket „auftragsfotos“.
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'fotophase' and typnamespace = 'public'::regnamespace) then
+    create type public.fotophase as enum (
+      'bestand', 'rohinstallation', 'heizungsanlage', 'fertigmontage', 'inbetriebnahme', 'sonstiges'
+    );
+  end if;
+end;
+$$;
 
-create type public.fotophase as enum (
-  'bestand', 'rohinstallation', 'heizungsanlage', 'fertigmontage', 'inbetriebnahme', 'sonstiges'
-);
-
-create table public.auftragsfotos (
+create table if not exists public.auftragsfotos (
   id uuid primary key default gen_random_uuid(),
   job_id uuid not null references public.auftraege (id) on delete restrict,
   storage_path text not null unique,
@@ -27,13 +29,19 @@ create table public.auftragsfotos (
   created_at timestamptz not null default now()
 );
 
-create index auftragsfotos_job_idx on public.auftragsfotos (job_id, created_at desc);
+create index if not exists auftragsfotos_job_idx on public.auftragsfotos (job_id, created_at desc);
 
+drop trigger if exists auftragsfotos_audit on public.auftragsfotos;
 create trigger auftragsfotos_audit after insert or update or delete on public.auftragsfotos
   for each row execute function public.aenderung_protokollieren();
 
 alter table public.auftragsfotos enable row level security;
 revoke all on public.auftragsfotos from anon;
+
+drop policy if exists auftragsfotos_select on public.auftragsfotos;
+drop policy if exists auftragsfotos_insert on public.auftragsfotos;
+drop policy if exists auftragsfotos_update on public.auftragsfotos;
+drop policy if exists auftragsfotos_delete on public.auftragsfotos;
 
 create policy auftragsfotos_select on public.auftragsfotos for select to authenticated
   using (public.darf_auftrag_sehen(job_id));
@@ -59,7 +67,7 @@ $$;
 
 grant execute on function public.foto_auftrag_id(text) to authenticated;
 
--- Storage (nur wo das Storage-Schema existiert, z. B. nicht in den reinen Datenbanktests)
+-- 3) Storage-Bucket und Zugriffsregeln (nur wo das Storage-Schema existiert)
 do $$
 begin
   if to_regclass('storage.objects') is null then
