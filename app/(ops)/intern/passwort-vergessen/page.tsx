@@ -19,13 +19,13 @@ export default function ForgotPasswordPage() {
           <Field label="E-Mail" htmlFor="email" error={state.error}>
             <Input id="email" name="email" type="email" autoComplete="username" required autoFocus />
           </Field>
-          <SubmitButton className="w-full" size="lg" pendingLabel="Wird gesendet …">
+          <SubmitButton variant="brand" className="w-full" size="lg" pendingLabel="Wird gesendet …">
             Link senden
           </SubmitButton>
         </form>
       )}
       <div className="mt-4 text-center">
-        <Link href="/intern/login" className="text-sm text-muted-foreground hover:text-foreground">
+        <Link href="/intern/login" className="text-sm font-medium text-[#6B2D8B] hover:underline">
           Zurück zur Anmeldung
         </Link>
       </div>

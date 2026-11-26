@@ -23,7 +23,7 @@ export default function SetPasswordPage() {
             {state.error}
           </p>
         ) : null}
-        <SubmitButton className="w-full" size="lg" pendingLabel="Wird gespeichert …">
+        <SubmitButton variant="brand" className="w-full" size="lg" pendingLabel="Wird gespeichert …">
           Passwort speichern
         </SubmitButton>
       </form>

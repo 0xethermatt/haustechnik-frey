@@ -57,6 +57,33 @@
     --ring: 280 60% 72%;
   }
 
+  /* Anmelde-Karte: immer hell wie die Website, auch im Dunkelmodus des Geräts */
+  .auth-light {
+    color-scheme: light;
+    --background: 0 0% 100%;
+    --foreground: 270 15% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 270 15% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 270 15% 10%;
+    --primary: 280 51% 36%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 275 20% 96%;
+    --secondary-foreground: 275 30% 18%;
+    --muted: 270 10% 96%;
+    --muted-foreground: 270 6% 42%;
+    --accent: 278 40% 95%;
+    --accent-foreground: 280 51% 30%;
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 60% 32%;
+    --warning: 35 92% 42%;
+    --border: 270 10% 90%;
+    --input: 270 10% 82%;
+    --ring: 280 51% 36%;
+    @apply bg-background text-foreground;
+  }
+
   * {
     @apply border-border;
   }
