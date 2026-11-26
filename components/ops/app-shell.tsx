@@ -67,7 +67,7 @@ export function AppShell({
       {/* Desktop-Seitenleiste */}
       <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r bg-background md:flex">
         <div className="flex h-16 items-center gap-2.5 px-5">
-          <Logo size={34} withText={false} />
+          <Logo size={34} withText={false} badge={false} />
           <div className="leading-tight">
             <div className="text-sm font-semibold">Frey Haustechnik</div>
             <div className="text-xs text-muted-foreground">Betriebsplattform</div>

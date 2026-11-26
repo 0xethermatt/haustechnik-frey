@@ -109,6 +109,14 @@ names (`kunden`, `fehlzeiten`, `arbeitsberichte`, …) because the business work
 Supabase dashboard. **Column names stay English** (`first_name`, `status`, …): they are mixed with generic UI words in
 hundreds of places in the code, so a rename would be risky; it can be done later with a dedicated, fully tested step.
 
+**ADR-6c – The company logo is the original artwork (26.11.2026).** `Images/Logo/Logo.png` is the master (it was the
+template for the vehicle lettering). The website used to draw a hand-made imitation in `components/Logo.tsx` (first
+commit); it is replaced by `public/logo-mark.svg`, a vector trace of the PNG (`scripts/logo/trace_logo.py`, potrace;
+fidelity ≈ 98 % of pixels identical, colours taken from the file: frame #59166C, flame #E9A600, drop #646DC1). The frame
+is dark purple, so the logo sits on a white badge on dark backgrounds (`Logo` prop `badge`, default on). Favicon, app
+icons (`public/intern/icons`) and the offline page use the same artwork. Request a vector file from the sign maker when
+possible and replace `logo-mark.svg` with it.
+
 **ADR-7 – Time & dates.** Business dates are `date` in Europe/Berlin; instants are `timestamptz` (UTC). Conversion is
 done server-side (`berlinLocalToUtc`), DST-safe and tested. A DB check enforces `duration = end − start − break` when a
 span is given. Baden-Württemberg public holidays are computed (no table needed).
