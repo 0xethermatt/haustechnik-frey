@@ -81,3 +81,16 @@ export async function deleteDraft(id: string, version: number): Promise<ActionRe
   revalidateReports()
   return ok(null)
 }
+
+/** Büro/Admin: Bericht in jedem Status komplett löschen (inkl. Zeiteinträge der Beteiligten). Rechte und Sperren prüft die Datenbank. */
+export async function deleteReportAsOffice(id: string): Promise<ActionResult<{ time_entries: number; people: number }>> {
+  const ctx = await requireSession()
+  if (!ctx.isOffice) return fail('Nur das Büro kann Berichte löschen.', { code: 'FORBIDDEN' })
+  const supabase = createClient()
+  const { data, error } = await supabase.rpc('arbeitsbericht_loeschen', { p_report_id: id })
+  if (error) return fromDbError(error)
+  revalidateReports()
+  revalidatePath('/intern', 'layout')
+  const r = data as unknown as { time_entries: number; people: number }
+  return ok({ time_entries: r.time_entries, people: r.people })
+}
