@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { customerName, formatAddress, formatJobNumber, formatQuantity, formatReportNumber } from '@/lib/ops/utils'
 import { ReviewPanel } from './review-panel'
+import { DeleteReportButton } from './delete-report-button'
 
 export const metadata: Metadata = { title: 'Arbeitsbericht' }
 
@@ -63,13 +64,25 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
         }
         back={{ href: '/intern/berichte', label: 'Berichte' }}
         actions={
-          canEdit ? (
-            <Button asChild variant="outline">
-              <Link href={`/intern/berichte/${report.id}/bearbeiten`}>
-                <Pencil /> {report.status === 'freigegeben' ? 'Korrigieren' : 'Bearbeiten'}
-              </Link>
-            </Button>
-          ) : null
+          <>
+            {canEdit ? (
+              <Button asChild variant="outline">
+                <Link href={`/intern/berichte/${report.id}/bearbeiten`}>
+                  <Pencil /> {report.status === 'freigegeben' ? 'Korrigieren' : 'Bearbeiten'}
+                </Link>
+              </Button>
+            ) : null}
+            {ctx.isOffice && report.job?.status !== 'abgerechnet' ? (
+              <DeleteReportButton
+                reportId={report.id}
+                label={`${formatReportNumber(report.report_number)} · ${report.job?.customer ? customerName(report.job.customer) : 'Bericht'}`}
+                status={report.status}
+                entries={report.time_links.filter((l) => l.time_entry).length}
+                people={new Set(report.time_links.map((l) => l.employee_id)).size}
+                minutes={totalMinutes}
+              />
+            ) : null}
+          </>
         }
       />
       <PageBody className="max-w-4xl">
