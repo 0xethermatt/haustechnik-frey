@@ -7,6 +7,7 @@
 set -euo pipefail
 : "${RESTORE_DB_URL:?RESTORE_DB_URL fehlt}"
 : "${BACKUP_PASSPHRASE:?BACKUP_PASSPHRASE fehlt}"
+RESTORE_DB_URL="$(DB_URL_INPUT="$RESTORE_DB_URL" node "$(dirname "$0")/lib/db-url.cjs")" || exit 1
 FILE="${1:?Backup-Datei angeben}"
 MODE="${2:-full}"
 

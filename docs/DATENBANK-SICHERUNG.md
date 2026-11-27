@@ -8,6 +8,7 @@ Täglich gegen 3–4 Uhr (GitHub Actions, „Datenbank-Backup“): alle Daten de
 ## Einrichtung (einmalig)
 1. **Passphrase:** langes Passwort (mind. 24 Zeichen) im Passwortmanager erzeugen und **getrennt** aufbewahren. Ohne sie ist jedes Backup wertlos.
 2. **Datenbank-Verbindung:** Supabase → Projekt → *Connect* → **Session pooler** → URI kopieren, `[YOUR-PASSWORD]` durch das Datenbank-Passwort ersetzen (Sonderzeichen URL-kodieren oder ein Passwort nur aus Buchstaben und Ziffern wählen; Neues Passwort: Project Settings → Database → Reset database password).
+   Das Skript bereinigt die Adresse selbst (Klammern um das Passwort, Leerzeichen/Zeilenumbrüche, Sonderzeichen im Passwort); bei einer unlesbaren Adresse bricht es mit einer verständlichen Meldung ab, ohne das Passwort auszugeben.
    Warum der Session pooler: Die direkte Verbindung ist nur per IPv6 erreichbar, GitHub-Runner nutzen IPv4.
 3. **GitHub-Secrets** (Repository → Settings → Secrets and variables → Actions → New repository secret):
    - `SUPABASE_DB_URL` = die URI aus Schritt 2
