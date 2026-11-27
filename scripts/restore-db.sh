@@ -14,12 +14,14 @@ WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 gpg --batch --yes --pinentry-mode loopback --passphrase-fd 3 --decrypt "$FILE" 3<<<"$BACKUP_PASSPHRASE" | tar -C "$WORK" -xzf -
 
+# Die Migrationen legen Ortskürzel als Startwerte an; sie stehen auch im Backup und würden sonst kollidieren.
+CLEAR_SEED="TRUNCATE public.ortskuerzel"
 if [ "$MODE" = "--data-only" ]; then
   psql "$RESTORE_DB_URL" --single-transaction -v ON_ERROR_STOP=1 \
-    -c 'SET session_replication_role = replica' -f "$WORK/data.sql"
+    -c "$CLEAR_SEED" -c 'SET session_replication_role = replica' -f "$WORK/data.sql"
 else
   psql "$RESTORE_DB_URL" --single-transaction -v ON_ERROR_STOP=1 \
     -f "$WORK/roles.sql" -f "$WORK/schema.sql" \
-    -c 'SET session_replication_role = replica' -f "$WORK/data.sql"
+    -c "$CLEAR_SEED" -c 'SET session_replication_role = replica' -f "$WORK/data.sql"
 fi
 echo "Wiederherstellung abgeschlossen."

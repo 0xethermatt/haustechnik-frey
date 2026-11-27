@@ -143,6 +143,8 @@ same layout (real Excel time values, one employee per printed A4 page).
 
 **ADR-11 – Staff who do not track their own time (added 28.11.2026).** The owner prefers paper and enters his own hours in the office. `mitarbeiter.requires_time_tracking` (default true; checkbox "Erfasst Arbeitszeit und Berichte selbst" on the employee form) switches this off for a person: no "Fehlende Zeiten" on the dashboard/overview, never a problem in the submission check (shown as "Schreibt selbst" only when he appears in a report), no automatic work day from report hours (existing automatic days are removed on switching off, re-created on switching on). He can still be added to reports with hours, so job hours remain complete. Pages read `mitarbeiter` with `select('*')` so they keep working before the SQL update (missing column = tracking required).
 
+**Backup runbook (28.11.2026).** Setup and restore steps: `docs/DATENBANK-SICHERUNG.md`. The restore script clears the migration-seeded `ortskuerzel` rows before loading the dump (otherwise a data-only restore into a migrated database fails on duplicate keys); the full round trip (dump → empty migrated DB → restore) was verified locally.
+
 **ADR-8 – Daily consistency checks are hints, not rules.** Flags: overlapping spans (error), missing times on past
 regular workdays (warning), absence with work time, > 10 h/day, break hint following ArbZG §4 thresholds (info),
 unsubmitted reports. **No** overtime, vacation balance or payroll calculation.
