@@ -342,6 +342,7 @@ export function ReportForm({
           value={state.job_id}
           disabled={locked}
           error={errors.job_id}
+          showSchool={employees.find((e) => e.id === currentEmployeeId)?.employment_role === 'auszubildender'}
           onChange={(job) => update((s) => ({ ...s, job_id: job.id }))}
         />
         <div className="mt-3 flex items-center gap-2">

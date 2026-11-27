@@ -67,7 +67,12 @@ async function EmployeeToday({ ctx }: { ctx: SessionContext }) {
         {employeeId ? (
           <div className="flex items-center gap-2 text-sm">
             <span className="shrink-0 text-muted-foreground">Ohne Kunde:</span>
-            {INTERNAL_KINDS.slice(0, 3).map((k) => (
+            {isApprentice ? (
+              <Button asChild variant="outline" size="sm" className="flex-1">
+                <Link href="/intern/berichte/neu?art=schule">Schule</Link>
+              </Button>
+            ) : null}
+            {INTERNAL_KINDS.slice(0, isApprentice ? 2 : 3).map((k) => (
               <Button key={k} asChild variant="outline" size="sm" className="flex-1">
                 <Link href={`/intern/berichte/neu?art=${k}`}>{INTERNAL_KIND_LABELS[k]}</Link>
               </Button>
