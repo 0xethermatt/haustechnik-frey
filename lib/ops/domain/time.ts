@@ -170,6 +170,8 @@ export interface AnalyzeDayInput {
   openDraftCount?: number
   /** Mitarbeiter war an diesem Tag beschäftigt (Eintritt/Austritt) */
   employed?: boolean
+  /** false = schreibt auf Papier (z. B. Inhaber): keine Hinweise auf fehlende Zeiten */
+  trackingRequired?: boolean
 }
 
 /**
@@ -183,16 +185,17 @@ export function analyzeDay(input: AnalyzeDayInput): DayFlag[] {
   const absence = absenceOn(date, absences)
   const employed = input.employed ?? true
   const past = date < today
+  const trackingRequired = input.trackingRequired ?? true
 
   for (const [a, b] of findOverlaps(entries)) {
     flags.push({ code: 'OVERLAP', severity: 'error', message: 'Zeiteinträge überschneiden sich.', entryIds: [a, b] })
   }
 
-  if (employed && past && !workDay && totals.allocatedMinutes === 0 && !absence && isRegularWorkday(date)) {
+  if (trackingRequired && employed && past && !workDay && totals.allocatedMinutes === 0 && !absence && isRegularWorkday(date)) {
     flags.push({ code: 'MISSING', severity: 'warning', message: 'Keine Arbeitszeit erfasst.' })
   }
 
-  if (past && !workDay && totals.allocatedMinutes > 0 && !(absence && !absence.half_day)) {
+  if (trackingRequired && past && !workDay && totals.allocatedMinutes > 0 && !(absence && !absence.half_day)) {
     flags.push({ code: 'WORKDAY_MISSING', severity: 'warning', message: 'Beginn und Ende des Arbeitstags fehlen.' })
   }
 

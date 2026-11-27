@@ -30,6 +30,12 @@ describe('Abgabe-Check', () => {
     expect(analyzeAbgabe({ ...base, reports: [], allocatedMinutes: 0, school: true, free: true }).status).toBe('schule')
     expect(analyzeAbgabe({ ...base, reports: [], allocatedMinutes: 0, presentMinutes: null, school: true }).status).toBe('nichts')
   })
+  it('Mitarbeiter ohne Erfassungspflicht (Inhaber) sind nie ein Problem', () => {
+    const chef = { ...base, trackingRequired: false }
+    expect(analyzeAbgabe({ ...chef, reports: [], allocatedMinutes: 0, presentMinutes: null }).status).toBe('frei')
+    expect(analyzeAbgabe({ ...chef, allocatedMinutes: 100 }).status).toBe('papier')
+    expect(analyzeAbgabe({ ...chef, reports: [report('entwurf')] }).status).toBe('papier')
+  })
   it('freie Tage und heutiger Tag sind keine Beanstandung', () => {
     expect(analyzeAbgabe({ ...base, reports: [], allocatedMinutes: 0, presentMinutes: null, free: true }).status).toBe('frei')
     expect(analyzeAbgabe({ ...base, reports: [], allocatedMinutes: 0, isToday: true }).status).toBe('offen')

@@ -99,6 +99,17 @@ describe('Prüfungen', () => {
   })
 })
 
+describe('Keine Erfassungspflicht (Inhaber schreibt auf Papier)', () => {
+  const base = { today: '2026-11-25', entries: [], absences: [] }
+  it('meldet keine fehlende Zeit und keinen fehlenden Arbeitstag', () => {
+    expect(analyzeDay({ ...base, date: '2026-11-24' }).map((f) => f.code)).toEqual(['MISSING'])
+    expect(analyzeDay({ ...base, date: '2026-11-24', trackingRequired: false })).toEqual([])
+    const entry = { id: 'a', entry_date: '2026-11-24', entry_type: 'kundenarbeit' as const, started_at: null, ended_at: null, break_minutes: 0, duration_minutes: 120, billable: true }
+    expect(analyzeDay({ ...base, date: '2026-11-24', entries: [entry] }).map((f) => f.code)).toEqual(['WORKDAY_MISSING'])
+    expect(analyzeDay({ ...base, date: '2026-11-24', entries: [entry], trackingRequired: false })).toEqual([])
+  })
+})
+
 describe('Berufsschultag (Azubi)', () => {
   const absences = [{ absence_type: 'berufsschule' as const, start_date: '2026-11-24', end_date: '2026-11-24', half_day: false }]
   const base = { date: '2026-11-24', today: '2026-11-25', entries: [], absences }

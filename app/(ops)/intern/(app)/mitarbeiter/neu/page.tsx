@@ -23,6 +23,7 @@ export default async function NewEmployeePage() {
             end_date: '',
             weekly_target_hours: '40',
             annual_vacation_days: '30',
+            requires_time_tracking: true,
           }}
         />
       </PageBody>

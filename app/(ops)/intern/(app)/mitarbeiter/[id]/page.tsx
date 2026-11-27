@@ -61,6 +61,7 @@ export default async function EmployeePage({ params }: { params: { id: string } 
             end_date: e.end_date ?? '',
             weekly_target_hours: String(e.weekly_target_minutes / 60).replace('.', ','),
             annual_vacation_days: String(e.annual_vacation_days).replace('.', ','),
+            requires_time_tracking: e.requires_time_tracking !== false,
           }}
         />
         <Card>

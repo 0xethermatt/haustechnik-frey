@@ -192,7 +192,7 @@ async function OfficeDashboard({ ctx }: { ctx: SessionContext }) {
       .in('status', ['abgeschlossen', 'abrechnungsbereit'])
       .order('completion_date', { ascending: true, nullsFirst: false })
       .limit(50),
-    supabase.from('mitarbeiter').select('id, first_name, last_name, start_date, end_date, employment_role').eq('is_active', true),
+    supabase.from('mitarbeiter').select('*').eq('is_active', true),
   ])
   const employees = (employeesRes.data ?? []) as Employee[]
   const [entries, absences, workDays] = await Promise.all([
