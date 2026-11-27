@@ -478,6 +478,9 @@ export function ReportForm({
         error={errors.participants}
         hint={totalMinutes ? `Gesamt ${formatMinutes(totalMinutes)}` : undefined}
       >
+        <p className="mb-3 text-xs text-muted-foreground">
+          Die Arbeitszeit wird für jeden Beteiligten automatisch als Arbeitstag übernommen, wenn dort noch nichts eingetragen ist.
+        </p>
         <div className="space-y-3">
           {state.participants.map((p, i) => (
             <div key={p.employee_id} className="rounded-xl border bg-background p-3">
