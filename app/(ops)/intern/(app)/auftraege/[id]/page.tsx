@@ -7,6 +7,9 @@ import { createClient } from '@/lib/ops/supabase/server'
 import { loadDirectory } from '@/lib/ops/data/common'
 import { loadReports } from '@/lib/ops/data/reports'
 import { loadJobPhotos } from '@/lib/ops/data/photos'
+import { loadJobDocuments } from '@/lib/ops/data/documents'
+import { DocumentList } from '@/components/ops/documents/document-list'
+import { DocumentUploadButton } from '@/components/ops/documents/document-upload-button'
 import { PhotoGallery } from '@/components/ops/photos/photo-gallery'
 import { PhotoUploadButton } from '@/components/ops/photos/photo-upload-button'
 import { formatDate } from '@/lib/ops/domain/dates'
@@ -36,10 +39,11 @@ export default async function JobPage({ params }: { params: { id: string } }) {
     .maybeSingle()
   if (!job) notFound()
 
-  const [directory, reports, photos, deletePreview, { data: entries }, { data: materials }] = await Promise.all([
+  const [directory, reports, photos, documents, deletePreview, { data: entries }, { data: materials }] = await Promise.all([
     loadDirectory(supabase),
     loadReports(supabase, { jobId: job.id, limit: 500 }),
     loadJobPhotos(supabase, job.id),
+    loadJobDocuments(supabase, job.id),
     supabase.rpc('auftrag_loeschvorschau', { p_job_id: job.id }),
     supabase
       .from('zeiteintraege')
@@ -217,6 +221,27 @@ export default async function JobPage({ params }: { params: { id: string } }) {
                     thumbUrl: p.thumbUrl,
                     fullUrl: p.fullUrl,
                     canDelete: ctx.isOffice || p.created_by === ctx.userId,
+                  }))}
+                />
+              </div>
+            </section>
+            <section className="space-y-3" aria-label="Dokumente">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-sm font-semibold text-muted-foreground">Dokumente ({documents.length})</h2>
+                <DocumentUploadButton jobId={job.id} jobLabel={`${customer ? customerName(customer) : 'Kunde'} · ${job.title}`} size="sm" />
+              </div>
+              <div className="rounded-xl border bg-card p-3">
+                <DocumentList
+                  documents={documents.map((d) => ({
+                    id: d.id,
+                    filename: d.filename,
+                    art: d.art,
+                    note: d.note,
+                    size_bytes: d.size_bytes,
+                    day: d.created_at.slice(0, 10),
+                    by: directory.profileName(d.created_by) ?? 'Büro',
+                    url: d.url,
+                    canDelete: ctx.isOffice || d.created_by === ctx.userId,
                   }))}
                 />
               </div>

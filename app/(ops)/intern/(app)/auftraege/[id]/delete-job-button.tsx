@@ -32,7 +32,7 @@ export function DeleteJobButton({ jobId, title, size = 'sm' }: { jobId: string; 
       .catch(() => setError('Keine Verbindung.'))
   }
 
-  const hasContent = !!preview && (preview.reports > 0 || preview.time_entries > 0 || preview.photos > 0)
+  const hasContent = !!preview && (preview.reports > 0 || preview.time_entries > 0 || preview.photos > 0 || (preview.documents ?? 0) > 0)
   const confirmed = !hasContent || typed.trim().toUpperCase() === CONFIRM_WORD
 
   return (
@@ -54,7 +54,7 @@ export function DeleteJobButton({ jobId, title, size = 'sm' }: { jobId: string; 
                 {preview.reason === 'BILLED'
                   ? 'Abgerechnete Aufträge können nicht gelöscht werden. Sie lassen sich archivieren.'
                   : preview.reason === 'HAS_CONTENT'
-                    ? 'Zu diesem Auftrag gibt es schon Berichte, Zeiten oder Fotos. Bitte das Büro fragen.'
+                    ? 'Zu diesem Auftrag gibt es schon Berichte, Zeiten, Fotos oder Dokumente. Bitte das Büro fragen.'
                     : 'Du darfst diesen Auftrag nicht löschen.'}
               </p>
             ) : null}
@@ -72,6 +72,7 @@ export function DeleteJobButton({ jobId, title, size = 'sm' }: { jobId: string; 
                         </li>
                       ) : null}
                       {preview.photos > 0 ? <li>{plural(preview.photos, 'Foto', 'Fotos')}</li> : null}
+                      {(preview.documents ?? 0) > 0 ? <li>{plural(preview.documents, 'Dokument', 'Dokumente')}</li> : null}
                     </ul>
                   </div>
                 ) : null}
