@@ -23,6 +23,7 @@ export interface EmployeeFormValues {
   end_date: string
   weekly_target_hours: string
   annual_vacation_days: string
+  requires_time_tracking: boolean
 }
 
 export function EmployeeForm({ id, initial }: { id?: string; initial: EmployeeFormValues }) {
@@ -45,6 +46,7 @@ export function EmployeeForm({ id, initial }: { id?: string; initial: EmployeeFo
           end_date: v.end_date || null,
           weekly_target_minutes: Math.round(Number(v.weekly_target_hours.replace(',', '.')) * 60),
           annual_vacation_days: Number(v.annual_vacation_days.replace(',', '.')),
+          requires_time_tracking: v.requires_time_tracking,
         })
         if (!res.ok) {
           setErrors(res.fieldErrors ?? {})
@@ -98,6 +100,20 @@ export function EmployeeForm({ id, initial }: { id?: string; initial: EmployeeFo
           <Field label="Urlaubsanspruch (Tage/Jahr)" htmlFor="e-vac" error={errors.annual_vacation_days}>
             <Input id="e-vac" inputMode="decimal" value={v.annual_vacation_days} onChange={(e) => set('annual_vacation_days', e.target.value)} />
           </Field>
+          <label className="flex items-start gap-3 text-sm md:col-span-2">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-5 w-5 accent-[hsl(var(--primary))]"
+              checked={v.requires_time_tracking}
+              onChange={(e) => set('requires_time_tracking', e.target.checked)}
+            />
+            <span>
+              Erfasst Arbeitszeit und Berichte selbst
+              <span className="block text-xs text-muted-foreground">
+                Ausschalten für den Inhaber, der auf Papier schreibt: Er erscheint nicht unter „Fehlende Zeiten“ und im Abgabe-Check und bekommt keinen automatischen Arbeitstag. In Berichten lässt er sich weiterhin mit Stunden eintragen.
+              </span>
+            </span>
+          </label>
           <label className="flex items-center gap-3 text-sm md:col-span-2">
             <input type="checkbox" className="h-5 w-5 accent-[hsl(var(--primary))]" checked={v.is_active} onChange={(e) => set('is_active', e.target.checked)} />
             Aktiv (erscheint in Auswahllisten)

@@ -8,4 +8,5 @@ select
   exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname = 'auftrag_loeschen') as update_3_auftrag_loeschen,
   exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname = 'arbeitsbericht_loeschen') as update_4_bericht_loeschen,
   to_regclass('public.auftragsdokumente') is not null as update_5_dokumente_tabelle,
-  coalesce((select exists (select 1 from storage.buckets where id = 'auftragsdokumente')), false) as update_5_dokumente_speicher;
+  coalesce((select exists (select 1 from storage.buckets where id = 'auftragsdokumente')), false) as update_5_dokumente_speicher,
+  exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'mitarbeiter' and column_name = 'requires_time_tracking') as update_6_erfassungspflicht;

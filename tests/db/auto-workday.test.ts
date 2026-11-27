@@ -87,3 +87,41 @@ describe('Arbeitstag automatisch aus Berichtsstunden', () => {
     expect(await day(ids.azubi)).toBeUndefined()
   })
 })
+
+describe('Ohne Erfassungspflicht (Inhaber schreibt auf Papier)', () => {
+  const D = '2026-11-20'
+  async function reportWith(employeeId: string, minutes: number) {
+    const id = randomUUID()
+    await db.as(ids.geselleUser)
+    await db.query('select public.arbeitsbericht_speichern($1::jsonb)', [
+      JSON.stringify({
+        id, mutation_id: randomUUID(), expected_version: null, job_id: ids.jobA, report_date: D,
+        activities: [{ id: randomUUID(), description: 'Montage' }], materials: [],
+        participants: [{ employee_id: ids.geselle, duration_minutes: 480 }, { employee_id: employeeId, duration_minutes: minutes }], submit: false,
+      }),
+    ])
+  }
+  const dayOf = async (employeeId: string) => {
+    await db.asAdmin()
+    return (await db.query<{ duration_minutes: number }>('select duration_minutes from public.arbeitstage where employee_id = $1 and work_date = $2', [employeeId, D])).rows[0]
+  }
+
+  it('kein automatischer Arbeitstag, Stunden stehen trotzdem im Bericht', async () => {
+    await db.asAdmin()
+    await db.query('update public.mitarbeiter set requires_time_tracking = false where id = $1', [ids.other])
+    await reportWith(ids.other, 120)
+    expect(await dayOf(ids.geselle)).toMatchObject({ duration_minutes: 480 })
+    expect(await dayOf(ids.other)).toBeUndefined()
+    const entries = await db.query<{ n: number }>('select count(*)::int as n from public.zeiteintraege where employee_id = $1 and entry_date = $2', [ids.other, D])
+    expect(entries.rows[0].n).toBe(1)
+  })
+
+  it('Umschalten zieht automatische Arbeitstage nach bzw. entfernt sie', async () => {
+    await db.asAdmin()
+    await db.query('update public.mitarbeiter set requires_time_tracking = true where id = $1', [ids.other])
+    expect(await dayOf(ids.other)).toMatchObject({ duration_minutes: 120 })
+    await db.asAdmin()
+    await db.query('update public.mitarbeiter set requires_time_tracking = false where id = $1', [ids.other])
+    expect(await dayOf(ids.other)).toBeUndefined()
+  })
+})

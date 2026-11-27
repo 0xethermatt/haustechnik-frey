@@ -28,6 +28,7 @@ const STATUS: Record<AbgabeStatus, { label: string; variant: BadgeProps['variant
   offen: { label: 'Heute noch offen', variant: 'muted' },
   frei: { label: 'Frei', variant: 'muted' },
   schule: { label: 'Berufsschule', variant: 'secondary' },
+  papier: { label: 'Schreibt selbst', variant: 'muted' },
 }
 
 function reportsOf(entries: TimeEntryRow[]): AbgabeReport[] {
@@ -53,12 +54,12 @@ export default async function SubmissionCheckPage({ searchParams }: { searchPara
 
   const { data } = await supabase
     .from('mitarbeiter')
-    .select('id, first_name, last_name, employment_role, start_date, end_date, is_active')
+    .select('*')
     .lte('start_date', to)
     .or(`end_date.is.null,end_date.gte.${from}`)
     .neq('employment_role', 'buero')
     .order('last_name')
-  const employees = (data ?? []) as Pick<Employee, 'id' | 'first_name' | 'last_name' | 'employment_role' | 'start_date' | 'end_date' | 'is_active'>[]
+  const employees = (data ?? []) as Employee[]
   const ids = employees.map((e) => e.id)
   const [entries, absences, workDays] = await Promise.all([
     loadTimeEntries(supabase, { from, to, employeeIds: ids }),
@@ -85,10 +86,11 @@ export default async function SubmissionCheckPage({ searchParams }: { searchPara
             free: isoWeekday(date) > 5 || !!holiday || !!absence,
             isToday: date === today,
             school: workDay?.berufsschule,
+            trackingRequired: e.requires_time_tracking !== false,
           })
           return { employee: e, workDay, absence, holiday, reports, ...result }
         })
-        .filter((r) => r.status !== 'frei' || r.absence || r.reports.length > 0)
+        .filter((r) => (r.status !== 'frei' || r.absence || r.reports.length > 0) && (r.employee.requires_time_tracking !== false || r.reports.length > 0))
       const submitted = new Set(entries.filter((x) => x.entry_date === date && x.link[0]?.report?.status === 'eingereicht').map((x) => x.link[0].work_report_id)).size
       return { date, rows, submitted, problems: rows.filter((r) => ABGABE_PROBLEMS.includes(r.status)).length }
     })
@@ -162,7 +164,11 @@ export default async function SubmissionCheckPage({ searchParams }: { searchPara
                     </Link>
                     <div className="tabular flex items-center gap-1 text-xs text-muted-foreground">
                       <Clock className="h-3 w-3" />
-                      {r.workDay ? `${r.workDay.start_time.slice(0, 5)}–${r.workDay.end_time.slice(0, 5)} · ${formatMinutes(r.workDay.duration_minutes)}` : 'keine Arbeitszeit'}
+                      {r.workDay
+                        ? `${r.workDay.start_time.slice(0, 5)}–${r.workDay.end_time.slice(0, 5)} · ${formatMinutes(r.workDay.duration_minutes)}`
+                        : r.employee.requires_time_tracking === false
+                          ? 'trägt seine Zeit selbst ein'
+                          : 'keine Arbeitszeit'}
                     </div>
                   </div>
                   <div className="min-w-0 space-y-1 text-sm">

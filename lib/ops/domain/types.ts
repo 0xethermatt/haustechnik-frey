@@ -38,6 +38,8 @@ export interface Employee {
   end_date: string | null
   weekly_target_minutes: number
   annual_vacation_days: number
+  /** false = schreibt auf Papier (z. B. Inhaber): keine Erinnerungen, kein automatischer Arbeitstag */
+  requires_time_tracking?: boolean
 }
 
 export interface DirectoryEmployee {

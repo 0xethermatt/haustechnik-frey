@@ -214,6 +214,7 @@ export const employeeSchema = z
     end_date: isoDate.nullable().optional().transform((v) => v ?? null),
     weekly_target_minutes: z.number().int().min(0).max(4200),
     annual_vacation_days: z.number().min(0).max(60),
+    requires_time_tracking: z.boolean().default(true),
   })
   .refine((e) => !e.end_date || e.end_date >= e.start_date, {
     message: 'Austritt muss nach dem Eintritt liegen.',

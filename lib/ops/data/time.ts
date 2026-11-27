@@ -120,7 +120,7 @@ export function buildDays(opts: {
   entries: TimeEntryRow[]
   absences: AbsenceRow[]
   workDays?: WorkDayRow[]
-  employment?: { start_date: string; end_date: string | null }
+  employment?: { start_date: string; end_date: string | null; requires_time_tracking?: boolean }
 }): EmployeeDay[] {
   return eachDay(opts.from, opts.to).map((date) => {
     const entries = opts.entries.filter((e) => e.entry_date === date)
@@ -138,7 +138,7 @@ export function buildDays(opts: {
       entries,
       workDay,
       totals: dayTotals(entries, workDay),
-      flags: analyzeDay({ date, today: opts.today, entries, absences: opts.absences, workDay, openDraftCount, employed }),
+      flags: analyzeDay({ date, today: opts.today, entries, absences: opts.absences, workDay, openDraftCount, employed, trackingRequired: opts.employment?.requires_time_tracking !== false }),
       absence: absenceOn(date, opts.absences) as AbsenceRow | undefined,
       holiday: holidayName(date),
     }

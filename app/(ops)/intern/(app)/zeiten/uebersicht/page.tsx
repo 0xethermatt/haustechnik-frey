@@ -39,7 +39,7 @@ export default async function TimeOverviewPage({ searchParams }: { searchParams:
 
   const { data: employeesData } = await supabase
     .from('mitarbeiter')
-    .select('id, first_name, last_name, employment_role, is_active, start_date, end_date, weekly_target_minutes')
+    .select('*')
     .lte('start_date', to)
     .or(`end_date.is.null,end_date.gte.${from}`)
     .order('last_name')
