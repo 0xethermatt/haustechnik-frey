@@ -98,6 +98,18 @@
     font-feature-settings: 'cv11', 'ss01';
   }
 
+  /* iOS-Safari gibt Datums-/Zeitfeldern eine feste Mindestbreite – sie ragten aus Karten und Spalten heraus */
+  input[type='date'],
+  input[type='time'],
+  input[type='month'],
+  input[type='datetime-local'] {
+    min-width: 0;
+    max-width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    text-align: left;
+  }
+
   /* iOS zoomt bei Schrift < 16px in Eingabefeldern – daher mindestens 16px */
   input,
   select,

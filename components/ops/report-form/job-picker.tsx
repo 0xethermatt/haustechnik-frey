@@ -52,12 +52,15 @@ export function JobPicker({
   onChange,
   error,
   disabled,
+  showSchool = false,
 }: {
   jobs: JobOption[]
   value: string | null
   onChange: (job: JobOption) => void
   error?: string
   disabled?: boolean
+  /** Azubis: zusätzlich „Schule“ bei „Arbeit ohne Kunde“ */
+  showSchool?: boolean
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -145,7 +148,16 @@ export function JobPicker({
               </Button>
               <div>
                 <div className="mb-1.5 text-xs font-medium text-muted-foreground">Arbeit ohne Kunde</div>
-                <div className="grid grid-cols-4 gap-1.5">
+                <div className={showSchool ? 'grid grid-cols-3 gap-1.5' : 'grid grid-cols-4 gap-1.5'}>
+                  {showSchool ? (
+                    <button
+                      type="button"
+                      onClick={() => router.push('/intern/berichte/neu?art=schule')}
+                      className="h-10 rounded-lg border border-primary/40 bg-primary/5 text-sm font-medium text-primary active:bg-accent"
+                    >
+                      Schule
+                    </button>
+                  ) : null}
                   {INTERNAL_KINDS.map((k) => (
                     <button
                       key={k}

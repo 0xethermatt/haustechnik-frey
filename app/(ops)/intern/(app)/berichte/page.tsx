@@ -83,11 +83,11 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
           {status ? <input type="hidden" name="status" value={status} /> : null}
           {customerId ? <input type="hidden" name="kunde" value={customerId} /> : null}
           {jobId ? <input type="hidden" name="auftrag" value={jobId} /> : null}
-          <label className="space-y-1 text-xs text-muted-foreground">
+          <label className="min-w-0 space-y-1 text-xs text-muted-foreground">
             Von
             <Input type="date" name="von" defaultValue={from} />
           </label>
-          <label className="space-y-1 text-xs text-muted-foreground">
+          <label className="min-w-0 space-y-1 text-xs text-muted-foreground">
             Bis
             <Input type="date" name="bis" defaultValue={to} />
           </label>
