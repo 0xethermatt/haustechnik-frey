@@ -4,8 +4,28 @@ Internal, invite-only operations app for field reports and time tracking, living
 Next.js website repository. Edison Handwerk stays the accounting/invoicing system; this platform is the operational data
 layer between field staff, office and accounting.
 
-> Status: **MVP implemented and verified locally** (unit, database/RLS and end-to-end tests green).
-> Not yet deployed: a Supabase project and Vercel environment variables are required (see [Deployment](#7-deployment-checklist)).
+> Status: **Version 1.0 released and in daily use (28.11.2026).** Live at `https://haustechnik-frey.de/intern`
+> (Supabase Free, Frankfurt; Vercel; nightly encrypted backup verified). Setup history: [Deployment](#7-deployment-checklist).
+> Operations: `docs/BETRIEB.md`, backup/restore: `docs/DATENBANK-SICHERUNG.md`, SQL updates: `supabase/updates/`.
+
+## Version 1.0 – scope and closing state (28.11.2026)
+
+**In scope and live:** customers/jobs/work reports with approval; time tracking with work day (one tap 8.5 h, vocational
+school 8 h flat for apprentices, automatic work day from shared reports); submission check ("Kontrolle") for the office;
+timesheet Excel in the existing layout; photos and documents per job; jobs/reports can be deleted (office; employees only
+their own empty jobs); staff who write on paper (owner) are excluded from reminders; invite-free account creation with
+start password; PWA with company logo; nightly encrypted backup.
+
+**Acceptance (business):** a full working week entered by the team; backup run green; Excel comparison with the old
+sheet by the owner's family; vocational-school entry, shared reports, deletion and permissions exercised in practice.
+
+**Known limits:** photos/documents are not part of the database backup; 1 GB storage on the free plan; no admin password
+reset in the app; invitation e-mails need custom SMTP (Resend) – accounts are created with a start password instead; a
+backup *restore drill* on the production backup was not performed (procedure verified locally, see §8).
+
+**Backlog for 1.1 (not built):** in-app help pages / quick guides; Edison customer import; Apple-Calendar link
+(plan vs. actual); backup of photos/documents; admin password reset; invitation/recovery e-mails via Resend; Friday
+default 8.5 h and the "*" timesheet column once clarified; collective report for large sites; restore drill.
 
 ---
 
@@ -287,7 +307,7 @@ Storage files (future photos) are **not** covered by the current database backup
 
 ## 10. Future extensions (prepared, not built)
 
-Photos & signatures (Supabase Storage, per-report bucket with RLS) · AI voice-to-report (only after a DPA/EU-hosted
+Signatures (photos and documents are built, see ADR-8/10) · AI voice-to-report (only after a DPA/EU-hosted
 model decision; report payload is already structured JSON) · catalog search in the material editor · payroll Excel
 export from `mitarbeiter_tagesminuten` · Edison UGL export from `ApprovedWorkRecord` · vacation requests by employees ·
 background sync of offline drafts (current approach: local safeguard + explicit retry).
