@@ -201,15 +201,15 @@ export function WorkDayCard({
         </Button>
       ) : null}
       <div className="grid grid-cols-3 gap-2">
-        <label className="space-y-1 text-xs text-muted-foreground">
+        <label className="min-w-0 space-y-1 text-xs text-muted-foreground">
           Beginn
           <TimeInput value={start} onValueChange={setStart} aria-label="Beginn" />
         </label>
-        <label className="space-y-1 text-xs text-muted-foreground">
+        <label className="min-w-0 space-y-1 text-xs text-muted-foreground">
           Ende
           <TimeInput value={end} onValueChange={setEnd} aria-label="Ende" />
         </label>
-        <label className="space-y-1 text-xs text-muted-foreground">
+        <label className="min-w-0 space-y-1 text-xs text-muted-foreground">
           Pause (min)
           <Input
             type="number"
