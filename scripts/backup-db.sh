@@ -8,6 +8,9 @@ set -euo pipefail
 : "${SUPABASE_DB_URL:?SUPABASE_DB_URL fehlt}"
 : "${BACKUP_PASSPHRASE:?BACKUP_PASSPHRASE fehlt}"
 
+# Adresse bereinigen (Klammern, Leerzeichen, Sonderzeichen im Passwort); bei Fehler ohne Klartext abbrechen.
+SUPABASE_DB_URL="$(DB_URL_INPUT="$SUPABASE_DB_URL" node "$(dirname "$0")/lib/db-url.cjs")" || exit 1
+
 OUT="${1:-backup}"
 SUPABASE_CLI="npx --yes supabase@3.4.0"
 WORK="$(mktemp -d)"
