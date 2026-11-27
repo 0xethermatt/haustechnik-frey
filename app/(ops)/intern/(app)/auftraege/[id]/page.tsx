@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { customerName, formatAddress, formatJobNumber, formatQuantity } from '@/lib/ops/utils'
 import { ArchiveJobButton, JobStatusControl } from './job-status-control'
+import { DeleteJobButton } from './delete-job-button'
 
 export const metadata: Metadata = { title: 'Auftrag' }
 
@@ -35,10 +36,11 @@ export default async function JobPage({ params }: { params: { id: string } }) {
     .maybeSingle()
   if (!job) notFound()
 
-  const [directory, reports, photos, { data: entries }, { data: materials }] = await Promise.all([
+  const [directory, reports, photos, deletePreview, { data: entries }, { data: materials }] = await Promise.all([
     loadDirectory(supabase),
     loadReports(supabase, { jobId: job.id, limit: 500 }),
     loadJobPhotos(supabase, job.id),
+    supabase.rpc('auftrag_loeschvorschau', { p_job_id: job.id }),
     supabase
       .from('zeiteintraege')
       .select('id, employee_id, entry_date, entry_type, started_at, ended_at, break_minutes, duration_minutes, billable')
@@ -48,6 +50,8 @@ export default async function JobPage({ params }: { params: { id: string } }) {
       .select('description, quantity, unit, article_number, report:arbeitsberichte!inner(job_id, status)')
       .eq('report.job_id', job.id),
   ])
+
+  const canDelete = !!(deletePreview.data as { allowed?: boolean } | null)?.allowed
 
   const timeEntries = (entries ?? []) as {
     id: string
@@ -106,6 +110,7 @@ export default async function JobPage({ params }: { params: { id: string } }) {
                 </Link>
               </Button>
             ) : null}
+            {canDelete ? <DeleteJobButton jobId={job.id} title={job.title} size="default" /> : null}
           </>
         }
       />
