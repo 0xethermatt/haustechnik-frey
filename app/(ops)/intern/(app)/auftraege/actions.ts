@@ -8,6 +8,7 @@ import { fail, fromDbError, invalid, ok, type ActionResult } from '@/lib/ops/act
 import { jobCategories, jobSchema, jobStatusSchema } from '@/lib/ops/validation/schemas'
 import { berlinToday } from '@/lib/ops/domain/dates'
 import type { JobOption } from '@/lib/ops/data/common'
+import { PHOTO_BUCKET } from '@/lib/ops/data/photos'
 
 const quickJobSchema = z.object({
   customer_id: z.uuid('Bitte einen Kunden wählen.'),
@@ -123,4 +124,37 @@ export async function setJobArchived(id: string, archived: boolean): Promise<Act
   if (error) return fromDbError(error)
   revalidatePath('/intern', 'layout')
   return ok(null)
+}
+
+export interface JobDeletePreview {
+  allowed: boolean
+  reason: 'BILLED' | 'HAS_CONTENT' | 'FORBIDDEN' | 'NOT_FOUND' | null
+  reports: number
+  time_entries: number
+  people: number
+  photos: number
+}
+
+/** Was würde beim Löschen verschwinden, und darf der Benutzer es? (Prüfung in der Datenbank) */
+export async function getJobDeletePreview(jobId: string): Promise<ActionResult<JobDeletePreview>> {
+  await requireSession()
+  const supabase = createClient()
+  const { data, error } = await supabase.rpc('auftrag_loeschvorschau', { p_job_id: jobId })
+  if (error) return fromDbError(error)
+  return ok(data as unknown as JobDeletePreview)
+}
+
+/** Auftrag komplett löschen (inkl. Berichte, Zeiten, Fotos). Rechte und Sperren prüft die Datenbankfunktion. */
+export async function deleteJob(jobId: string): Promise<ActionResult<{ reports: number; time_entries: number; photos: number }>> {
+  await requireSession()
+  const supabase = createClient()
+  const { data, error } = await supabase.rpc('auftrag_loeschen', { p_job_id: jobId })
+  if (error) return fromDbError(error)
+  const res = data as unknown as JobDeletePreview & { photo_paths?: string[] }
+  if (res.photo_paths?.length) {
+    const removed = await supabase.storage.from(PHOTO_BUCKET).remove(res.photo_paths)
+    if (removed.error) console.error('[auftrag_loeschen] Fotodateien nicht entfernt:', removed.error.message)
+  }
+  revalidatePath('/intern', 'layout')
+  return ok({ reports: res.reports, time_entries: res.time_entries, photos: res.photos })
 }
